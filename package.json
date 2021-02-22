@@ -1,24 +1,24 @@
 {
   "name": "vue-next-use",
-  "version": "0.0.1",
-  "main": "./dist/vue-next-use.umd.js",
-  "module": "./dist/vue-next-use.es.js",
-  "exports": {
-    ".": {
-      "import": "./dist/vue-next-use.es.js",
-      "require": "./dist/vue-next-use.umd.js"
-    }
-  },
+  "version": "0.0.4-beta",
+  "main": "esm/index.js",
   "files": [
-    "dist",
-    "lib"
+    "lib/",
+    "esm/",
+    "src/"
   ],
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
-    "serve": "vite preview"
+    "serve": "vite preview",
+    "build:cjs": "tsc",
+    "build:es": "tsc -m esNext --outDir esm",
+    "build": "npm run build:cjs && npm run build:es",
+    "clean": "rimraf node_modules"
   },
+  "author": "niqingyang",
+  "license": "MIT",
   "dependencies": {
+    "copy-to-clipboard": "^3.3.1",
     "vue": "^3.0.5"
   },
   "devDependencies": {

@@ -9,13 +9,19 @@
     "resolveJsonModule": true,
     "esModuleInterop": true,
     "noUnusedParameters": false,
+    "outDir": "lib",
+    "rootDir": "src",
     "lib": [
+      "es2018",
       "esnext",
       "dom"
     ],
     "types": [
       "node",
       "vite/client"
+    ],
+    "typeRoots": [
+      "node_modules/@types"
     ]
   },
   "include": [

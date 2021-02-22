@@ -10,7 +10,8 @@
     }
   },
   "files": [
-    "dist"
+    "dist",
+    "lib"
   ],
   "scripts": {
     "dev": "vite",

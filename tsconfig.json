@@ -9,6 +9,7 @@
     "resolveJsonModule": true,
     "esModuleInterop": true,
     "noUnusedParameters": false,
+    "noImplicitAny": false,
     "outDir": "lib",
     "rootDir": "src",
     "lib": [

@@ -1,7 +1,17 @@
 {
   "name": "vue-next-use",
-  "version": "0.0.4-beta",
-  "main": "esm/index.js",
+  "version": "0.0.7-beta",
+  "description": "Collection of Vue Hooks",
+  "main": "lib/index.js",
+  "module": "esm/index.js",
+  "types": "src/index.ts",
+  "typings": "src/index.ts",
+  "exports": {
+    ".": {
+      "import": "./lib/index.js",
+      "require": "./esm/index.js"
+    }
+  },
   "files": [
     "lib/",
     "esm/",
@@ -17,6 +27,14 @@
   },
   "author": "niqingyang",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/niqingyang/vue-next-use"
+  },
+  "bugs": {
+    "url": "https://github.com/niqingyang/vue-next-use/issues"
+  },
+  "homepage": "https://github.com/niqingyang/vue-next-use#readme",
   "dependencies": {
     "copy-to-clipboard": "^3.3.1",
     "vue": "^3.0.5"

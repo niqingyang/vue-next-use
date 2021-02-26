@@ -13,3 +13,6 @@ export {default as useToggle} from './useToggle';
 export {default as useBoolean} from './useToggle';
 export {default as useGetSet} from './useGetSet';
 export {default as useSet} from './useSet';
+export {default as useClickAway} from './useClickAway';
+export {default as useDrop} from './useDrop';
+export {default as useDropArea} from './useDropArea';

@@ -56,9 +56,11 @@ const createProcess = (options: DropAreaOptions, isMounted: () => boolean) => (
 const createBond = (process: (dataTransfer: DataTransfer, event: (ClipboardEvent | DragEvent)) => void, setOver: (over: boolean) => void): DropAreaBond => ({
     onDragOver: (event) => {
         event.preventDefault();
+        setOver(true);
     },
     onDragEnter: (event) => {
         event.preventDefault();
+        setOver(true);
     },
     onDragLeave: () => {
         setOver(false);

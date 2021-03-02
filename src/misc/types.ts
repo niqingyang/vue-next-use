@@ -1,3 +1,13 @@
+import {
+    AnimationEvent,
+    ChangeEvent,
+    ClipboardEvent,
+    CompositionEvent,
+    DragEvent,
+    FocusEvent, FormEvent, KeyboardEvent, MouseEvent, PointerEvent,
+    SyntheticEvent, TouchEvent, TransitionEvent, UIEvent, WheelEvent
+} from "_@types_react@17.0.2@@types/react";
+
 export type PromiseType<P extends Promise<any>> = P extends Promise<infer T> ? T : never;
 
 export type FunctionReturningPromise = (...args: any[]) => Promise<any>;
@@ -11,17 +21,19 @@ export type EffectCallback = () => (void | (() => void | undefined));
 // TODO (TypeScript 3.0): ReadonlyArray<unknown>
 export type DependencyList = ReadonlyArray<any>;
 
-export type EventHandler<E extends Event> = { bivarianceHack(event: E): void }["bivarianceHack"];
+export type EventHandler<E> = { bivarianceHack(event: E): void }["bivarianceHack"];
 
-export type ClipboardEventHandler<T = Element> = EventHandler<ClipboardEvent>;
-export type CompositionEventHandler<T = Element> = EventHandler<CompositionEvent>;
-export type DragEventHandler<T = Element> = EventHandler<DragEvent>;
-export type FocusEventHandler<T = Element> = EventHandler<FocusEvent>;
-export type KeyboardEventHandler<T = Element> = EventHandler<KeyboardEvent>;
-export type MouseEventHandler<T = Element> = EventHandler<MouseEvent>;
-export type TouchEventHandler<T = Element> = EventHandler<TouchEvent>;
-export type PointerEventHandler<T = Element> = EventHandler<PointerEvent>;
-export type UIEventHandler<T = Element> = EventHandler<UIEvent>;
-export type WheelEventHandler<T = Element> = EventHandler<WheelEvent>;
-export type AnimationEventHandler<T = Element> = EventHandler<AnimationEvent>;
-export type TransitionEventHandler<T = Element> = EventHandler<TransitionEvent>;
+export type ClipboardEventHandler = EventHandler<ClipboardEvent>;
+export type CompositionEventHandler = EventHandler<CompositionEvent>;
+export type DragEventHandler = EventHandler<DragEvent>;
+export type FocusEventHandler = EventHandler<FocusEvent>;
+export type FormEventHandler = EventHandler<FormEvent>;
+export type ChangeEventHandler = EventHandler<ChangeEvent>;
+export type KeyboardEventHandler = EventHandler<KeyboardEvent>;
+export type MouseEventHandler = EventHandler<MouseEvent>;
+export type TouchEventHandler = EventHandler<TouchEvent>;
+export type PointerEventHandler = EventHandler<PointerEvent>;
+export type UIEventHandler = EventHandler<UIEvent>;
+export type WheelEventHandler = EventHandler<WheelEvent>;
+export type AnimationEventHandler = EventHandler<AnimationEvent>;
+export type TransitionEventHandler = EventHandler<TransitionEvent>;

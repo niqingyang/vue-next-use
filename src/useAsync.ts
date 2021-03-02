@@ -15,6 +15,8 @@ export default function useAsync<T extends FunctionReturningPromise>(
     if (deps) {
         watch(deps, () => {
             callback();
+        }, {
+            immediate: true
         });
     } else {
         callback();

@@ -1,5 +1,5 @@
-import {Ref, onMounted, onBeforeUnmount} from 'vue';
-import {useSetState} from "./index";
+import {Ref, watchEffect} from 'vue';
+import {useSetState, useMountedState} from "./index";
 import {noop, off, on} from './misc/util';
 import {DragEventHandler, ClipboardEventHandler} from './misc/types';
 
@@ -16,12 +16,13 @@ export interface DropAreaBond {
 }
 
 export interface DropAreaOptions {
+    ref?: Ref<HTMLElement>,
     onFiles?: (files: File[], event?: Event) => void;
     onText?: (text: string, event?: Event) => void;
     onUri?: (url: string, event?: Event) => void;
 }
 
-const createProcess = (options: DropAreaOptions) => (dataTransfer: DataTransfer, event: (ClipboardEvent | DragEvent)) => {
+const createProcess = (options: DropAreaOptions, isMounted: () => boolean) => (dataTransfer: DataTransfer, event: (ClipboardEvent | DragEvent)) => {
     const uri = dataTransfer.getData('text/uri-list');
 
     if (uri) {
@@ -34,71 +35,77 @@ const createProcess = (options: DropAreaOptions) => (dataTransfer: DataTransfer,
         return;
     }
 
-    event = event as ClipboardEvent;
-
-    if (event.clipboardData) {
-        const text = event.clipboardData.getData('text');
-        (options.onText || noop)(text, event);
-        return;
+    if (dataTransfer.items && dataTransfer.items.length) {
+        dataTransfer.items[0].getAsString((text) => {
+            if (isMounted()) {
+                (options.onText || noop)(text, event);
+            }
+        });
     }
 };
 
 const useDrop = (options: DropAreaOptions = {}, args = []): Ref<DropAreaState> => {
-    const {onFiles, onText, onUri} = options;
+    const {ref, onFiles, onText, onUri} = options;
     const [state, set] = useSetState<DropAreaState>({over: false});
-    const process = createProcess(options);
 
     const setOver = (over: boolean) => {
         set({over});
     }
 
-    const onDragOver = (event: Event) => {
-        event.preventDefault();
-        setOver(true);
-    };
+    const isMounted = useMountedState();
 
-    const onDragEnter = (event: Event) => {
-        event.preventDefault();
-        setOver(true);
-    };
+    watchEffect((onInvalidate) => {
+        const element = ref?.value ? ref?.value : document;
 
-    const onDragLeave = () => {
-        setOver(false);
-    };
+        const onDragOver = (event: Event) => {
+            event.preventDefault();
+            setOver(true);
+        };
 
-    const onDragExit = () => {
-        setOver(false);
-    };
+        const onDragEnter = (event: Event) => {
+            event.preventDefault();
+            setOver(true);
+        };
 
-    const onDrop = (event: DragEvent) => {
-        event.preventDefault();
-        setOver(false);
-        process(event.dataTransfer as DataTransfer, event);
-    };
+        const onDragLeave = () => {
+            setOver(false);
+        };
 
-    const onPaste = (event: ClipboardEvent) => {
-        process(event.clipboardData as DataTransfer, event);
-    };
+        const onDragExit = () => {
+            setOver(false);
+        };
 
-    onMounted(() => {
-        on(document, 'dragover', onDragOver);
-        on(document, 'dragenter', onDragEnter);
-        on(document, 'dragleave', onDragLeave);
-        on(document, 'dragexit', onDragExit);
-        on(document, 'drop', onDrop);
+        const process = createProcess(options, isMounted);
+
+        const onDrop = (event: DragEvent) => {
+            event.preventDefault();
+            setOver(false);
+            process(event.dataTransfer as DataTransfer, event);
+        };
+
+        const onPaste = (event: ClipboardEvent) => {
+            process(event.clipboardData as DataTransfer, event);
+        };
+
+        on(element, 'dragover', onDragOver);
+        on(element, 'dragenter', onDragEnter);
+        on(element, 'dragleave', onDragLeave);
+        on(element, 'dragexit', onDragExit);
+        on(element, 'drop', onDrop);
+
         if (onText) {
-            on(document, 'paste', onPaste);
+            on(element, 'paste', onPaste);
         }
-    });
 
-    onBeforeUnmount(() => {
-        off(document, 'dragover', onDragOver);
-        off(document, 'dragenter', onDragEnter);
-        off(document, 'dragleave', onDragLeave);
-        off(document, 'dragexit', onDragExit);
-        off(document, 'drop', onDrop);
-        off(document, 'paste', onPaste);
-    })
+        onInvalidate(() => {
+            off(element, 'dragover', onDragOver);
+            off(element, 'dragenter', onDragEnter);
+            off(element, 'dragleave', onDragLeave);
+            off(element, 'dragexit', onDragExit);
+            off(element, 'drop', onDrop);
+            off(element, 'paste', onPaste);
+        })
+    });
 
     return state;
 };

@@ -1,4 +1,4 @@
-import {watch, onUpdated, onMounted, onUnmounted} from 'vue';
+import {watch, onUpdated, onMounted, onBeforeUnmount} from 'vue';
 import {off, on} from './misc/util';
 
 const useBeforeUnload = (enabled: boolean | (() => boolean) = true, message?: string) => {
@@ -18,17 +18,19 @@ const useBeforeUnload = (enabled: boolean | (() => boolean) = true, message?: st
         return message;
     }
 
-    watch([enabled], ([value], oldValue) => {
-        if (value) {
-            on(window, 'beforeunload', handler);
-        } else {
-            off(window, 'beforeunload', handler);
-        }
-    }, {
-        immediate: true
+    onMounted(() => {
+        watch([enabled], ([value], oldValue) => {
+            if (value) {
+                on(window, 'beforeunload', handler);
+            } else {
+                off(window, 'beforeunload', handler);
+            }
+        }, {
+            immediate: true
+        });
     });
 
-    onUnmounted(() => {
+    onBeforeUnmount(() => {
         off(window, 'beforeunload', handler);
     });
 };

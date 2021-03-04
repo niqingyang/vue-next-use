@@ -1,6 +1,7 @@
 import {Ref, ref, onMounted} from "vue";
-import useSetState from './useSetState';
+import {useEffect, useState, useSetState} from "./index";
 import {isBrowser} from './misc/util';
+import {watch} from "rollup";
 
 export interface SpeechState {
     isPlaying: boolean;
@@ -33,20 +34,18 @@ const useSpeech = (text: string, opts: SpeechOptions = {}): Ref<SpeechState> => 
 
     const utteranceRef = ref<SpeechSynthesisUtterance | null>(null);
 
-    onMounted(() => {
-        const utterance = new SpeechSynthesisUtterance(text);
-        opts.lang && (utterance.lang = opts.lang);
-        opts.voice && (utterance.voice = opts.voice);
-        utterance.rate = opts.rate || 1;
-        utterance.pitch = opts.pitch || 1;
-        utterance.volume = opts.volume || 1;
-        utterance.onstart = () => setState({isPlaying: true});
-        utterance.onresume = () => setState({isPlaying: true});
-        utterance.onend = () => setState({isPlaying: false});
-        utterance.onpause = () => setState({isPlaying: false});
-        utteranceRef.value = utterance;
-        window.speechSynthesis.speak(utteranceRef.value);
-    });
+    const utterance = new SpeechSynthesisUtterance(text);
+    opts.lang && (utterance.lang = opts.lang);
+    opts.voice && (utterance.voice = opts.voice);
+    utterance.rate = opts.rate || 1;
+    utterance.pitch = opts.pitch || 1;
+    utterance.volume = opts.volume || 1;
+    utterance.onstart = () => setState({isPlaying: true});
+    utterance.onresume = () => setState({isPlaying: true});
+    utterance.onend = () => setState({isPlaying: false});
+    utterance.onpause = () => setState({isPlaying: false});
+    utteranceRef.value = utterance;
+    window.speechSynthesis.speak(utteranceRef.value);
 
     return state;
 };

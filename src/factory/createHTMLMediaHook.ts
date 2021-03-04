@@ -1,9 +1,20 @@
-import {Ref, ref as useRef, onMounted, createVNode, VNode, isVNode, AudioHTMLAttributes, VideoHTMLAttributes} from 'vue';
-import useSetState from '../useSetState';
+import {
+    Ref,
+    ref as useRef,
+    computed,
+    createVNode,
+    VNode,
+    isVNode,
+    AudioHTMLAttributes,
+    VideoHTMLAttributes,
+    isRef,
+    unref
+} from 'vue';
+import {useEffect, useSetState} from "../index";
 import parseTimeRanges from '../misc/parseTimeRanges';
 
 export interface HTMLMediaProps extends AudioHTMLAttributes, VideoHTMLAttributes {
-    src: string;
+    src: string
 }
 
 export interface HTMLMediaState {
@@ -33,7 +44,7 @@ type createHTMLMediaHookReturn = [
 
 export default function createHTMLMediaHook(tag: 'audio' | 'video') {
     return (
-        elOrProps: HTMLMediaProps | VNode<HTMLMediaProps>
+        elOrProps: HTMLMediaProps | Ref<HTMLMediaProps> | VNode<HTMLMediaProps>
     ): createHTMLMediaHookReturn => {
 
         let element: VNode<any> | undefined;
@@ -43,7 +54,7 @@ export default function createHTMLMediaHook(tag: 'audio' | 'video') {
             element = elOrProps;
             props = element.props as HTMLMediaProps
         } else {
-            props = elOrProps as HTMLMediaProps;
+            props = unref(elOrProps) as HTMLMediaProps;
         }
 
         const [state, setState] = useSetState<HTMLMediaState>({
@@ -189,6 +200,7 @@ export default function createHTMLMediaHook(tag: 'audio' | 'video') {
                     return;
                 }
                 el.muted = true;
+                setState({muted: el.muted});
             },
             unmute: () => {
                 const el = ref.value;
@@ -196,10 +208,32 @@ export default function createHTMLMediaHook(tag: 'audio' | 'video') {
                     return;
                 }
                 el.muted = false;
+                setState({muted: el.muted});
             },
+            show: () => {
+                const el = ref.value;
+                if (!el) {
+                    return;
+                }
+                el.controls = true;
+            },
+            hide: () => {
+                const el = ref.value;
+                if (!el) {
+                    return;
+                }
+                el.controls = false;
+            },
+            autoplay: (autoplay: boolean) => {
+                const el = ref.value;
+                if (!el) {
+                    return;
+                }
+                el.autoplay = !!autoplay;
+            }
         };
 
-        onMounted(() => {
+        useEffect(() => {
             const el = ref.value!;
 
             if (!el) {
@@ -221,18 +255,26 @@ export default function createHTMLMediaHook(tag: 'audio' | 'video') {
                 return;
             }
 
+            if (isRef(elOrProps) && el.src != elOrProps.value.src) {
+                el.src = elOrProps.value.src;
+            }
+
             setState({
                 volume: el.volume,
                 muted: el.muted,
                 paused: el.paused,
+                controls: el.controls,
+                autoplay: el.autoplay,
             });
 
             // Start media, if autoPlay requested.
-            if (props.autoplay && el.paused) {
+            if (el.autoplay && el.paused) {
                 controls.play();
             }
-        });
+        }, isRef(elOrProps) ? () => elOrProps.value.src : null);
 
-        return [element, state, controls, ref];
+        return [element, computed(() => {
+            return state.value;
+        }), controls, ref];
     };
 }

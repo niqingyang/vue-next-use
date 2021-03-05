@@ -1,6 +1,6 @@
 {
   "name": "vue-next-use",
-  "version": "0.0.14-beta",
+  "version": "0.0.15-beta",
   "description": "Collection of Vue Hooks",
   "main": "src/index.ts",
   "module": "esm/index.js",

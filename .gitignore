@@ -6,3 +6,4 @@ dist-ssr
 .idea
 /esm
 /lib
+/package-lock.json

@@ -24,6 +24,8 @@ export interface HTMLMediaState {
     muted: boolean;
     time: number;
     volume: number;
+    controls: boolean;
+    autoplay: boolean;
 }
 
 export interface HTMLMediaControls {
@@ -64,6 +66,8 @@ export default function createHTMLMediaHook(tag: 'audio' | 'video') {
             paused: true,
             muted: false,
             volume: 1,
+            controls: false,
+            autoplay: true
         });
 
         const ref = useRef<HTMLAudioElement | null>(null);

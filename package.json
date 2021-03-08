@@ -1,28 +1,26 @@
 {
   "name": "vue-next-use",
-  "version": "0.0.15-beta",
+  "version": "0.0.18-beta",
   "description": "Collection of Vue Hooks",
-  "main": "src/index.ts",
-  "module": "esm/index.js",
-  "types": "src/index.ts",
-  "typings": "src/index.ts",
+  "main": "dist/vue-next-use.bundle.esm.js",
+  "module": "dist/vue-next-use.bundle.esm.js",
+  "type": "module",
   "exports": {
     ".": {
-      "import": "./src/index.ts",
-      "require": "./esm/index.js"
+      "import": "./dist/vue-next-use.bundle.esm.js",
+      "require": "./dist/vue-next-use.bundle.cjs.js"
     }
   },
   "files": [
-    "lib/",
-    "esm/",
+    "dist/",
     "src/"
   ],
   "scripts": {
     "dev": "vite",
     "serve": "vite preview",
-    "build:cjs": "tsc",
-    "build:es": "tsc -m esNext --outDir esm",
-    "build": "npm run build:cjs && npm run build:es",
+    "build:cjs": "tsc -d --sourceMap",
+    "build:es": "tsc -d --sourceMap -m esNext --outDir esm",
+    "build": "rollup -c --sourcemap",
     "clean": "rimraf node_modules"
   },
   "author": "niqingyang",
@@ -40,16 +38,23 @@
     "js-cookie": "^2.2.1",
     "rebound": "^0.1.0",
     "screenfull": "^5.1.0",
-    "set-harmonic-interval": "^1.0.1",
-    "vue": "^3.0.5"
+    "set-harmonic-interval": "^1.0.1"
   },
   "devDependencies": {
+    "@babel/core": "^7.13.8",
+    "@rollup/plugin-alias": "^3.1.2",
+    "@rollup/plugin-babel": "^5.3.0",
+    "@rollup/plugin-commonjs": "^17.1.0",
+    "@rollup/plugin-node-resolve": "^11.2.0",
+    "@rollup/plugin-typescript": "^8.2.0",
     "@types/node": "^14.14.30",
-    "@vitejs/plugin-vue": "^1.1.4",
-    "@vue/compiler-sfc": "^3.0.5",
-    "@vuedx/typecheck": "^0.6.3",
-    "@vuedx/typescript-plugin-vue": "^0.6.3",
+    "@vue/compiler-sfc": "^3.0.7",
+    "rollup": "^2.40.0",
+    "rollup-plugin-cleanup": "^3.2.1",
+    "rollup-plugin-progress": "^1.1.2",
+    "rollup-plugin-vue": "^6.0.0",
+    "tslib": "^2.1.0",
     "typescript": "^4.1.5",
-    "vite": "^2.0.1"
+    "vue": "3.0.7"
   }
 }

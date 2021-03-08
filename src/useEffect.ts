@@ -1,4 +1,4 @@
-import {onMounted, onUnmounted, onUpdated, unref, watch, WatchSource} from "vue";
+import {onMounted, onUnmounted, watch, WatchSource} from "vue";
 import {useState} from "./index";
 
 declare type MultiWatchSources = (WatchSource<unknown> | object)[];

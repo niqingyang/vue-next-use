@@ -10,7 +10,7 @@ import {
     isRef,
     unref
 } from 'vue';
-import {useEffect, useSetState} from "../index";
+import { useEffect, useSetState } from "../index";
 import parseTimeRanges from '../misc/parseTimeRanges';
 
 export interface HTMLMediaProps extends AudioHTMLAttributes, VideoHTMLAttributes {
@@ -46,7 +46,7 @@ type createHTMLMediaHookReturn = [
 
 export default function createHTMLMediaHook(tag: 'audio' | 'video') {
     return (
-        elOrProps: HTMLMediaProps | Ref<HTMLMediaProps> | VNode<HTMLMediaProps>
+        elOrProps: HTMLMediaProps | VNode<HTMLMediaProps>
     ): createHTMLMediaHookReturn => {
 
         let element: VNode<any> | undefined;
@@ -56,7 +56,7 @@ export default function createHTMLMediaHook(tag: 'audio' | 'video') {
             element = elOrProps;
             props = element.props as HTMLMediaProps
         } else {
-            props = unref(elOrProps) as HTMLMediaProps;
+            props = elOrProps as HTMLMediaProps;
         }
 
         const [state, setState] = useSetState<HTMLMediaState>({
@@ -82,8 +82,8 @@ export default function createHTMLMediaHook(tag: 'audio' | 'video') {
             };
         };
 
-        const onPlay = () => setState({paused: false});
-        const onPause = () => setState({paused: true});
+        const onPlay = () => setState({ paused: false });
+        const onPause = () => setState({ paused: true });
         const onVolumeChange = () => {
             const el = ref.value;
             if (!el) {
@@ -99,7 +99,7 @@ export default function createHTMLMediaHook(tag: 'audio' | 'video') {
             if (!el) {
                 return;
             }
-            const {duration, buffered} = el;
+            const { duration, buffered } = el;
             setState({
                 duration,
                 buffered: parseTimeRanges(buffered),
@@ -110,14 +110,14 @@ export default function createHTMLMediaHook(tag: 'audio' | 'video') {
             if (!el) {
                 return;
             }
-            setState({time: el.currentTime});
+            setState({ time: el.currentTime });
         };
         const onProgress = () => {
             const el = ref.value;
             if (!el) {
                 return;
             }
-            setState({buffered: parseTimeRanges(el.buffered)});
+            setState({ buffered: parseTimeRanges(el.buffered) });
         };
 
         if (element) {
@@ -136,7 +136,6 @@ export default function createHTMLMediaHook(tag: 'audio' | 'video') {
             element = createVNode(tag, {
                 controls: false,
                 ...props,
-                ref,
                 onPlay: wrapEvent(props.onPlay, onPlay),
                 onPause: wrapEvent(props.onPause, onPause),
                 onVolumeChange: wrapEvent(props.onVolumechange, onVolumeChange),
@@ -196,7 +195,7 @@ export default function createHTMLMediaHook(tag: 'audio' | 'video') {
                 }
                 volume = Math.min(1, Math.max(0, volume));
                 el.volume = volume;
-                setState({volume});
+                setState({ volume });
             },
             mute: () => {
                 const el = ref.value;
@@ -204,7 +203,7 @@ export default function createHTMLMediaHook(tag: 'audio' | 'video') {
                     return;
                 }
                 el.muted = true;
-                setState({muted: el.muted});
+                setState({ muted: el.muted });
             },
             unmute: () => {
                 const el = ref.value;
@@ -212,7 +211,7 @@ export default function createHTMLMediaHook(tag: 'audio' | 'video') {
                     return;
                 }
                 el.muted = false;
-                setState({muted: el.muted});
+                setState({ muted: el.muted });
             },
             show: () => {
                 const el = ref.value;
@@ -231,51 +230,51 @@ export default function createHTMLMediaHook(tag: 'audio' | 'video') {
             autoplay: (autoplay: boolean) => {
                 const el = ref.value;
                 if (!el) {
+                    if (process.env.NODE_ENV !== 'production') {
+                        if (tag === 'audio') {
+                            console.error(
+                                'useAudio() ref to <audio> element is empty at mount. ' +
+                                'It seem you have not rendered the audio element, which it ' +
+                                'returns as the first argument const [audio] = useAudio(...).'
+                            );
+                        } else if (tag === 'video') {
+                            console.error(
+                                'useVideo() ref to <video> element is empty at mount. ' +
+                                'It seem you have not rendered the video element, which it ' +
+                                'returns as the first argument const [video] = useVideo(...).'
+                            );
+                        }
+                    }
                     return;
                 }
                 el.autoplay = !!autoplay;
+            },
+            change: (src: string) => {
+                const el = ref.value;
+                if (!el) {
+                    return;
+                }
+
+                if (el.src == src) {
+                    return;
+                }
+
+                el.src = src;
+
+                setState({
+                    volume: el.volume,
+                    muted: el.muted,
+                    paused: el.paused,
+                    controls: el.controls,
+                    autoplay: el.autoplay,
+                });
+
+                // Start media, if autoPlay requested.
+                if (el.autoplay && el.paused) {
+                    controls.play();
+                }
             }
         };
-
-        useEffect(() => {
-            const el = ref.value!;
-
-            if (!el) {
-                if (process.env.NODE_ENV !== 'production') {
-                    if (tag === 'audio') {
-                        console.error(
-                            'useAudio() ref to <audio> element is empty at mount. ' +
-                            'It seem you have not rendered the audio element, which it ' +
-                            'returns as the first argument const [audio] = useAudio(...).'
-                        );
-                    } else if (tag === 'video') {
-                        console.error(
-                            'useVideo() ref to <video> element is empty at mount. ' +
-                            'It seem you have not rendered the video element, which it ' +
-                            'returns as the first argument const [video] = useVideo(...).'
-                        );
-                    }
-                }
-                return;
-            }
-
-            if (isRef(elOrProps) && el.src != elOrProps.value.src) {
-                el.src = elOrProps.value.src;
-            }
-
-            setState({
-                volume: el.volume,
-                muted: el.muted,
-                paused: el.paused,
-                controls: el.controls,
-                autoplay: el.autoplay,
-            });
-
-            // Start media, if autoPlay requested.
-            if (el.autoplay && el.paused) {
-                controls.play();
-            }
-        }, isRef(elOrProps) ? () => elOrProps.value.src : null);
 
         return [element, computed(() => {
             return state.value;

@@ -4,7 +4,6 @@
   "description": "Collection of Vue Hooks",
   "main": "dist/vue-next-use.bundle.esm.js",
   "module": "dist/vue-next-use.bundle.esm.js",
-  "type": "module",
   "types": "dist/vue-next-use.d.ts",
   "typings": "dist/vue-next-use.d.ts",
   "exports": {
@@ -23,7 +22,9 @@
     "build:cjs": "tsc -d --sourceMap",
     "build:es": "tsc -d --sourceMap -m esNext --outDir esm",
     "build": "rollup -c --sourcemap",
-    "clean": "rimraf node_modules"
+    "clean": "rimraf node_modules",
+    "storybook": "start-storybook -p 6006",
+    "build-storybook": "build-storybook"
   },
   "author": "niqingyang",
   "license": "MIT",
@@ -49,8 +50,13 @@
     "@rollup/plugin-commonjs": "^17.1.0",
     "@rollup/plugin-node-resolve": "^11.2.0",
     "@rollup/plugin-typescript": "^8.2.0",
+    "@storybook/addon-actions": "^6.2.0-beta.11",
+    "@storybook/addon-essentials": "^6.2.0-beta.11",
+    "@storybook/addon-links": "^6.2.0-beta.11",
+    "@storybook/vue3": "^6.2.0-beta.11",
     "@types/node": "^14.14.30",
     "@vue/compiler-sfc": "^3.0.7",
+    "babel-loader": "^8.2.2",
     "rollup": "^2.40.0",
     "rollup-plugin-cleanup": "^3.2.1",
     "rollup-plugin-dts": "^3.0.1",
@@ -58,6 +64,7 @@
     "rollup-plugin-vue": "^6.0.0",
     "tslib": "^2.1.0",
     "typescript": "^4.1.5",
-    "vue": "3.0.7"
+    "vue": "3.0.7",
+    "vue-loader": "^16.1.2"
   }
 }

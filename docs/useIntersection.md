@@ -4,33 +4,52 @@ Vue sensor hook that tracks the changes in the intersection of a target element 
 
 ## Usage
 
-```jsx
-import * as React from 'react';
-import { useIntersection } from 'vue-next-use';
+```vue
+<template>
+    <div>
+        {{
+            intersection && intersection.intersectionRatio < 1
+            ? 'Obscured'
+            : 'Fully in view'
+        }} - {{intersection && intersection.intersectionRatio}}
+    </div>
+    <div style="width: 400px; height: 400px; background-color: whitesmoke; overflow: scroll;">Scroll me
+        <div style="width: 200px; height: 500px; background-color: whitesmoke;"></div>
+        <div style="width: 100px; height: 100px; padding: 20px; background-color: palegreen;" ref="intersectionRef">Obscured</div>
+        <div style="width: 200px; height: 500px; background-color: whitesmoke;"></div>
+    </div>
+</template>
 
-const Demo = () => {
-  const intersectionRef = React.useRef(null);
-  const intersection = useIntersection(intersectionRef, {
+<script>
+    import {ref} from 'vue';
+    import {useIntersection} from "vue-next-use";
+
+    export default {
+    setup() {
+    const intersectionRef = ref(null);
+    const intersection = useIntersection(intersectionRef, {
     root: null,
     rootMargin: '0px',
     threshold: 1
-  });
+});
 
-  return (
-    <div ref={intersectionRef}>
-      {intersection && intersection.intersectionRatio < 1
-        ? 'Obscured'
-        : 'Fully in view'}
-    </div>
-  );
+    return {
+    intersectionRef,
+    intersection,
 };
+},
+};
+</script>
+
+<style scoped>
+</style>
 ```
 
 ## Reference
 
 ```ts
 useIntersection(
-  ref: RefObject<HTMLElement>,
-  options: IntersectionObserverInit,
-): IntersectionObserverEntry | null;
+  ref: Ref<HTMLElement>,
+  options: IntersectionObserverInit | Ref<IntersectionObserverInit>,
+): ComputedRef<IntersectionObserverEntry | null>;
 ```

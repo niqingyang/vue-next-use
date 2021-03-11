@@ -1,6 +1,6 @@
-import { isRef } from 'vue';
-import { useEffect } from './index';
-import { isBrowser, off, on, sources } from './misc/util';
+import {isRef, Ref, unref} from 'vue';
+import {useEffect} from './index';
+import {isBrowser, off, on, sources} from './misc/util';
 
 export interface ListenerType1 {
     addEventListener(name: string, handler: (event?: any) => void, ...args: any[]);
@@ -28,13 +28,13 @@ const isListenerType2 = (target: any): target is ListenerType2 => {
 type AddEventListener<T> = T extends ListenerType1
     ? T['addEventListener']
     : T extends ListenerType2
-    ? T['on']
-    : never;
+        ? T['on']
+        : never;
 
 const useEvent = <T extends UseEventTarget>(
     name: Parameters<AddEventListener<T>>[0],
-    handler?: null | undefined | Parameters<AddEventListener<T>>[1],
-    target: null | T | Window = defaultTarget,
+    handler?: null | undefined | Parameters<AddEventListener<T>>[1] | Ref<Parameters<AddEventListener<T>>[1]>,
+    target: null | T | Ref<T> | Window = defaultTarget,
     options?: Parameters<AddEventListener<T>>[2]
 ) => {
     useEffect(() => {
@@ -44,19 +44,23 @@ const useEvent = <T extends UseEventTarget>(
         if (!target) {
             return;
         }
-        if (isListenerType1(target)) {
-            on(target, name, handler, options);
-        } else if (isListenerType2(target)) {
-            target.on(name, handler, options);
+
+        const element = unref(target);
+        const fn = unref(handler);
+
+        if (isListenerType1(element)) {
+            on(element, name, fn, options);
+        } else if (isListenerType2(element)) {
+            element.on(name, fn, options);
         }
         return () => {
-            if (isListenerType1(target)) {
-                off(target, name, handler, options);
-            } else if (isListenerType2(target)) {
-                target.off(name, handler, options);
+            if (isListenerType1(element)) {
+                off(element, name, fn, options);
+            } else if (isListenerType2(element)) {
+                element.off(name, fn, options);
             }
         };
-    }, sources([name, () => handler, target, JSON.stringify(options)]));
+    }, sources([name, isRef(handler) ? handler : () => handler, target, JSON.stringify(options)]));
 };
 
 export default useEvent;

@@ -1,6 +1,6 @@
 {
   "name": "vue-next-use",
-  "version": "0.0.21-beta",
+  "version": "0.0.22-beta",
   "description": "Vue Hooks - 👍",
   "main": "dist/vue-next-use.bundle.esm.js",
   "module": "dist/vue-next-use.bundle.esm.js",
@@ -46,7 +46,8 @@
     "js-cookie": "^2.2.1",
     "rebound": "^0.1.0",
     "screenfull": "^5.1.0",
-    "set-harmonic-interval": "^1.0.1"
+    "set-harmonic-interval": "^1.0.1",
+    "throttle-debounce": "^3.0.1"
   },
   "devDependencies": {
     "@babel/core": "^7.13.8",

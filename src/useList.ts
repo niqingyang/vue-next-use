@@ -1,6 +1,6 @@
-import {ref, Ref, UnwrapRef, toRaw} from 'vue';
-import {useState} from './index';
-import {IHookStateInitAction, IHookStateSetAction, resolveHookState} from './misc/hookState';
+import { ref, Ref, UnwrapRef, toRaw, computed } from 'vue';
+import { useState } from './index';
+import { IHookStateInitAction, IHookStateSetAction, resolveHookState } from './misc/hookState';
 
 export interface ListActions<T> {
     /**
@@ -136,7 +136,9 @@ function useList<T>(initialList: IHookStateInitAction<T[]> = []): [Ref<T[]>, Lis
         }
     }
 
-    return [list, actions];
+    return [computed(() => {
+        return list.value;
+    }), actions];
 }
 
 export default useList;

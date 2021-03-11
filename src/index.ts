@@ -1,4 +1,4 @@
-export {on, off} from './misc/util';
+export {on, off, sources} from './misc/util';
 export {default as useAsync} from './useAsync';
 export {default as useAsyncFn} from './useAsyncFn';
 export {default as useAsyncRetry} from './useAsyncRetry';
@@ -28,3 +28,8 @@ export {default as useInterval} from './useInterval';
 export {default as useHarmonicIntervalFn} from './useHarmonicIntervalFn';
 export {default as useEffect} from './useEffect';
 export {default as useSpring} from './useSpring';
+export {default as useKey} from './useKey';
+export {default as useEvent} from './useEvent';
+export {default as useGeolocation} from './useGeolocation';
+export {default as useIdle} from './useIdle';
+export {default as useHover} from './useHover';

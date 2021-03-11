@@ -1,5 +1,5 @@
-import {onMounted, onUnmounted, watch, WatchSource} from "vue";
-import {useState} from "./index";
+import { isRef, ComputedRef, onMounted, onUnmounted, watch, WatchSource } from "vue";
+import { useState } from "./index";
 
 declare type MultiWatchSources = (WatchSource<unknown> | object)[];
 

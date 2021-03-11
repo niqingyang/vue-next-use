@@ -1,3 +1,5 @@
+import { WatchSource } from 'vue';
+
 export type PromiseType<P extends Promise<any>> = P extends Promise<infer T> ? T : never;
 
 export type FunctionReturningPromise = (...args: any[]) => Promise<any>;
@@ -8,8 +10,10 @@ export type SetStateAction<S> = S | ((prevState: S) => S);
 // The destructor is itself only allowed to return void.
 export type EffectCallback = () => (void | (() => void | undefined));
 
+declare type MultiWatchSources = (WatchSource<unknown> | object)[];
+
 // TODO (TypeScript 3.0): ReadonlyArray<unknown>
-export type DependencyList = ReadonlyArray<any>;
+export type DependencyList = MultiWatchSources | WatchSource;
 
 export type EventHandler<E> = { bivarianceHack(event: E): void }["bivarianceHack"];
 

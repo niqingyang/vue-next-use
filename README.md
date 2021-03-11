@@ -21,6 +21,7 @@
 - useHarmonicIntervalFn
 - useHash
 - useHover
+- useHoverDirty
 - useInterval
 - useKey
 - useList

@@ -1,4 +1,4 @@
-import { h } from 'vue';
+import {h} from 'vue';
 import Docs from './Docs.vue';
 
 // 展示文档
@@ -10,7 +10,7 @@ export function ShowDocs(args) {
         },
         setup() {
 
-            const { md } = args;
+            const {md} = args;
 
             return {
                 content: md?.default ? md.default : md
@@ -23,11 +23,17 @@ export function ShowDocs(args) {
 }
 
 // 展示单个组件
-export function ShowDemo(vnode, props, children) {
-    const Demo = () => ({
-        render() {
-            return h(vnode, props, children);
-        }
+export function ShowDemo(vnode, args) {
+    const Template = (args) => ({
+        components: {
+            Demo: vnode
+        },
+        setup() {
+            return {args};
+        },
+        template: '<Demo v-bind="args"></Demo>'
     });
-    return Demo.bind({});
+    const Demo = Template.bind({});
+    Demo.args = args;
+    return Demo;
 }

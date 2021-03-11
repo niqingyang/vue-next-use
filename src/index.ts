@@ -35,4 +35,5 @@ export {default as useEvent} from './useEvent';
 export {default as useGeolocation} from './useGeolocation';
 export {default as useIdle} from './useIdle';
 export {default as useHover} from './useHover';
+export {default as useHoverDirty} from './useHoverDirty';
 export {default as useHash} from './useHash';

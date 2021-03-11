@@ -37,3 +37,4 @@ export {default as useIdle} from './useIdle';
 export {default as useHover} from './useHover';
 export {default as useHoverDirty} from './useHoverDirty';
 export {default as useHash} from './useHash';
+export {default as useIntersection} from './useIntersection';

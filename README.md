@@ -22,6 +22,8 @@
 - useHash
 - useHover
 - useHoverDirty
+- useIdle
+- useIntersection
 - useInterval
 - useKey
 - useList

@@ -7,15 +7,22 @@
 - useAsyncRetry
 - useBeforeUnload
 - useClickAway
+- useComputedSetState
+- useComputedState
 - useCookie
 - useCopyToClipboard
 - useDrop
 - useDropArea
 - useEffect
+- useEvent
 - useFullscreen
+- useGeolocation
 - useGetSet
 - useHarmonicIntervalFn
+- useHash
+- useHover
 - useInterval
+- useKey
 - useList
 - useMap
 - useMountedState
@@ -32,3 +39,14 @@
 - useVideo
 
 
+## Usage
+
+```bash
+npm install vue-next-use
+```
+
+or
+
+```bash
+yarn add vue-next-use
+```

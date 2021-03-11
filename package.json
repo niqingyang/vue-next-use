@@ -57,6 +57,7 @@
     "@types/node": "^14.14.30",
     "@vue/compiler-sfc": "^3.0.7",
     "babel-loader": "^8.2.2",
+    "markdown-loader": "^6.0.0",
     "rollup": "^2.40.0",
     "rollup-plugin-cleanup": "^3.2.1",
     "rollup-plugin-dts": "^3.0.1",

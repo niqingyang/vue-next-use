@@ -1,7 +1,7 @@
 {
   "name": "vue-next-use",
   "version": "0.0.21-beta",
-  "description": "Collection of Vue Hooks",
+  "description": "Vue Hooks - 👍",
   "main": "dist/vue-next-use.bundle.esm.js",
   "module": "dist/vue-next-use.bundle.esm.js",
   "types": "dist/vue-next-use.d.ts",
@@ -16,11 +16,16 @@
     "dist/",
     "src/"
   ],
+  "keywords": [
+    "vue",
+    "use",
+    "vue3",
+    "hooks",
+    "vue-use",
+    "vue-hooks",
+    "react-use"
+  ],
   "scripts": {
-    "dev": "vite",
-    "serve": "vite preview",
-    "build:cjs": "tsc -d --sourceMap",
-    "build:es": "tsc -d --sourceMap -m esNext --outDir esm",
     "build": "rollup -c --sourcemap",
     "clean": "rimraf node_modules",
     "storybook": "start-storybook -p 6006",

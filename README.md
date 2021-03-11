@@ -4,9 +4,31 @@
 
 - useAsync
 - useAsyncFn
+- useAsyncRetry
+- useBeforeUnload
+- useClickAway
+- useCookie
+- useCopyToClipboard
+- useDrop
+- useDropArea
+- useEffect
+- useFullscreen
+- useGetSet
+- useHarmonicIntervalFn
+- useInterval
 - useList
 - useMap
-- useSet
+- useMountedState
 - useQueue
-- useAudio
+- useSet
+- useSetState
+- useSlider
+- useSpeech
+- useSpring
+- useState
+- useTimeout
+- useTimeoutFn
+- useToggle
 - useVideo
+
+

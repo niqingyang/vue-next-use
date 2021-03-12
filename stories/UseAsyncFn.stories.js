@@ -1,4 +1,3 @@
-import { h } from 'vue';
 import UseAsyncFn from './UseAsyncFn.vue';
 import { ShowDemo, ShowDocs } from './util/index';
 

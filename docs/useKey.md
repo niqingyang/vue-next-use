@@ -4,37 +4,45 @@ Vue UI sensor hook that executes a `handler` when a keyboard key is used.
 
 ## Usage
 
-```jsx
-import {useKey} from 'react-use';
+```vue
+<template>
+  <div>Press the key <input v-model="key"/> to increment: {{count}}</div>
+</template>
 
-const Demo = () => {
-  const [count, set] = useState(0);
-  const increment = () => set(count => ++count);
-  useKey('ArrowUp', increment);
+<script>
+import {useKey, useState} from "vue-next-use";
 
-  return (
-    <div>
-      Press arrow up: {count}
-    </div>
-  );
+export default {
+  setup() {
+    const [key] = useState('ArrowUp');
+    const [count] = useState(0);
+    const increment = () => {
+      count.value += 1;
+    };
+    useKey(key, increment);
+
+    return {
+      key,
+      count,
+    }
+  },
 };
+</script>
 ```
 
 Or as render-prop:
 
 ```jsx
-import UseKey from 'react-use/lib/component/UseKey';
+import UseKey from 'vue-next-use';
 
-<UseKey filter='a' fn={() => alert('"a" key pressed!')} />
+<UseKey filter='a' fn={() => alert('"a" key pressed!')}/>
 ```
-
 
 ## Reference
 
 ```js
-useKey(filter, handler, options?, deps?)
+useKey(filter, handler, options ?)
 ```
-
 
 ## Examples
 

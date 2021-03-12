@@ -31,6 +31,8 @@ export {default as useHarmonicIntervalFn} from './useHarmonicIntervalFn';
 export {default as useEffect} from './useEffect';
 export {default as useSpring} from './useSpring';
 export {default as useKey} from './useKey';
+// @ts-ignore
+export {default as UseKey} from './component/UseKey.js';
 export {default as useEvent} from './useEvent';
 export {default as useGeolocation} from './useGeolocation';
 export {default as useIdle} from './useIdle';

@@ -1,4 +1,4 @@
-import {h} from 'vue';
+import {h, onMounted, defineComponent} from 'vue';
 import Docs from './Docs.vue';
 
 // 展示文档

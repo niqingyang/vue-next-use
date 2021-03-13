@@ -1,15 +1,24 @@
-import UseGeolocation from './UseGeolocation.vue';
-import { ShowDemo, ShowDocs } from './util/index';
+import {ShowDemo, ShowDocs} from './util/index';
+import {useGeolocation} from "../src/index";
 
 export default {
-    title: 'Sensors/UseGeolocation',
-    component: UseGeolocation,
+    title: 'Sensors/useGeolocation',
     argTypes: {},
 };
 
-export const Docs = ShowDocs({ md: require('../docs/useGeolocation.md') });
+export const Docs = ShowDocs(require('../docs/useGeolocation.md'));
 
-export const Demo = ShowDemo(UseGeolocation);
+export const Demo = ShowDemo({
+    setup() {
+        const state = useGeolocation();
+
+        return () => (
+            <pre>
+              {JSON.stringify(state.value, null, 2)}
+            </pre>
+        );
+    },
+});
 
 
 

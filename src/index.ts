@@ -42,3 +42,5 @@ export {default as useHash} from './useHash';
 export {default as useIntersection} from './useIntersection';
 export {default as useKeyPress} from './useKeyPress';
 export {default as useKeyPressEvent} from './useKeyPressEvent';
+export {default as useKeyboardJs} from './useKeyboardJs';
+export {default as useMount} from './useMount';

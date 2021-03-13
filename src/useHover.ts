@@ -21,8 +21,8 @@ const useHover = (element: Element): [Vue.VNode<any>, Vue.ComputedRef<boolean>] 
     }
 
     const el = Vue.cloneVNode(element, {
-        onmouseenter: onMouseEnter(element?.props?.onmouseenter),
-        onmouseleave: onMouseLeave(element?.props?.onmouseleave),
+        onmouseenter: onMouseEnter(element?.props?.onMouseEnter),
+        onmouseleave: onMouseLeave(element?.props?.onMouseLeave),
     });
 
     return [el, Vue.computed(() => {

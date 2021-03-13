@@ -14,14 +14,14 @@ by a mouse.
 ```vue
 <template>
   <div>
-    <Hoverable @mouseenter="enter" @mouseleave="leave"/>
+    <Hoverable onMouseEnter="enter" onMouseLeave="leave"/>
     <div>{{ hovered ? "HOVERED" : "" }}</div>
   </div>
 </template>
 
 <script>
 import {h, unref} from "vue";
-import {useHover} from "../src/index";
+import {useHover} from "vue-next-use";
 
 export default {
   setup() {

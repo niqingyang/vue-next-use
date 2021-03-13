@@ -44,6 +44,7 @@
   "dependencies": {
     "copy-to-clipboard": "^3.3.1",
     "js-cookie": "^2.2.1",
+    "keyboardjs": "^2.6.4",
     "rebound": "^0.1.0",
     "screenfull": "^5.1.0",
     "set-harmonic-interval": "^1.0.1",

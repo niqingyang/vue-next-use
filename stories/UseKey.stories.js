@@ -7,7 +7,7 @@ export default {
     argTypes: {},
 };
 
-export const Docs = ShowDocs({md: require('../docs/useKey.md')});
+export const Docs = ShowDocs(require('../docs/useKey.md'));
 
 export const Demo = ShowDemo({
     template: "Press 'q' <UseKey v-bind='args'/>",

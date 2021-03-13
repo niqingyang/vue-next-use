@@ -3,11 +3,11 @@ import {useKeyPress} from '../src/index'
 import {ShowDemo, ShowDocs} from './util/index';
 
 export default {
-    title: 'Sensors/UseKeyPress',
+    title: 'Sensors/useKeyPress',
     argTypes: {},
 };
 
-export const Docs = ShowDocs({md: require('../docs/useKeyPress.md')});
+export const Docs = ShowDocs(require('../docs/useKeyPress.md'));
 
 export const Demo = ShowDemo({
     template: `<div style="text-align: center;">Try pressing numbers<br/>{{ states }}</div>`,

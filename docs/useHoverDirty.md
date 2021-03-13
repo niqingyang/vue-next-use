@@ -49,7 +49,7 @@ export default {
 ## Reference
 
 ```js
-const [newReactElement, isHovering] = useHoverDirty(reactElement);
-const [newReactElement, isHovering] = useHoverDirty((isHovering) => reactElement);
+const [newVNode, isHovering] = useHoverDirty(reactElement);
+const [newVNode, isHovering] = useHoverDirty((isHovering) => reactElement);
 const isHovering = useHoverDirty(ref, enabled);
 ```

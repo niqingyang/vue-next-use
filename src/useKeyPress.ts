@@ -8,11 +8,7 @@ const useKeyPress = (keyFilter: KeyFilter): [ComputedRef<boolean>, ComputedRef<n
     useKey(keyFilter, (event) => set([true, event]), {event: 'keydown'});
     useKey(keyFilter, (event) => set([false, event]), {event: 'keyup'});
 
-    return [computed(() => {
-        return state.value[0];
-    }), computed(() => {
-        return state.value[1];
-    })];
+    return [computed(() => state.value[0]), computed(() => state.value[1])];
 };
 
 export default useKeyPress;

@@ -1,4 +1,4 @@
-import { ref, onMounted, onUnmounted, watch, onBeforeUnmount, computed, isVNode, createVNode, watchEffect, unref, isRef } from 'vue';
+import { isRef, isReactive, ref, onMounted, onUnmounted, watch, computed, onBeforeUnmount, isVNode, createVNode, watchEffect, unref, cloneVNode } from 'vue';
 import writeText from 'copy-to-clipboard';
 import screenfull from 'screenfull';
 import Cookies from 'js-cookie';
@@ -18,6 +18,33 @@ function off(obj, ...args) {
     }
 }
 const isBrowser = typeof window !== 'undefined';
+const isWatchSource = (target) => {
+    // A watch source can only be a getter/effect function, a ref, a reactive object, or an array of these types.
+    if (isRef(target) || isReactive(target) || target instanceof Function) {
+        return true;
+    }
+    return false;
+};
+/**
+ * filter watch sources
+ * @param target
+ * @returns
+ */
+const sources = (target) => {
+    const deps = [];
+    if (Array.isArray(target)) {
+        target.forEach((item) => {
+            if (isWatchSource(item)) {
+                deps.push(item);
+            }
+        });
+        return deps.length > 0 ? deps : null;
+    }
+    if (isWatchSource(target)) {
+        return target;
+    }
+    return null;
+};
 
 function useState(initialState) {
     const state = initialState instanceof Function ? ref(initialState()) : ref(initialState);
@@ -92,6 +119,16 @@ function useAsyncRetry(fn, deps = []) {
         setAttempt((currentAttempt) => currentAttempt + 1);
     };
     return [state, retry];
+}
+
+function useComputedState(initialState) {
+    const [state, setState] = useState(initialState);
+    return [
+        computed(() => {
+            return state.value;
+        }),
+        setState
+    ];
 }
 
 const useBeforeUnload = (enabled = true, message) => {
@@ -211,7 +248,9 @@ function useList(initialList = []) {
             actions.set(resolveHookState(initialList).slice());
         }
     };
-    return [list, actions];
+    return [computed(() => {
+            return list.value;
+        }), actions];
 }
 
 /*! *****************************************************************************
@@ -598,8 +637,8 @@ const useSpeech = (text, opts = {}) => {
     return state;
 };
 
-const defaultEvents = ['mousedown', 'touchstart'];
-const useClickAway = (ref, onClickAway, events = defaultEvents) => {
+const defaultEvents$1 = ['mousedown', 'touchstart'];
+const useClickAway = (ref, onClickAway, events = defaultEvents$1) => {
     const handler = (event) => {
         const { value: el } = ref;
         el && !el.contains(event.target) && onClickAway(event);
@@ -956,5 +995,336 @@ const useSpring = (targetValue = 0, tension = 50, friction = 3) => {
     return value;
 };
 
-export { off, on, useAsync, useAsyncFn, useAsyncRetry, useAudio, useBeforeUnload, useToggle as useBoolean, useClickAway, useCookie, useCopyToClipboard, useDrop, useDropArea, useEffect, useFullscreen, useGetSet, useHarmonicIntervalFn, useInterval, useList, useMap, useMountedState, useQueue, useSet, useSetState, useSpeech, useSpring, useState, useTimeout, useTimeoutFn, useToggle, useVideo };
+const defaultTarget = isBrowser ? window : null;
+const isListenerType1 = (target) => {
+    return !!target.addEventListener;
+};
+const isListenerType2 = (target) => {
+    return !!target.on;
+};
+const useEvent = (name, handler, target = defaultTarget, options) => {
+    useEffect(() => {
+        if (!handler) {
+            return;
+        }
+        if (!target) {
+            return;
+        }
+        const element = unref(target);
+        const fn = unref(handler);
+        if (isListenerType1(element)) {
+            on(element, name, fn, options);
+        }
+        else if (isListenerType2(element)) {
+            element.on(name, fn, options);
+        }
+        return () => {
+            if (isListenerType1(element)) {
+                off(element, name, fn, options);
+            }
+            else if (isListenerType2(element)) {
+                element.off(name, fn, options);
+            }
+        };
+    }, sources([name, isRef(handler) ? handler : () => handler, target, JSON.stringify(options)]));
+};
+
+const createKeyPredicate = (keyFilter) => typeof keyFilter === 'function'
+    ? keyFilter
+    : typeof keyFilter === 'string'
+        ? (event) => event.key === keyFilter
+        : keyFilter
+            ? () => true
+            : () => false;
+const useKey = (key, fn = noop, opts = {}) => {
+    const { event = 'keydown', target, options } = opts;
+    const [predicate, setPredicate] = useState(() => createKeyPredicate(unref(key)));
+    if (isRef(key)) {
+        watch(key, () => {
+            setPredicate(() => createKeyPredicate(unref(key)));
+        });
+    }
+    const handler = (handlerEvent) => {
+        if (unref(predicate)(handlerEvent)) {
+            return fn(handlerEvent);
+        }
+    };
+    useEvent(event, handler, target, options);
+};
+
+var UseKey = {
+  props: {
+    filter: {
+      type: [String, Function],
+      required: true
+    },
+    fn: {
+      type: Function
+    },
+    event: {
+      type: String
+    },
+    target: {
+      Object
+    },
+    options: {
+      Object
+    }
+  },
+  setup(props) {
+    const {
+      filter,
+      fn,
+      ...rest
+    } = props;
+    useKey(filter, fn, rest);
+    return {};
+  }
+};
+
+const useGeolocation = (options) => {
+    const [state, setState] = useState({
+        loading: true,
+        accuracy: null,
+        altitude: null,
+        altitudeAccuracy: null,
+        heading: null,
+        latitude: null,
+        longitude: null,
+        speed: null,
+        timestamp: Date.now(),
+    });
+    let mounted = true;
+    let watchId;
+    const onEvent = (event) => {
+        if (mounted) {
+            setState({
+                loading: false,
+                accuracy: event.coords.accuracy,
+                altitude: event.coords.altitude,
+                altitudeAccuracy: event.coords.altitudeAccuracy,
+                heading: event.coords.heading,
+                latitude: event.coords.latitude,
+                longitude: event.coords.longitude,
+                speed: event.coords.speed,
+                timestamp: event.timestamp,
+            });
+        }
+    };
+    const onEventError = (error) => mounted && setState((oldState) => (Object.assign(Object.assign({}, oldState), { loading: false, error })));
+    useEffect(() => {
+        navigator.geolocation.getCurrentPosition(onEvent, onEventError, options);
+        watchId = navigator.geolocation.watchPosition(onEvent, onEventError, options);
+        return () => {
+            mounted = false;
+            navigator.geolocation.clearWatch(watchId);
+        };
+    });
+    return computed(() => {
+        return state.value;
+    });
+};
+
+function throttle (delay, noTrailing, callback, debounceMode) {
+  var timeoutID;
+  var cancelled = false;
+  var lastExec = 0;
+  function clearExistingTimeout() {
+    if (timeoutID) {
+      clearTimeout(timeoutID);
+    }
+  }
+  function cancel() {
+    clearExistingTimeout();
+    cancelled = true;
+  }
+  if (typeof noTrailing !== 'boolean') {
+    debounceMode = callback;
+    callback = noTrailing;
+    noTrailing = undefined;
+  }
+  function wrapper() {
+    for (var _len = arguments.length, arguments_ = new Array(_len), _key = 0; _key < _len; _key++) {
+      arguments_[_key] = arguments[_key];
+    }
+    var self = this;
+    var elapsed = Date.now() - lastExec;
+    if (cancelled) {
+      return;
+    }
+    function exec() {
+      lastExec = Date.now();
+      callback.apply(self, arguments_);
+    }
+    function clear() {
+      timeoutID = undefined;
+    }
+    if (debounceMode && !timeoutID) {
+      exec();
+    }
+    clearExistingTimeout();
+    if (debounceMode === undefined && elapsed > delay) {
+      exec();
+    } else if (noTrailing !== true) {
+      timeoutID = setTimeout(debounceMode ? clear : exec, debounceMode === undefined ? delay - elapsed : delay);
+    }
+  }
+  wrapper.cancel = cancel;
+  return wrapper;
+}
+
+const defaultEvents = ['mousemove', 'mousedown', 'resize', 'keydown', 'touchstart', 'wheel'];
+const oneMinute = 60e3;
+const useIdle = (ms = oneMinute, initialState = false, events = defaultEvents) => {
+    const [state, setState] = useState(initialState);
+    useEffect(() => {
+        let mounted = true;
+        let timeout;
+        let localState = state.value;
+        const set = (newState) => {
+            if (mounted) {
+                localState = newState;
+                setState(newState);
+            }
+        };
+        const onEvent = throttle(50, () => {
+            if (localState) {
+                set(false);
+            }
+            clearTimeout(timeout);
+            timeout = setTimeout(() => set(true), unref(ms));
+        });
+        const onVisibility = () => {
+            if (!document.hidden) {
+                onEvent();
+            }
+        };
+        const e = unref(events);
+        for (let i = 0; i < e.length; i++) {
+            on(window, e[i], onEvent);
+        }
+        on(document, 'visibilitychange', onVisibility);
+        timeout = setTimeout(() => set(true), ms);
+        return () => {
+            mounted = false;
+            for (let i = 0; i < e.length; i++) {
+                off(window, e[i], onEvent);
+            }
+            off(document, 'visibilitychange', onVisibility);
+        };
+    }, sources([ms, events]));
+    return computed(() => {
+        return state.value;
+    });
+};
+
+const useHover = (element) => {
+    var _a, _b;
+    const [state, setState] = useState(false);
+    const onMouseEnter = (originalOnMouseEnter) => (event) => {
+        (originalOnMouseEnter || noop)(event);
+        setState(true);
+    };
+    const onMouseLeave = (originalOnMouseLeave) => (event) => {
+        (originalOnMouseLeave || noop)(event);
+        setState(false);
+    };
+    if (typeof element === 'function') {
+        element = element(state);
+    }
+    const el = cloneVNode(element, {
+        onmouseenter: onMouseEnter((_a = element === null || element === void 0 ? void 0 : element.props) === null || _a === void 0 ? void 0 : _a.onmouseenter),
+        onmouseleave: onMouseLeave((_b = element === null || element === void 0 ? void 0 : element.props) === null || _b === void 0 ? void 0 : _b.onmouseleave),
+    });
+    return [el, computed(() => {
+            return state.value;
+        })];
+};
+
+// kudos: https://usehooks.com/
+const useHoverDirty = (ref, enabled = true) => {
+    if (process.env.NODE_ENV === 'development') {
+        if (typeof ref !== 'object' || typeof unref(ref) === 'undefined') {
+            console.error('useHoverDirty expects a single ref argument.');
+        }
+    }
+    const [value, setValue] = useComputedState(false);
+    const onMouseOver = () => setValue(true);
+    const onMouseOut = () => setValue(false);
+    useEffect(() => {
+        if (enabled && ref && ref.value) {
+            on(ref.value, 'mouseover', onMouseOver);
+            on(ref.value, 'mouseout', onMouseOut);
+        }
+        // fixes react-hooks/exhaustive-deps warning about stale ref elements
+        const { value } = ref;
+        return () => {
+            if (enabled && value) {
+                off(value, 'mouseover', onMouseOver);
+                off(value, 'mouseout', onMouseOut);
+            }
+        };
+    }, sources([enabled, ref]));
+    return value;
+};
+
+/**
+ * read and write url hash, response to url hash change
+ */
+function useHash() {
+    const [hash, setHash] = useState(() => window.location.hash);
+    const onHashChange = () => {
+        setHash(window.location.hash);
+    };
+    useEffect(() => {
+        on(window, 'hashchange', onHashChange);
+        return () => {
+            off(window, 'hashchange', onHashChange);
+        };
+    });
+    watch(hash, (newHash) => {
+        if (window.location.hash != newHash) {
+            window.location.hash = newHash;
+        }
+    });
+    const _setHash = (newHash) => {
+        if (newHash !== unref(hash)) {
+            window.location.hash = newHash;
+        }
+    };
+    return [hash, _setHash];
+}
+
+const useIntersection = (ref, options) => {
+    const [intersectionObserverEntry, setIntersectionObserverEntry,] = useComputedState(null);
+    const deps = [ref];
+    if (isRef(options)) {
+        deps.push(() => unref(options).threshold);
+        deps.push(() => unref(options).root);
+        deps.push(() => unref(options).rootMargin);
+    }
+    else {
+        deps.push(options === null || options === void 0 ? void 0 : options.threshold);
+        deps.push(options === null || options === void 0 ? void 0 : options.root);
+        deps.push(options === null || options === void 0 ? void 0 : options.rootMargin);
+    }
+    useEffect(() => {
+        if (ref.value && typeof IntersectionObserver === 'function') {
+            const handler = (entries) => {
+                setIntersectionObserverEntry(entries[0]);
+            };
+            const observer = new IntersectionObserver(handler, unref(options));
+            observer.observe(ref.value);
+            return () => {
+                setIntersectionObserverEntry(null);
+                observer.disconnect();
+            };
+        }
+        return () => {
+        };
+    }, sources(deps));
+    return intersectionObserverEntry;
+};
+
+export { UseKey, off, on, sources, useAsync, useAsyncFn, useAsyncRetry, useAudio, useBeforeUnload, useToggle as useBoolean, useClickAway, useSetState as useComputedSetState, useComputedState, useCookie, useCopyToClipboard, useDrop, useDropArea, useEffect, useEvent, useFullscreen, useGeolocation, useGetSet, useHarmonicIntervalFn, useHash, useHover, useHoverDirty, useIdle, useIntersection, useInterval, useKey, useList, useMap, useMountedState, useQueue, useSet, useSetState, useSpeech, useSpring, useState, useTimeout, useTimeoutFn, useToggle, useVideo };
 //# sourceMappingURL=vue-next-use.bundle.esm.js.map

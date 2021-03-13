@@ -24,7 +24,7 @@ export const Demo = ShowDemo({
     })
 });
 
-export const Count = ShowDemo({
+export const Counter = ShowDemo({
     template: '<div>Press the key <input v-model="key"/> to increment: {{count}}</div>',
     setup() {
         const [key] = useState('ArrowUp');

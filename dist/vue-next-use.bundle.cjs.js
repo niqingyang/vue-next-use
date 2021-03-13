@@ -2,7 +2,7 @@
 
 Object.defineProperty(exports, '__esModule', { value: true });
 
-var vue = require('vue');
+var Vue = require('vue');
 var writeText = require('copy-to-clipboard');
 var screenfull = require('screenfull');
 var Cookies = require('js-cookie');
@@ -28,9 +28,36 @@ function off(obj, ...args) {
     }
 }
 const isBrowser = typeof window !== 'undefined';
+const isWatchSource = (target) => {
+    // A watch source can only be a getter/effect function, a ref, a reactive object, or an array of these types.
+    if (Vue.isRef(target) || Vue.isReactive(target) || target instanceof Function) {
+        return true;
+    }
+    return false;
+};
+/**
+ * filter watch sources
+ * @param target
+ * @returns
+ */
+const sources = (target) => {
+    const deps = [];
+    if (Array.isArray(target)) {
+        target.forEach((item) => {
+            if (isWatchSource(item)) {
+                deps.push(item);
+            }
+        });
+        return deps.length > 0 ? deps : null;
+    }
+    if (isWatchSource(target)) {
+        return target;
+    }
+    return null;
+};
 
 function useState(initialState) {
-    const state = initialState instanceof Function ? vue.ref(initialState()) : vue.ref(initialState);
+    const state = initialState instanceof Function ? Vue.ref(initialState()) : Vue.ref(initialState);
     const set = (value) => {
         if (value instanceof Function) {
             state.value = value(state.value);
@@ -43,19 +70,19 @@ function useState(initialState) {
 }
 
 function useMountedState() {
-    const mountedRef = vue.ref(false);
+    const mountedRef = Vue.ref(false);
     const get = () => mountedRef.value;
-    vue.onMounted(() => {
+    Vue.onMounted(() => {
         mountedRef.value = true;
     });
-    vue.onUnmounted(() => {
+    Vue.onUnmounted(() => {
         mountedRef.value = false;
     });
     return get;
 }
 
 function useAsyncFn(fn, initialState = { loading: false }) {
-    const lastCallId = vue.ref(0);
+    const lastCallId = Vue.ref(0);
     const isMounted = useMountedState();
     const [state, set] = useState(initialState);
     const callback = (...args) => {
@@ -77,7 +104,7 @@ function useAsync(fn, deps) {
         loading: true,
     });
     if (deps) {
-        vue.watch(deps, () => {
+        Vue.watch(deps, () => {
             callback();
         }, {
             immediate: true
@@ -104,6 +131,16 @@ function useAsyncRetry(fn, deps = []) {
     return [state, retry];
 }
 
+function useComputedState(initialState) {
+    const [state, setState] = useState(initialState);
+    return [
+        Vue.computed(() => {
+            return state.value;
+        }),
+        setState
+    ];
+}
+
 const useBeforeUnload = (enabled = true, message) => {
     const handler = (event) => {
         const finalEnabled = typeof enabled === 'function' ? enabled() : true;
@@ -116,8 +153,8 @@ const useBeforeUnload = (enabled = true, message) => {
         }
         return message;
     };
-    vue.onMounted(() => {
-        vue.watch([enabled], ([value], oldValue) => {
+    Vue.onMounted(() => {
+        Vue.watch([enabled], ([value], oldValue) => {
             if (value) {
                 on(window, 'beforeunload', handler);
             }
@@ -128,7 +165,7 @@ const useBeforeUnload = (enabled = true, message) => {
             immediate: true
         });
     });
-    vue.onBeforeUnmount(() => {
+    Vue.onBeforeUnmount(() => {
         off(window, 'beforeunload', handler);
     });
 };
@@ -148,13 +185,13 @@ const useQueue = (initialValue = []) => {
             });
             return result;
         },
-        first: vue.computed(() => {
+        first: Vue.computed(() => {
             return state.value[0];
         }),
-        last: vue.computed(() => {
+        last: Vue.computed(() => {
             return state.value[state.value.length - 1];
         }),
-        size: vue.computed(() => {
+        size: Vue.computed(() => {
             return state.value.length;
         }),
     };
@@ -221,7 +258,9 @@ function useList(initialList = []) {
             actions.set(resolveHookState(initialList).slice());
         }
     };
-    return [list, actions];
+    return [Vue.computed(() => {
+            return list.value;
+        }), actions];
 }
 
 /*! *****************************************************************************
@@ -382,7 +421,7 @@ function createHTMLMediaHook(tag) {
     return (elOrProps) => {
         let element;
         let props;
-        if (vue.isVNode(elOrProps)) {
+        if (Vue.isVNode(elOrProps)) {
             element = elOrProps;
             props = element.props;
         }
@@ -399,7 +438,7 @@ function createHTMLMediaHook(tag) {
             controls: false,
             autoplay: true
         });
-        const ref = vue.ref(null);
+        const ref = Vue.ref(null);
         const wrapEvent = (userEvent, proxyEvent) => {
             return (event) => {
                 try {
@@ -448,10 +487,10 @@ function createHTMLMediaHook(tag) {
             setState({ buffered: parseTimeRanges(el.buffered) });
         };
         if (element) {
-            element = vue.createVNode(element, Object.assign(Object.assign({ controls: false }, props), { ref, onPlay: wrapEvent(props.onPlay, onPlay), onPause: wrapEvent(props.onPause, onPause), onVolumeChange: wrapEvent(props.onVolumechange, onVolumeChange), onDurationChange: wrapEvent(props.onDurationchange, onDurationChange), onTimeUpdate: wrapEvent(props.onTimeupdate, onTimeUpdate), onProgress: wrapEvent(props.onProgress, onProgress) }));
+            element = Vue.createVNode(element, Object.assign(Object.assign({ controls: false }, props), { ref, onPlay: wrapEvent(props.onPlay, onPlay), onPause: wrapEvent(props.onPause, onPause), onVolumeChange: wrapEvent(props.onVolumechange, onVolumeChange), onDurationChange: wrapEvent(props.onDurationchange, onDurationChange), onTimeUpdate: wrapEvent(props.onTimeupdate, onTimeUpdate), onProgress: wrapEvent(props.onProgress, onProgress) }));
         }
         else {
-            element = vue.createVNode(tag, Object.assign(Object.assign({ controls: false }, props), { onPlay: wrapEvent(props.onPlay, onPlay), onPause: wrapEvent(props.onPause, onPause), onVolumeChange: wrapEvent(props.onVolumechange, onVolumeChange), onDurationChange: wrapEvent(props.onDurationchange, onDurationChange), onTimeUpdate: wrapEvent(props.onTimeupdate, onTimeUpdate), onProgress: wrapEvent(props.onProgress, onProgress) })); // TODO: fix this typing.
+            element = Vue.createVNode(tag, Object.assign(Object.assign({ controls: false }, props), { onPlay: wrapEvent(props.onPlay, onPlay), onPause: wrapEvent(props.onPause, onPause), onVolumeChange: wrapEvent(props.onVolumechange, onVolumeChange), onDurationChange: wrapEvent(props.onDurationchange, onDurationChange), onTimeUpdate: wrapEvent(props.onTimeupdate, onTimeUpdate), onProgress: wrapEvent(props.onProgress, onProgress) })); // TODO: fix this typing.
         }
         // Some browsers return `Promise` on `.play()` and may throw errors
         // if one tries to execute another `.play()` or `.pause()` while that
@@ -572,7 +611,7 @@ function createHTMLMediaHook(tag) {
                 }
             }
         };
-        return [element, vue.computed(() => {
+        return [element, Vue.computed(() => {
                 return state.value;
             }), controls, ref];
     };
@@ -592,7 +631,7 @@ const useSpeech = (text, opts = {}) => {
         pitch: opts.pitch || 1,
         volume: opts.volume || 1,
     });
-    const utteranceRef = vue.ref(null);
+    const utteranceRef = Vue.ref(null);
     const utterance = new SpeechSynthesisUtterance(text);
     opts.lang && (utterance.lang = opts.lang);
     opts.voice && (utterance.voice = opts.voice);
@@ -608,18 +647,18 @@ const useSpeech = (text, opts = {}) => {
     return state;
 };
 
-const defaultEvents = ['mousedown', 'touchstart'];
-const useClickAway = (ref, onClickAway, events = defaultEvents) => {
+const defaultEvents$1 = ['mousedown', 'touchstart'];
+const useClickAway = (ref, onClickAway, events = defaultEvents$1) => {
     const handler = (event) => {
         const { value: el } = ref;
         el && !el.contains(event.target) && onClickAway(event);
     };
-    vue.onMounted(() => {
+    Vue.onMounted(() => {
         for (const eventName of events) {
             on(document, eventName, handler);
         }
     });
-    vue.onBeforeUnmount(() => {
+    Vue.onBeforeUnmount(() => {
         for (const eventName of events) {
             off(document, eventName, handler);
         }
@@ -651,7 +690,7 @@ const useDrop = (options = {}, args = []) => {
         set({ over });
     };
     const isMounted = useMountedState();
-    vue.watchEffect((onInvalidate) => {
+    Vue.watchEffect((onInvalidate) => {
         const element = (ref === null || ref === void 0 ? void 0 : ref.value) ? ref === null || ref === void 0 ? void 0 : ref.value : document;
         const onDragOver = (event) => {
             event.preventDefault();
@@ -759,9 +798,9 @@ const useDropArea = (options = {}) => {
 
 const useFullscreen = (ref, enabled, options = {}) => {
     const { video, onClose = noop } = options;
-    const [isFullscreen, setIsFullscreen] = useState(vue.unref(enabled));
+    const [isFullscreen, setIsFullscreen] = useState(Vue.unref(enabled));
     useEffect(() => {
-        if (!vue.unref(enabled)) {
+        if (!Vue.unref(enabled)) {
             return;
         }
         if (!ref.value) {
@@ -818,7 +857,7 @@ const useFullscreen = (ref, enabled, options = {}) => {
             }
         };
     }, enabled);
-    return vue.computed(() => {
+    return Vue.computed(() => {
         return isFullscreen.value;
     });
 };
@@ -838,10 +877,10 @@ const useCookie = (cookieName) => {
 
 function useEffect(fn, deps = undefined) {
     const [callback, setCallback] = useState(undefined);
-    vue.onMounted(() => {
+    Vue.onMounted(() => {
         setCallback(() => fn());
         if (deps) {
-            vue.watch(deps, (newValue, oldValue) => {
+            Vue.watch(deps, (newValue, oldValue) => {
                 if (callback.value instanceof Function) {
                     callback.value();
                 }
@@ -849,7 +888,7 @@ function useEffect(fn, deps = undefined) {
             });
         }
     });
-    vue.onUnmounted(() => {
+    Vue.onUnmounted(() => {
         if (callback.value instanceof Function) {
             callback.value();
         }
@@ -865,16 +904,16 @@ function useEffect(fn, deps = undefined) {
 // cancel: ()=>void - cancel the timeout
 // reset: ()=>void - reset the timeout
 function useTimeoutFn(fn, ms = 0) {
-    const ready = vue.ref(false);
-    const timeout = vue.ref();
-    const isReady = vue.computed(() => ready.value);
+    const ready = Vue.ref(false);
+    const timeout = Vue.ref();
+    const isReady = Vue.computed(() => ready.value);
     const set = () => {
         ready.value = false;
         timeout.value && clearTimeout(timeout.value);
         timeout.value = setTimeout(() => {
             ready.value = true;
-            vue.unref(fn)();
-        }, vue.unref(ms));
+            Vue.unref(fn)();
+        }, Vue.unref(ms));
     };
     const clear = () => {
         ready.value = null;
@@ -884,7 +923,7 @@ function useTimeoutFn(fn, ms = 0) {
     useEffect(() => {
         set();
         return clear;
-    }, vue.isRef(ms) ? ms : null);
+    }, Vue.isRef(ms) ? ms : null);
     return [isReady, clear, set];
 }
 
@@ -895,40 +934,40 @@ function useTimeout(ms = 0) {
 }
 
 const useInterval = (callback, delay) => {
-    const savedCallback = vue.ref(vue.unref(callback));
-    if (vue.isRef(callback)) {
-        vue.watch(callback, () => {
-            savedCallback.value = vue.unref(callback);
+    const savedCallback = Vue.ref(Vue.unref(callback));
+    if (Vue.isRef(callback)) {
+        Vue.watch(callback, () => {
+            savedCallback.value = Vue.unref(callback);
         });
     }
     useEffect(() => {
-        if (vue.unref(delay) !== null) {
-            const interval = setInterval(vue.unref(savedCallback), vue.unref(delay) || 0);
+        if (Vue.unref(delay) !== null) {
+            const interval = setInterval(Vue.unref(savedCallback), Vue.unref(delay) || 0);
             return () => clearInterval(interval);
         }
         return undefined;
-    }, vue.isRef(delay) ? delay : undefined);
+    }, Vue.isRef(delay) ? delay : undefined);
 };
 
 const useHarmonicIntervalFn = (fn, delay = 0) => {
-    const latestCallback = vue.ref(() => {
+    const latestCallback = Vue.ref(() => {
         // void
     });
     useEffect(() => {
         latestCallback.value = fn;
     });
     useEffect(() => {
-        if (vue.unref(delay) !== null) {
-            const interval = setHarmonicInterval.setHarmonicInterval(() => latestCallback.value, vue.unref(delay) || 0);
+        if (Vue.unref(delay) !== null) {
+            const interval = setHarmonicInterval.setHarmonicInterval(() => latestCallback.value, Vue.unref(delay) || 0);
             return () => setHarmonicInterval.clearHarmonicInterval(interval);
         }
         return undefined;
-    }, vue.isRef(delay) ? delay : undefined);
+    }, Vue.isRef(delay) ? delay : undefined);
 };
 
 const useSpring = (targetValue = 0, tension = 50, friction = 3) => {
     const [spring, setSpring] = useState(null);
-    const [value, setValue] = useState(vue.unref(targetValue));
+    const [value, setValue] = useState(Vue.unref(targetValue));
     // memoize listener to being able to unsubscribe later properly, otherwise
     // listener fn will be different on each re-render and wouldn't unsubscribe properly.
     const listener = {
@@ -939,8 +978,8 @@ const useSpring = (targetValue = 0, tension = 50, friction = 3) => {
     };
     useEffect(() => {
         if (!spring.value) {
-            const newSpring = new rebound.SpringSystem().createSpring(vue.unref(tension), vue.unref(friction));
-            newSpring.setCurrentValue(vue.unref(targetValue));
+            const newSpring = new rebound.SpringSystem().createSpring(Vue.unref(tension), Vue.unref(friction));
+            newSpring.setCurrentValue(Vue.unref(targetValue));
             setSpring(newSpring);
             newSpring.addListener(listener);
         }
@@ -951,23 +990,356 @@ const useSpring = (targetValue = 0, tension = 50, friction = 3) => {
             }
         };
     }, [
-        vue.computed(() => {
-            return vue.unref(tension);
+        Vue.computed(() => {
+            return Vue.unref(tension);
         }),
-        vue.computed(() => {
-            return vue.unref(friction);
+        Vue.computed(() => {
+            return Vue.unref(friction);
         })
     ]);
     useEffect(() => {
         if (spring.value) {
-            spring.value.setEndValue(vue.unref(targetValue));
+            spring.value.setEndValue(Vue.unref(targetValue));
         }
-    }, vue.isRef(targetValue) ? targetValue : null);
+    }, Vue.isRef(targetValue) ? targetValue : null);
     return value;
 };
 
+const defaultTarget = isBrowser ? window : null;
+const isListenerType1 = (target) => {
+    return !!target.addEventListener;
+};
+const isListenerType2 = (target) => {
+    return !!target.on;
+};
+const useEvent = (name, handler, target = defaultTarget, options) => {
+    useEffect(() => {
+        if (!handler) {
+            return;
+        }
+        if (!target) {
+            return;
+        }
+        const element = Vue.unref(target);
+        const fn = Vue.unref(handler);
+        if (isListenerType1(element)) {
+            on(element, name, fn, options);
+        }
+        else if (isListenerType2(element)) {
+            element.on(name, fn, options);
+        }
+        return () => {
+            if (isListenerType1(element)) {
+                off(element, name, fn, options);
+            }
+            else if (isListenerType2(element)) {
+                element.off(name, fn, options);
+            }
+        };
+    }, sources([name, Vue.isRef(handler) ? handler : () => handler, target, JSON.stringify(options)]));
+};
+
+const createKeyPredicate = (keyFilter) => typeof keyFilter === 'function'
+    ? keyFilter
+    : typeof keyFilter === 'string'
+        ? (event) => event.key === keyFilter
+        : keyFilter
+            ? () => true
+            : () => false;
+const useKey = (key, fn = noop, opts = {}) => {
+    const { event = 'keydown', target, options } = opts;
+    const [predicate, setPredicate] = useState(() => createKeyPredicate(Vue.unref(key)));
+    if (Vue.isRef(key)) {
+        Vue.watch(key, () => {
+            setPredicate(() => createKeyPredicate(Vue.unref(key)));
+        });
+    }
+    const handler = (handlerEvent) => {
+        if (Vue.unref(predicate)(handlerEvent)) {
+            return fn(handlerEvent);
+        }
+    };
+    useEvent(event, handler, target, options);
+};
+
+var UseKey = {
+  props: {
+    filter: {
+      type: [String, Function],
+      required: true
+    },
+    fn: {
+      type: Function
+    },
+    event: {
+      type: String
+    },
+    target: {
+      Object
+    },
+    options: {
+      Object
+    }
+  },
+  setup(props) {
+    const {
+      filter,
+      fn,
+      ...rest
+    } = props;
+    useKey(filter, fn, rest);
+    return {};
+  }
+};
+
+const useGeolocation = (options) => {
+    const [state, setState] = useState({
+        loading: true,
+        accuracy: null,
+        altitude: null,
+        altitudeAccuracy: null,
+        heading: null,
+        latitude: null,
+        longitude: null,
+        speed: null,
+        timestamp: Date.now(),
+    });
+    let mounted = true;
+    let watchId;
+    const onEvent = (event) => {
+        if (mounted) {
+            setState({
+                loading: false,
+                accuracy: event.coords.accuracy,
+                altitude: event.coords.altitude,
+                altitudeAccuracy: event.coords.altitudeAccuracy,
+                heading: event.coords.heading,
+                latitude: event.coords.latitude,
+                longitude: event.coords.longitude,
+                speed: event.coords.speed,
+                timestamp: event.timestamp,
+            });
+        }
+    };
+    const onEventError = (error) => mounted && setState((oldState) => (Object.assign(Object.assign({}, oldState), { loading: false, error })));
+    useEffect(() => {
+        navigator.geolocation.getCurrentPosition(onEvent, onEventError, options);
+        watchId = navigator.geolocation.watchPosition(onEvent, onEventError, options);
+        return () => {
+            mounted = false;
+            navigator.geolocation.clearWatch(watchId);
+        };
+    });
+    return Vue.computed(() => {
+        return state.value;
+    });
+};
+
+function throttle (delay, noTrailing, callback, debounceMode) {
+  var timeoutID;
+  var cancelled = false;
+  var lastExec = 0;
+  function clearExistingTimeout() {
+    if (timeoutID) {
+      clearTimeout(timeoutID);
+    }
+  }
+  function cancel() {
+    clearExistingTimeout();
+    cancelled = true;
+  }
+  if (typeof noTrailing !== 'boolean') {
+    debounceMode = callback;
+    callback = noTrailing;
+    noTrailing = undefined;
+  }
+  function wrapper() {
+    for (var _len = arguments.length, arguments_ = new Array(_len), _key = 0; _key < _len; _key++) {
+      arguments_[_key] = arguments[_key];
+    }
+    var self = this;
+    var elapsed = Date.now() - lastExec;
+    if (cancelled) {
+      return;
+    }
+    function exec() {
+      lastExec = Date.now();
+      callback.apply(self, arguments_);
+    }
+    function clear() {
+      timeoutID = undefined;
+    }
+    if (debounceMode && !timeoutID) {
+      exec();
+    }
+    clearExistingTimeout();
+    if (debounceMode === undefined && elapsed > delay) {
+      exec();
+    } else if (noTrailing !== true) {
+      timeoutID = setTimeout(debounceMode ? clear : exec, debounceMode === undefined ? delay - elapsed : delay);
+    }
+  }
+  wrapper.cancel = cancel;
+  return wrapper;
+}
+
+const defaultEvents = ['mousemove', 'mousedown', 'resize', 'keydown', 'touchstart', 'wheel'];
+const oneMinute = 60e3;
+const useIdle = (ms = oneMinute, initialState = false, events = defaultEvents) => {
+    const [state, setState] = useState(initialState);
+    useEffect(() => {
+        let mounted = true;
+        let timeout;
+        let localState = state.value;
+        const set = (newState) => {
+            if (mounted) {
+                localState = newState;
+                setState(newState);
+            }
+        };
+        const onEvent = throttle(50, () => {
+            if (localState) {
+                set(false);
+            }
+            clearTimeout(timeout);
+            timeout = setTimeout(() => set(true), Vue.unref(ms));
+        });
+        const onVisibility = () => {
+            if (!document.hidden) {
+                onEvent();
+            }
+        };
+        const e = Vue.unref(events);
+        for (let i = 0; i < e.length; i++) {
+            on(window, e[i], onEvent);
+        }
+        on(document, 'visibilitychange', onVisibility);
+        timeout = setTimeout(() => set(true), ms);
+        return () => {
+            mounted = false;
+            for (let i = 0; i < e.length; i++) {
+                off(window, e[i], onEvent);
+            }
+            off(document, 'visibilitychange', onVisibility);
+        };
+    }, sources([ms, events]));
+    return Vue.computed(() => {
+        return state.value;
+    });
+};
+
+const useHover = (element) => {
+    var _a, _b;
+    const [state, setState] = useState(false);
+    const onMouseEnter = (originalOnMouseEnter) => (event) => {
+        (originalOnMouseEnter || noop)(event);
+        setState(true);
+    };
+    const onMouseLeave = (originalOnMouseLeave) => (event) => {
+        (originalOnMouseLeave || noop)(event);
+        setState(false);
+    };
+    if (typeof element === 'function') {
+        element = element(state);
+    }
+    const el = Vue.cloneVNode(element, {
+        onmouseenter: onMouseEnter((_a = element === null || element === void 0 ? void 0 : element.props) === null || _a === void 0 ? void 0 : _a.onmouseenter),
+        onmouseleave: onMouseLeave((_b = element === null || element === void 0 ? void 0 : element.props) === null || _b === void 0 ? void 0 : _b.onmouseleave),
+    });
+    return [el, Vue.computed(() => {
+            return state.value;
+        })];
+};
+
+// kudos: https://usehooks.com/
+const useHoverDirty = (ref, enabled = true) => {
+    if (process.env.NODE_ENV === 'development') {
+        if (typeof ref !== 'object' || typeof Vue.unref(ref) === 'undefined') {
+            console.error('useHoverDirty expects a single ref argument.');
+        }
+    }
+    const [value, setValue] = useComputedState(false);
+    const onMouseOver = () => setValue(true);
+    const onMouseOut = () => setValue(false);
+    useEffect(() => {
+        if (enabled && ref && ref.value) {
+            on(ref.value, 'mouseover', onMouseOver);
+            on(ref.value, 'mouseout', onMouseOut);
+        }
+        // fixes react-hooks/exhaustive-deps warning about stale ref elements
+        const { value } = ref;
+        return () => {
+            if (enabled && value) {
+                off(value, 'mouseover', onMouseOver);
+                off(value, 'mouseout', onMouseOut);
+            }
+        };
+    }, sources([enabled, ref]));
+    return value;
+};
+
+/**
+ * read and write url hash, response to url hash change
+ */
+function useHash() {
+    const [hash, setHash] = useState(() => window.location.hash);
+    const onHashChange = () => {
+        setHash(window.location.hash);
+    };
+    useEffect(() => {
+        on(window, 'hashchange', onHashChange);
+        return () => {
+            off(window, 'hashchange', onHashChange);
+        };
+    });
+    Vue.watch(hash, (newHash) => {
+        if (window.location.hash != newHash) {
+            window.location.hash = newHash;
+        }
+    });
+    const _setHash = (newHash) => {
+        if (newHash !== Vue.unref(hash)) {
+            window.location.hash = newHash;
+        }
+    };
+    return [hash, _setHash];
+}
+
+const useIntersection = (ref, options) => {
+    const [intersectionObserverEntry, setIntersectionObserverEntry,] = useComputedState(null);
+    const deps = [ref];
+    if (Vue.isRef(options)) {
+        deps.push(() => Vue.unref(options).threshold);
+        deps.push(() => Vue.unref(options).root);
+        deps.push(() => Vue.unref(options).rootMargin);
+    }
+    else {
+        deps.push(options === null || options === void 0 ? void 0 : options.threshold);
+        deps.push(options === null || options === void 0 ? void 0 : options.root);
+        deps.push(options === null || options === void 0 ? void 0 : options.rootMargin);
+    }
+    useEffect(() => {
+        if (ref.value && typeof IntersectionObserver === 'function') {
+            const handler = (entries) => {
+                setIntersectionObserverEntry(entries[0]);
+            };
+            const observer = new IntersectionObserver(handler, Vue.unref(options));
+            observer.observe(ref.value);
+            return () => {
+                setIntersectionObserverEntry(null);
+                observer.disconnect();
+            };
+        }
+        return () => {
+        };
+    }, sources(deps));
+    return intersectionObserverEntry;
+};
+
+exports.UseKey = UseKey;
 exports.off = off;
 exports.on = on;
+exports.sources = sources;
 exports.useAsync = useAsync;
 exports.useAsyncFn = useAsyncFn;
 exports.useAsyncRetry = useAsyncRetry;
@@ -975,15 +1347,25 @@ exports.useAudio = useAudio;
 exports.useBeforeUnload = useBeforeUnload;
 exports.useBoolean = useToggle;
 exports.useClickAway = useClickAway;
+exports.useComputedSetState = useSetState;
+exports.useComputedState = useComputedState;
 exports.useCookie = useCookie;
 exports.useCopyToClipboard = useCopyToClipboard;
 exports.useDrop = useDrop;
 exports.useDropArea = useDropArea;
 exports.useEffect = useEffect;
+exports.useEvent = useEvent;
 exports.useFullscreen = useFullscreen;
+exports.useGeolocation = useGeolocation;
 exports.useGetSet = useGetSet;
 exports.useHarmonicIntervalFn = useHarmonicIntervalFn;
+exports.useHash = useHash;
+exports.useHover = useHover;
+exports.useHoverDirty = useHoverDirty;
+exports.useIdle = useIdle;
+exports.useIntersection = useIntersection;
 exports.useInterval = useInterval;
+exports.useKey = useKey;
 exports.useList = useList;
 exports.useMap = useMap;
 exports.useMountedState = useMountedState;

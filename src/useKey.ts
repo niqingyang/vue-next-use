@@ -35,7 +35,6 @@ const useKey = (
             setPredicate(() => createKeyPredicate(unref(key)));
         });
     }
-
     const handler: Handler = (handlerEvent) => {
         if (unref(predicate)(handlerEvent)) {
             return fn(handlerEvent);

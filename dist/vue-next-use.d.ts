@@ -1,7 +1,14 @@
-import { Ref, UnwrapRef, ComputedRef, AudioHTMLAttributes, VideoHTMLAttributes, VNode, RendererElement, WatchSource } from 'vue';
+import { WatchSource, Ref, UnwrapRef, ComputedRef, AudioHTMLAttributes, VideoHTMLAttributes, VNode, RendererElement } from 'vue';
 
 declare function on<T extends Window | Document | HTMLElement | EventTarget>(obj: T | null, ...args: Parameters<T['addEventListener']> | [string, Function | null, ...any]): void;
 declare function off<T extends Window | Document | HTMLElement | EventTarget>(obj: T | null, ...args: Parameters<T['removeEventListener']> | [string, Function | null, ...any]): void;
+declare type MultiWatchSources$1 = (WatchSource<unknown> | object)[];
+/**
+ * filter watch sources
+ * @param target
+ * @returns
+ */
+declare const sources: (target: any) => (MultiWatchSources$1 | WatchSource | null);
 
 declare type PromiseType<P extends Promise<any>> = P extends Promise<infer T> ? T : never;
 declare type FunctionReturningPromise = (...args: any[]) => Promise<any>;
@@ -65,6 +72,8 @@ declare function useAsync<T extends FunctionReturningPromise>(fn: T, deps?: any[
 declare function useAsyncRetry<T>(fn: () => Promise<T>, deps?: any[]): [Ref<UnwrapRef<AsyncState<T>>>, () => void];
 
 declare function useState<T>(initialState: T | (() => T)): [Ref<T>, (prevState: SetStateAction<T>) => void];
+
+declare function useComputedState<T>(initialState: T | (() => T)): [ComputedRef<T>, (prevState: SetStateAction<T>) => void];
 
 declare const useBeforeUnload: (enabled?: boolean | (() => boolean), message?: string | undefined) => void;
 
@@ -278,5 +287,90 @@ declare function useEffect(fn: () => (void | (() => void)), deps?: MultiWatchSou
 
 declare const useSpring: (targetValue?: number | Ref<number>, tension?: number | Ref<number>, friction?: number | Ref<number>) => Ref<number>;
 
-export { off, on, useAsync, useAsyncFn, useAsyncRetry, useAudio, useBeforeUnload, useToggle as useBoolean, useClickAway, useCookie, useCopyToClipboard, useDrop, useDropArea, useEffect, useFullscreen, useGetSet, useHarmonicIntervalFn, useInterval, useList, useMap, useMountedState, useQueue, useSet, useSetState, useSpeech, useSpring, useState, useTimeout, useTimeoutFn, useToggle, useVideo };
+interface ListenerType1 {
+    addEventListener(name: string, handler: (event?: any) => void, ...args: any[]): any;
+    removeEventListener(name: string, handler: (event?: any) => void, ...args: any[]): any;
+}
+interface ListenerType2 {
+    on(name: string, handler: (event?: any) => void, ...args: any[]): any;
+    off(name: string, handler: (event?: any) => void, ...args: any[]): any;
+}
+declare type UseEventTarget = ListenerType1 | ListenerType2;
+declare type AddEventListener<T> = T extends ListenerType1 ? T['addEventListener'] : T extends ListenerType2 ? T['on'] : never;
+declare const useEvent: <T extends UseEventTarget>(name: Parameters<AddEventListener<T>>[0], handler?: Parameters<AddEventListener<T>>[1] | Ref<Parameters<AddEventListener<T>>[1]> | null | undefined, target?: Window | T | Ref<T> | null, options?: Parameters<AddEventListener<T>>[2] | undefined) => void;
+
+declare type KeyFilter = null | undefined | Ref<string> | string | ((event: KeyboardEvent) => boolean);
+declare type Handler = (event: KeyboardEvent) => void;
+interface UseKeyOptions {
+    event?: 'keydown' | 'keypress' | 'keyup';
+    target?: UseEventTarget;
+    options?: any;
+}
+declare const useKey: (key: KeyFilter, fn?: Handler, opts?: UseKeyOptions) => void;
+
+var UseKey = {
+    props: {
+        filter: {
+            type: [String, Function],
+            required: true
+        },
+        fn: {
+            type: Function
+        },
+        event: {
+            type: String,
+        },
+        target: {
+            Object
+        },
+        options: {
+            Object
+        },
+    },
+    setup(props) {
+        return {};
+    }
+};
+
+/**
+ * @desc Made compatible with {GeolocationPositionError} and {PositionError} cause
+ * PositionError been renamed to GeolocationPositionError in typescript 4.1.x and making
+ * own compatible interface is most easiest way to avoid errors.
+ */
+interface IGeolocationPositionError {
+    readonly code: number;
+    readonly message: string;
+    readonly PERMISSION_DENIED: number;
+    readonly POSITION_UNAVAILABLE: number;
+    readonly TIMEOUT: number;
+}
+interface GeoLocationSensorState {
+    loading: boolean;
+    accuracy: number | null;
+    altitude: number | null;
+    altitudeAccuracy: number | null;
+    heading: number | null;
+    latitude: number | null;
+    longitude: number | null;
+    speed: number | null;
+    timestamp: number | null;
+    error?: Error | IGeolocationPositionError;
+}
+declare const useGeolocation: (options?: PositionOptions | undefined) => ComputedRef<GeoLocationSensorState>;
+
+declare const useIdle: (ms?: number, initialState?: boolean, events?: string[]) => ComputedRef<boolean>;
+
+declare type Element$1 = ((state: Ref<boolean>) => VNode<any>) | VNode<any>;
+declare const useHover: (element: Element$1) => [VNode<any>, ComputedRef<boolean>];
+
+declare const useHoverDirty: (ref: Ref<Element>, enabled?: boolean | Ref<boolean>) => ComputedRef<boolean>;
+
+/**
+ * read and write url hash, response to url hash change
+ */
+declare function useHash(): [Ref<string>, (hash: string) => void];
+
+declare const useIntersection: (ref: Ref<HTMLElement>, options: IntersectionObserverInit | Ref<IntersectionObserverInit>) => ComputedRef<IntersectionObserverEntry | null> | null;
+
+export { UseKey, off, on, sources, useAsync, useAsyncFn, useAsyncRetry, useAudio, useBeforeUnload, useToggle as useBoolean, useClickAway, useSetState as useComputedSetState, useComputedState, useCookie, useCopyToClipboard, useDrop, useDropArea, useEffect, useEvent, useFullscreen, useGeolocation, useGetSet, useHarmonicIntervalFn, useHash, useHover, useHoverDirty, useIdle, useIntersection, useInterval, useKey, useList, useMap, useMountedState, useQueue, useSet, useSetState, useSpeech, useSpring, useState, useTimeout, useTimeoutFn, useToggle, useVideo };
 //# sourceMappingURL=vue-next-use.d.ts.map

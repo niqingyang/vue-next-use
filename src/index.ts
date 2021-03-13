@@ -41,3 +41,4 @@ export {default as useHoverDirty} from './useHoverDirty';
 export {default as useHash} from './useHash';
 export {default as useIntersection} from './useIntersection';
 export {default as useKeyPress} from './useKeyPress';
+export {default as useKeyPressEvent} from './useKeyPressEvent';

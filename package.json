@@ -61,6 +61,7 @@
     "@storybook/addon-links": "^6.2.0-beta.11",
     "@storybook/vue3": "^6.2.0-beta.11",
     "@types/node": "^14.14.30",
+    "@vue/babel-plugin-jsx": "^1.0.3",
     "@vue/compiler-sfc": "^3.0.7",
     "babel-loader": "^8.2.2",
     "markdown-loader": "^6.0.0",

@@ -45,3 +45,4 @@ export {default as useKeyPressEvent} from './useKeyPressEvent';
 export {default as useKeyboardJs} from './useKeyboardJs';
 export {default as useMount} from './useMount';
 export {default as useLocation} from './useLocation';
+export {default as useLongPress} from './useLongPress';

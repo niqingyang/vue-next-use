@@ -1,4 +1,5 @@
 import {ShowDemo, ShowDocs} from './util/index';
+import {ref} from "vue";
 import {useLocation} from "../src/index";
 
 export default {

@@ -1,6 +1,20 @@
 # vue-next-use
 
-迁移 [react-use](https://github.com/streamich/react-use) 至 vue，目前已实现：
+a vue3 [react-use](https://github.com/streamich/react-use) implementation：
+
+## Usage (beta)
+
+```bash
+npm install vue-next-use
+```
+
+or
+
+```bash
+yarn add vue-next-use
+```
+
+## Done
 
 - useAsync
 - useAsyncFn
@@ -49,15 +63,6 @@
 - useToggle
 - useVideo
 
+## Other
 
-## Usage
-
-```bash
-npm install vue-next-use
-```
-
-or
-
-```bash
-yarn add vue-next-use
-```
+doing...

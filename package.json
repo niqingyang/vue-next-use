@@ -29,7 +29,8 @@
     "build": "rollup -c --sourcemap",
     "clean": "rimraf node_modules",
     "storybook": "start-storybook -p 6006",
-    "build-storybook": "build-storybook"
+    "build-storybook": "build-storybook",
+    "deploy-storybook": "storybook-to-ghpages"
   },
   "author": "niqingyang",
   "license": "MIT",
@@ -61,6 +62,7 @@
     "@storybook/addon-actions": "^6.2.0-beta.11",
     "@storybook/addon-essentials": "^6.2.0-beta.11",
     "@storybook/addon-links": "^6.2.0-beta.11",
+    "@storybook/storybook-deployer": "^2.8.7",
     "@storybook/vue3": "^6.2.0-beta.11",
     "@types/node": "^14.14.30",
     "@vue/babel-plugin-jsx": "^1.0.3",

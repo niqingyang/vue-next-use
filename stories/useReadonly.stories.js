@@ -1,5 +1,6 @@
 import {useReadonly} from "../src/index";
 import {ShowDemo, ShowDocs} from './util/index';
+import {readonly} from "vue";
 
 export default {
     title: 'State/useReadonly',

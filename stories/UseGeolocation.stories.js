@@ -14,7 +14,7 @@ export const Demo = ShowDemo({
 
         return () => (
             <pre>
-              {JSON.stringify(state.value, null, 2)}
+              {JSON.stringify(state, null, 2)}
             </pre>
         );
     },

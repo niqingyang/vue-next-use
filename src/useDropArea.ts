@@ -3,6 +3,7 @@ import useState from './useState';
 import useMountedState from './useMountedState';
 import {noop} from './misc/util';
 import {DragEventHandler, ClipboardEventHandler} from './misc/types';
+import {useReadonly} from "./index";
 
 export interface DropAreaState {
     over: boolean;
@@ -81,10 +82,10 @@ const createBond = (process: (dataTransfer: DataTransfer, event: (ClipboardEvent
 // @dragleave="bond.onDragLeave"
 // @drop="bond.onDrop"
 // @paste="bond.onPaste"
-const useDropArea = (options: DropAreaOptions = {}): [DropAreaBond, Ref<DropAreaState>] => {
+const useDropArea = (options: DropAreaOptions = {}): [DropAreaBond, Readonly<DropAreaState>] => {
     const {onFiles, onText, onUri} = options;
     const isMounted = useMountedState();
-    const [state, set] = useState<DropAreaState>({over: false});
+    const [state, set] = useReadonly<DropAreaState>({over: false});
 
     const setOver = (over: boolean) => {
         set({over});

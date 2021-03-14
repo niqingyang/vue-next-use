@@ -46,3 +46,6 @@ export {default as useKeyboardJs} from './useKeyboardJs';
 export {default as useMount} from './useMount';
 export {default as useLocation} from './useLocation';
 export {default as useLongPress} from './useLongPress';
+export {default as useBattery} from './useBattery';
+export {default as useReactive} from './useReactive';
+export {default as useReadonly} from './useReadonly';

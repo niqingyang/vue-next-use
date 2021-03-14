@@ -1,5 +1,5 @@
 import { computed, ComputedRef } from 'vue';
-import { useEffect, useState } from './index';
+import {useEffect, useReadonly, useState} from './index';
 
 /**
  * @desc Made compatible with {GeolocationPositionError} and {PositionError} cause
@@ -27,8 +27,8 @@ export interface GeoLocationSensorState {
     error?: Error | IGeolocationPositionError;
 }
 
-const useGeolocation = (options?: PositionOptions): ComputedRef<GeoLocationSensorState> => {
-    const [state, setState] = useState<GeoLocationSensorState>({
+const useGeolocation = (options?: PositionOptions): Readonly<GeoLocationSensorState> => {
+    const [state, setState] = useReadonly<GeoLocationSensorState>({
         loading: true,
         accuracy: null,
         altitude: null,
@@ -70,9 +70,7 @@ const useGeolocation = (options?: PositionOptions): ComputedRef<GeoLocationSenso
         };
     });
 
-    return computed(() => {
-        return state.value
-    });
+    return state;
 };
 
 export default useGeolocation;

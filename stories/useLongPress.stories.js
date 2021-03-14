@@ -7,7 +7,7 @@ export default {
     argTypes: {},
 };
 
-export const Docs = ShowDocs(require('../docs/useLocation.md'));
+export const Docs = ShowDocs(require('../docs/useLongPress.md'));
 
 export const Demo = ShowDemo({
     props: {

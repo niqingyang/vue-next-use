@@ -1,5 +1,5 @@
 import {Ref, watchEffect} from 'vue';
-import {useSetState, useMountedState} from "./index";
+import {useSetState, useMountedState, useReadonly} from "./index";
 import {noop, off, on} from './misc/util';
 import {DragEventHandler, ClipboardEventHandler} from './misc/types';
 
@@ -44,9 +44,9 @@ const createProcess = (options: DropAreaOptions, isMounted: () => boolean) => (d
     }
 };
 
-const useDrop = (options: DropAreaOptions = {}, args = []): Ref<DropAreaState> => {
+const useDrop = (options: DropAreaOptions = {}, args = []): Readonly<DropAreaState> => {
     const {ref, onFiles, onText, onUri} = options;
-    const [state, set] = useSetState<DropAreaState>({over: false});
+    const [state, set] = useReadonly<DropAreaState>({over: false});
 
     const setOver = (over: boolean) => {
         set({over});

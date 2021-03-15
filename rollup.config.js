@@ -1,7 +1,7 @@
 // https://github.com/rollup/plugins/tree/master/packages/multi-entry
 // https://github.com/rollup/awesome
 import alias from '@rollup/plugin-alias';
-import { babel } from '@rollup/plugin-babel';
+import {babel} from '@rollup/plugin-babel';
 import resolve from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
 import progress from 'rollup-plugin-progress';
@@ -15,8 +15,8 @@ import dts from "rollup-plugin-dts";
 export default [{
     input: 'src/index.ts',
     output: [
-        { file: 'dist/vue-next-use.bundle.cjs.js', format: 'cjs' },
-        { file: 'dist/vue-next-use.bundle.esm.js', format: 'esm' },
+        {file: 'dist/vue-next-use.bundle.cjs.js', format: 'cjs'},
+        {file: 'dist/vue-next-use.bundle.esm.js', format: 'esm'},
     ],
     global: {
         vue: "Vue" // 告诉rollup全局变量Vue即是vue
@@ -66,14 +66,14 @@ export default [{
     ]
 },
 // 生成类型的头文件
-{
-    input: "./src/index.ts",
-    output: [{
-        file: "dist/vue-next-use.d.ts",
-        format: "es"
-    }],
-    plugins: [
-        // https://github.com/Swatinem/rollup-plugin-dts
-        dts()
-    ],
-}];
+    {
+        input: "./src/index.ts",
+        output: [{
+            file: "dist/vue-next-use.d.ts",
+            format: "es"
+        }],
+        plugins: [
+            // https://github.com/Swatinem/rollup-plugin-dts
+            dts()
+        ],
+    }];

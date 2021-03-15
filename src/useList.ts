@@ -1,6 +1,6 @@
-import { ref, Ref, UnwrapRef, toRaw, computed } from 'vue';
-import { useState } from './index';
-import { IHookStateInitAction, IHookStateSetAction, resolveHookState } from './misc/hookState';
+import {Ref, computed} from 'vue';
+import {useState} from './index';
+import {IHookStateInitAction, IHookStateSetAction, resolveHookState} from './misc/hookState';
 
 export interface ListActions<T> {
     /**
@@ -59,7 +59,7 @@ export interface ListActions<T> {
 }
 
 function useList<T>(initialList: IHookStateInitAction<T[]> = []): [Ref<T[]>, ListActions<T>] {
-    const [list, set] = useState(resolveHookState(initialList));
+    const [list] = useState(resolveHookState(initialList));
 
     const actions: ListActions<T> = {
         set: (newList: IHookStateSetAction<T[]>) => {

@@ -242,7 +242,7 @@ interface DropAreaOptions$1 {
     onText?: (text: string, event?: Event) => void;
     onUri?: (url: string, event?: Event) => void;
 }
-declare const useDrop: (options?: DropAreaOptions$1, args?: never[]) => Ref<DropAreaState$1>;
+declare const useDrop: (options?: DropAreaOptions$1, args?: never[]) => Readonly<DropAreaState$1>;
 
 interface DropAreaState {
     over: boolean;
@@ -259,7 +259,7 @@ interface DropAreaOptions {
     onText?: (text: string, event?: Event) => void;
     onUri?: (url: string, event?: Event) => void;
 }
-declare const useDropArea: (options?: DropAreaOptions) => [DropAreaBond, Ref<DropAreaState>];
+declare const useDropArea: (options?: DropAreaOptions) => [DropAreaBond, Readonly<DropAreaState>];
 
 interface FullScreenOptions {
     video?: Ref<HTMLVideoElement & {
@@ -309,6 +309,7 @@ interface UseKeyOptions {
 declare const useKey: (key: KeyFilter, fn?: Handler, opts?: UseKeyOptions) => void;
 
 var UseKey = {
+    template: '<Fragment></Fragment>',
     props: {
         filter: {
             type: [String, Function],
@@ -356,7 +357,7 @@ interface GeoLocationSensorState {
     timestamp: number | null;
     error?: Error | IGeolocationPositionError;
 }
-declare const useGeolocation: (options?: PositionOptions | undefined) => ComputedRef<GeoLocationSensorState>;
+declare const useGeolocation: (options?: PositionOptions | undefined) => Readonly<GeoLocationSensorState>;
 
 declare const useIdle: (ms?: number, initialState?: boolean, events?: string[]) => ComputedRef<boolean>;
 
@@ -372,5 +373,73 @@ declare function useHash(): [Ref<string>, (hash: string) => void];
 
 declare const useIntersection: (ref: Ref<HTMLElement>, options: IntersectionObserverInit | Ref<IntersectionObserverInit>) => ComputedRef<IntersectionObserverEntry | null> | null;
 
-export { UseKey, off, on, sources, useAsync, useAsyncFn, useAsyncRetry, useAudio, useBeforeUnload, useToggle as useBoolean, useClickAway, useSetState as useComputedSetState, useComputedState, useCookie, useCopyToClipboard, useDrop, useDropArea, useEffect, useEvent, useFullscreen, useGeolocation, useGetSet, useHarmonicIntervalFn, useHash, useHover, useHoverDirty, useIdle, useIntersection, useInterval, useKey, useList, useMap, useMountedState, useQueue, useSet, useSetState, useSpeech, useSpring, useState, useTimeout, useTimeoutFn, useToggle, useVideo };
+declare const useKeyPress: (keyFilter: KeyFilter) => [ComputedRef<boolean>, ComputedRef<null | KeyboardEvent>];
+
+declare const useKeyPressEvent: (key: string | KeyFilter, keydown?: Handler | null | undefined, keyup?: Handler | null | undefined, useKeyPress?: (keyFilter: KeyFilter) => [ComputedRef<boolean>, ComputedRef<KeyboardEvent | null>]) => void;
+
+declare const useKeyboardJs: (combination: string | string[]) => [ComputedRef<boolean>, ComputedRef<null | KeyboardEvent>];
+
+declare function useMount(fn: () => void): void;
+
+interface LocationSensorState {
+    trigger: string;
+    state?: any;
+    length?: number;
+    hash?: string;
+    host?: string;
+    hostname?: string;
+    href?: string;
+    origin?: string;
+    pathname?: string;
+    port?: string;
+    protocol?: string;
+    search?: string;
+}
+declare const _default$1: (() => LocationSensorState) | (() => ComputedRef<LocationSensorState>);
+
+interface Options {
+    isPreventDefault?: boolean | Ref<boolean>;
+    delay?: number | Ref<number>;
+}
+declare const useLongPress: (callback: (e: TouchEvent | MouseEvent) => void | Ref<(e: TouchEvent | MouseEvent) => void>, options?: Options) => {
+    readonly onMousedown: (e: any) => void;
+    readonly onTouchstart: (e: any) => void;
+    readonly onMouseup: () => void;
+    readonly onMouseleave: () => void;
+    readonly onTouchend: () => void;
+};
+
+interface BatteryState {
+    charging: boolean;
+    chargingTime: number;
+    dischargingTime: number;
+    level: number;
+}
+declare type UseBatteryState = {
+    isSupported: false;
+} | {
+    isSupported: true;
+    fetched: false;
+} | (BatteryState & {
+    isSupported: true;
+    fetched: true;
+});
+declare function useBattery(): Readonly<UseBatteryState>;
+declare const _default: typeof useBattery;
+
+declare function useReactive<T extends Object>(initialState?: T | (() => T)): [T, (patch: Partial<T> | ((prevState: T) => Partial<T>)) => void];
+
+declare function useReadonly<T extends Object>(initialState?: T | (() => T)): [Readonly<T>, (patch: Partial<T> | ((prevState: T) => Partial<T>)) => void];
+
+declare type Dispatch<T> = (value: T) => void;
+interface StateMediator<S = any> {
+    (newState: any): S;
+    (newState: any, dispatch: Dispatch<SetStateAction<S>>): void;
+}
+declare type UseMediatedStateReturn<S = any> = [Ref<S>, Dispatch<SetStateAction<S>>];
+declare function useMediatedState<S = undefined>(mediator: StateMediator<S | undefined>): UseMediatedStateReturn<S | undefined>;
+declare function useMediatedState<S = any>(mediator: StateMediator<S>, initialState: S): UseMediatedStateReturn<S>;
+declare function useMediatedState<S = any>(mediator: StateMediator<S>, initialState?: S): UseMediatedStateReturn<S>;
+
+export { UseKey, off, on, sources, useAsync, useAsyncFn, useAsyncRetry, useAudio, _default as useBattery, useBeforeUnload, useToggle as useBoolean, useClickAway, useSetState as useComputedSetState, useComputedState, useCookie, useCopyToClipboard, useDrop, useDropArea, useEffect, useEvent, useFullscreen, useGeolocation, useGetSet, useHarmonicIntervalFn, useHash, useHover, useHoverDirty, useIdle, useIntersection, useInterval, useKey, useKeyPress, useKeyPressEvent, useKeyboardJs, useList, _default$1 as useLocation, useLongPress, useMap, useMediatedState, useMount, useMountedState, useQueue, useReactive, useReadonly, useSet, useSetState, useSpeech, useSpring, useState, useTimeout, useTimeoutFn, useToggle, useVideo };
 //# sourceMappingURL=vue-next-use.d.ts.map

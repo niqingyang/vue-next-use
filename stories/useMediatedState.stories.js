@@ -7,7 +7,7 @@ export default {
     argTypes: {},
 };
 
-export const Docs = ShowDocs(require('../docs/useIdle.md'));
+// export const Docs = ShowDocs(require('../docs/useIdle.md'));
 
 export const Demo = ShowDemo({
     setup() {

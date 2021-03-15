@@ -43,35 +43,30 @@ export const Demo = ShowDemo({
     }
 });
 
-interface UpsertDemoType {
-    id: string;
-    text: string;
-}
-
 export const UpsertDemo = ShowDemo({
     setup() {
 
-        const upsertPredicate = (a: UpsertDemoType, b: UpsertDemoType) => a.id === b.id;
-        const upsertInitialItems: UpsertDemoType[] = [
-            { id: '1', text: 'Sample' },
-            { id: '2', text: 'Example' },
+        const upsertPredicate = (a, b) => a.id === b.id;
+        const upsertInitialItems = [
+            {id: '1', text: 'Sample'},
+            {id: '2', text: 'Example'},
         ];
 
-        const [list, { upsert, reset, removeAt }] = useList(upsertInitialItems);
+        const [list, {upsert, reset, removeAt}] = useList(upsertInitialItems);
 
         return () => (
-            <div style={{ display: 'inline-flex', flexDirection: 'column' }}>
+            <div style={{display: 'inline-flex', flexDirection: 'column'}}>
                 {list.value.map((item, index) => (
                     <div key={item.id}>
                         <input
                             value={item.text}
-                            onChange={(e: Event) => upsert(upsertPredicate, { ...item, text: e.target?.value })}
+                            onChange={(e) => upsert(upsertPredicate, {...item, text: e.target?.value})}
                         />
                         <button onClick={() => removeAt(index)}>Remove</button>
                     </div>
                 ))}
                 <button
-                    onClick={() => upsert(upsertPredicate, { id: (list.value.length + 1).toString(), text: '' })}>
+                    onClick={() => upsert(upsertPredicate, {id: (list.value.length + 1).toString(), text: ''})}>
                     Add item
                 </button>
                 <button onClick={() => reset()}>Reset</button>

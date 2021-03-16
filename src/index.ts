@@ -50,3 +50,4 @@ export {default as useBattery} from './useBattery';
 export {default as useReactive} from './useReactive';
 export {default as useReadonly} from './useReadonly';
 export {default as useMediatedState} from './useMediatedState';
+export {default as useReducer} from './useReducer';

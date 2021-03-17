@@ -51,3 +51,4 @@ export {default as useReactive} from './useReactive';
 export {default as useReadonly} from './useReadonly';
 export {default as useMediatedState} from './useMediatedState';
 export {default as useReducer} from './useReducer';
+export {default as useMethods} from './useMethods';

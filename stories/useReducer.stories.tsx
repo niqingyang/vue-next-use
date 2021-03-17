@@ -29,9 +29,9 @@ export const Demo = ShowDemo({
 
         return () => (
             <div>
-                <button onClick={() => dispatch('increment')}>increment</button>
+                <div style={{margin: "0 5px"}}>Count: {state.value}</div>
                 <button onClick={() => dispatch('decrement')}>decrement</button>
-                <span style={{margin: "0 5px"}}>count: {state.value}</span>
+                <button onClick={() => dispatch('increment')}>increment</button>
             </div>
         );
     },

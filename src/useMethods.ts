@@ -1,4 +1,4 @@
-import {ComputedRef, ref} from 'vue';
+import {ComputedRef} from 'vue';
 import {useReducer} from "./index";
 import {Reducer} from './misc/types';
 

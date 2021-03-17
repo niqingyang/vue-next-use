@@ -1,4 +1,6 @@
 export {on, off, sources} from './misc/util';
+export {SetStateAction, Dispatch, Reducer} from './misc/types';
+
 export {default as useAsync} from './useAsync';
 export {default as useAsyncFn} from './useAsyncFn';
 export {default as useAsyncRetry} from './useAsyncRetry';
@@ -52,3 +54,4 @@ export {default as useReadonly} from './useReadonly';
 export {default as useMediatedState} from './useMediatedState';
 export {default as useReducer} from './useReducer';
 export {default as useMethods} from './useMethods';
+export {default as useStateValidator, ValidityState, UseStateValidatorReturn} from './useStateValidator';

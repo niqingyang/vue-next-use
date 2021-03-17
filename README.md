@@ -1,6 +1,6 @@
 # vue-next-use
 
-a vue3 [react-use](https://github.com/streamich/react-use) implementation：
+a vue3 [react-use](https://github.com/streamich/react-use) implementation - it is under active development, and the interface may change greatly
 
 ## Usage (beta)
 

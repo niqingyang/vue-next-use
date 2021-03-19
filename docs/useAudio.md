@@ -6,7 +6,7 @@ Creates `<audio>` element, tracks its state and exposes playback controls.
 ## Usage
 
 ```jsx
-import {useAudio} from 'react-use';
+import {useAudio} from 'vue-next-use';
 
 const Demo = () => {
   const [audio, state, controls, ref] = useAudio({
@@ -43,7 +43,7 @@ const [audio, state, controls, ref] = useAudio(props);
 const [audio, state, controls] = useAudio(<audio {...props}/>);
 ```
 
-`audio` is React's `<audio>` element that you have to insert somewhere in your
+`audio` is Vue's `<audio>` element that you have to insert somewhere in your
 render tree, for example:
 
 ```jsx

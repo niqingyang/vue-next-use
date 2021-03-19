@@ -1,16 +1,16 @@
-import {Ref, watchEffect} from 'vue';
-import {useSetState, useMountedState, useReadonly} from "./index";
-import {noop, off, on} from './misc/util';
+import {isRef, Ref, unref, watchEffect} from 'vue';
+import {sources, useEffect, useMountedState, useReadonly} from "./index";
 import {DragEventHandler, ClipboardEventHandler} from './misc/types';
+import {noop, off, on} from './misc/util';
 
 export interface DropAreaState {
     over: boolean;
 }
 
 export interface DropAreaBond {
-    onDragOver: DragEventHandler;
-    onDragEnter: DragEventHandler;
-    onDragLeave: DragEventHandler;
+    onDragover: DragEventHandler;
+    onDragenter: DragEventHandler;
+    onDragleave: DragEventHandler;
     onDrop: DragEventHandler;
     onPaste: ClipboardEventHandler;
 }
@@ -26,19 +26,19 @@ const createProcess = (options: DropAreaOptions, isMounted: () => boolean) => (d
     const uri = dataTransfer.getData('text/uri-list');
 
     if (uri) {
-        (options.onUri || noop)(uri, event);
+        (unref(options.onUri) || noop)(uri, event);
         return;
     }
 
     if (dataTransfer.files && dataTransfer.files.length) {
-        (options.onFiles || noop)(Array.from(dataTransfer.files), event);
+        (unref(options.onFiles) || noop)(Array.from(dataTransfer.files), event);
         return;
     }
 
     if (dataTransfer.items && dataTransfer.items.length) {
         dataTransfer.items[0].getAsString((text) => {
             if (isMounted()) {
-                (options.onText || noop)(text, event);
+                (unref(options.onText) || noop)(text, event);
             }
         });
     }
@@ -54,8 +54,10 @@ const useDrop = (options: DropAreaOptions = {}, args = []): Readonly<DropAreaSta
 
     const isMounted = useMountedState();
 
-    watchEffect((onInvalidate) => {
-        const element = ref?.value ? ref?.value : document;
+    const process = createProcess(options, isMounted);
+
+    useEffect(() => {
+        const element = ref?.value ? ref.value : document;
 
         const onDragOver = (event: Event) => {
             event.preventDefault();
@@ -75,8 +77,6 @@ const useDrop = (options: DropAreaOptions = {}, args = []): Readonly<DropAreaSta
             setOver(false);
         };
 
-        const process = createProcess(options, isMounted);
-
         const onDrop = (event: DragEvent) => {
             event.preventDefault();
             setOver(false);
@@ -93,19 +93,19 @@ const useDrop = (options: DropAreaOptions = {}, args = []): Readonly<DropAreaSta
         on(element, 'dragexit', onDragExit);
         on(element, 'drop', onDrop);
 
-        if (onText) {
+        if (unref(onText)) {
             on(element, 'paste', onPaste);
         }
 
-        onInvalidate(() => {
+        return () => {
             off(element, 'dragover', onDragOver);
             off(element, 'dragenter', onDragEnter);
             off(element, 'dragleave', onDragLeave);
             off(element, 'dragexit', onDragExit);
             off(element, 'drop', onDrop);
             off(element, 'paste', onPaste);
-        })
-    });
+        }
+    }, sources([ref, isRef(onText) ? onText : null, isRef(onFiles) ? onFiles : null, isRef(onUri) ? onUri : null]));
 
     return state;
 };

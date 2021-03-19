@@ -8,7 +8,7 @@ For Internet Explorer you need to [install a polyfill](https://github.com/stream
 ## Usage
 
 ```jsx
-import {useLocation} from 'react-use';
+import {useLocation} from 'vue-next-use';
 
 const Demo = () => {
   const state = useLocation();

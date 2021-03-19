@@ -6,7 +6,7 @@ Creates `<video>` element, tracks its state and exposes playback controls.
 ## Usage
 
 ```jsx
-import {useVideo} from 'react-use';
+import {useVideo} from 'vue-next-use';
 
 const Demo = {
     setup(props) {
@@ -53,7 +53,7 @@ const [video, state, controls, ref] = useVideo(props);
 const [video, state, controls, ref] = useVideo(<video {...props}/>);
 ```
 
-`video` is React's `<video>` element that you have to insert somewhere in your
+`video` is Vue's `<video>` element that you have to insert somewhere in your
 render tree, for example:
 
 ```jsx

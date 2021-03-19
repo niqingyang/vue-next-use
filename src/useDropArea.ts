@@ -1,18 +1,16 @@
-import {Ref} from 'vue';
-import useState from './useState';
-import useMountedState from './useMountedState';
+import {Ref, unref} from 'vue';
 import {noop} from './misc/util';
 import {DragEventHandler, ClipboardEventHandler} from './misc/types';
-import {useReadonly} from "./index";
+import {useReadonly, useMountedState} from "./index";
 
 export interface DropAreaState {
     over: boolean;
 }
 
 export interface DropAreaBond {
-    onDragOver: DragEventHandler;
-    onDragEnter: DragEventHandler;
-    onDragLeave: DragEventHandler;
+    onDragover: DragEventHandler;
+    onDragenter: DragEventHandler;
+    onDragleave: DragEventHandler;
     onDrop: DragEventHandler;
     onPaste: ClipboardEventHandler;
 }
@@ -36,34 +34,34 @@ const createProcess = (options: DropAreaOptions, isMounted: () => boolean) => (
     const uri = dataTransfer.getData('text/uri-list');
 
     if (uri) {
-        (options.onUri || noop)(uri, event);
+        (unref(options.onUri) || noop)(uri, event);
         return;
     }
 
     if (dataTransfer.files && dataTransfer.files.length) {
-        (options.onFiles || noop)(Array.from(dataTransfer.files), event);
+        (unref(options.onFiles) || noop)(Array.from(dataTransfer.files), event);
         return;
     }
 
     if (dataTransfer.items && dataTransfer.items.length) {
         dataTransfer.items[0].getAsString((text) => {
             if (isMounted()) {
-                (options.onText || noop)(text, event);
+                (unref(options.onText) || noop)(text, event);
             }
         });
     }
 };
 
 const createBond = (process: (dataTransfer: DataTransfer, event: (ClipboardEvent | DragEvent)) => void, setOver: (over: boolean) => void): DropAreaBond => ({
-    onDragOver: (event) => {
+    onDragover: (event) => {
         event.preventDefault();
         setOver(true);
     },
-    onDragEnter: (event) => {
+    onDragenter: (event) => {
         event.preventDefault();
         setOver(true);
     },
-    onDragLeave: () => {
+    onDragleave: () => {
         setOver(false);
     },
     onDrop: (event: DragEvent) => {

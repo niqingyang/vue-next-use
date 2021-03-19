@@ -1,5 +1,6 @@
-import {Ref, ref as useRef, onMounted, onBeforeUnmount, onUnmounted, watchEffect, toRaw} from 'vue';
+import {Ref} from 'vue';
 import {off, on} from './misc/util';
+import {useEffect} from "./index";
 
 const defaultEvents = ['mousedown', 'touchstart'];
 
@@ -13,15 +14,15 @@ const useClickAway = <E extends Event = Event>(
         el && !el.contains(event.target as Node) && onClickAway(event);
     };
 
-    onMounted(() => {
+    useEffect(() => {
         for (const eventName of events) {
             on(document, eventName, handler);
         }
-    });
 
-    onBeforeUnmount(() => {
-        for (const eventName of events) {
-            off(document, eventName, handler);
+        return () => {
+            for (const eventName of events) {
+                off(document, eventName, handler);
+            }
         }
     });
 };

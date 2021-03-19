@@ -9,7 +9,7 @@ Vue sensor hook that tracks battery status.
 ## Usage
 
 ```jsx
-import {useBattery} from 'react-use';
+import {useBattery} from 'vue-next-use';
 
 const Demo = () => {
   const batteryState = useBattery();

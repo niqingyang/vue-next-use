@@ -95,6 +95,6 @@ interface AudioControls {
 ```
 
 `ref` is a Vue reference to HTML `<video>` element, you can access the element by
-`ref.current`, note that it may be `null`.
+`ref.value`, note that it may be `null`.
 
 And finally, `props` &mdash; all props that `<video>` accepts.

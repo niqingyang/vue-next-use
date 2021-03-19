@@ -6,11 +6,9 @@ import {
     VNode,
     isVNode,
     AudioHTMLAttributes,
-    VideoHTMLAttributes,
-    isRef,
-    unref
+    VideoHTMLAttributes, unref, ComputedRef,
 } from 'vue';
-import { useEffect, useSetState } from "../index";
+import {sources, useEffect, useSetState} from "../index";
 import parseTimeRanges from '../misc/parseTimeRanges';
 
 export interface HTMLMediaProps extends AudioHTMLAttributes, VideoHTMLAttributes {
@@ -35,11 +33,14 @@ export interface HTMLMediaControls {
     unmute: () => void;
     volume: (volume: number) => void;
     seek: (time: number) => void;
+    toggle: (controls?: boolean) => void;
+    autoplay: (autoplay: boolean) => void;
+    change: (src: string) => void;
 }
 
 type createHTMLMediaHookReturn = [
-    VNode<HTMLMediaProps>,
-    Ref<HTMLMediaState>,
+    () => VNode<HTMLMediaProps>,
+    ComputedRef<HTMLMediaState>,
     HTMLMediaControls,
     (Ref<HTMLAudioElement | null>)
 ];
@@ -70,7 +71,7 @@ export default function createHTMLMediaHook(tag: 'audio' | 'video') {
             autoplay: true
         });
 
-        const ref = useRef<HTMLAudioElement | null>(null);
+        const ref = useRef<HTMLAudioElement | HTMLVideoElement | null>(null);
 
         const wrapEvent = (userEvent, proxyEvent?) => {
             return (event) => {
@@ -82,8 +83,8 @@ export default function createHTMLMediaHook(tag: 'audio' | 'video') {
             };
         };
 
-        const onPlay = () => setState({ paused: false });
-        const onPause = () => setState({ paused: true });
+        const onPlay = () => setState({paused: false});
+        const onPause = () => setState({paused: true});
         const onVolumeChange = () => {
             const el = ref.value;
             if (!el) {
@@ -99,7 +100,7 @@ export default function createHTMLMediaHook(tag: 'audio' | 'video') {
             if (!el) {
                 return;
             }
-            const { duration, buffered } = el;
+            const {duration, buffered} = el;
             setState({
                 duration,
                 buffered: parseTimeRanges(buffered),
@@ -110,14 +111,14 @@ export default function createHTMLMediaHook(tag: 'audio' | 'video') {
             if (!el) {
                 return;
             }
-            setState({ time: el.currentTime });
+            setState({time: el.currentTime});
         };
         const onProgress = () => {
             const el = ref.value;
             if (!el) {
                 return;
             }
-            setState({ buffered: parseTimeRanges(el.buffered) });
+            setState({buffered: parseTimeRanges(el.buffered)});
         };
 
         if (element) {
@@ -127,9 +128,9 @@ export default function createHTMLMediaHook(tag: 'audio' | 'video') {
                 ref,
                 onPlay: wrapEvent(props.onPlay, onPlay),
                 onPause: wrapEvent(props.onPause, onPause),
-                onVolumeChange: wrapEvent(props.onVolumechange, onVolumeChange),
-                onDurationChange: wrapEvent(props.onDurationchange, onDurationChange),
-                onTimeUpdate: wrapEvent(props.onTimeupdate, onTimeUpdate),
+                onVolumechange: wrapEvent(props.onVolumechange, onVolumeChange),
+                onDurationchange: wrapEvent(props.onDurationchange, onDurationChange),
+                onTimeupdate: wrapEvent(props.onTimeupdate, onTimeUpdate),
                 onProgress: wrapEvent(props.onProgress, onProgress),
             });
         } else {
@@ -138,9 +139,9 @@ export default function createHTMLMediaHook(tag: 'audio' | 'video') {
                 ...props,
                 onPlay: wrapEvent(props.onPlay, onPlay),
                 onPause: wrapEvent(props.onPause, onPause),
-                onVolumeChange: wrapEvent(props.onVolumechange, onVolumeChange),
-                onDurationChange: wrapEvent(props.onDurationchange, onDurationChange),
-                onTimeUpdate: wrapEvent(props.onTimeupdate, onTimeUpdate),
+                onVolumechange: wrapEvent(props.onVolumechange, onVolumeChange),
+                onDurationchange: wrapEvent(props.onDurationchange, onDurationChange),
+                onTimeupdate: wrapEvent(props.onTimeupdate, onTimeUpdate),
                 onProgress: wrapEvent(props.onProgress, onProgress),
             } as any); // TODO: fix this typing.
         }
@@ -186,6 +187,9 @@ export default function createHTMLMediaHook(tag: 'audio' | 'video') {
                     return;
                 }
                 time = Math.min(state.value.duration, Math.max(0, time));
+                if (isNaN(time)) {
+                    console.error("HTMLMediaElement currentTime must be a number", time);
+                }
                 el.currentTime = time;
             },
             volume: (volume: number) => {
@@ -195,7 +199,7 @@ export default function createHTMLMediaHook(tag: 'audio' | 'video') {
                 }
                 volume = Math.min(1, Math.max(0, volume));
                 el.volume = volume;
-                setState({ volume });
+                setState({volume});
             },
             mute: () => {
                 const el = ref.value;
@@ -203,7 +207,7 @@ export default function createHTMLMediaHook(tag: 'audio' | 'video') {
                     return;
                 }
                 el.muted = true;
-                setState({ muted: el.muted });
+                setState({muted: el.muted});
             },
             unmute: () => {
                 const el = ref.value;
@@ -211,21 +215,19 @@ export default function createHTMLMediaHook(tag: 'audio' | 'video') {
                     return;
                 }
                 el.muted = false;
-                setState({ muted: el.muted });
+                setState({muted: el.muted});
             },
-            show: () => {
+            toggle: (controls?: boolean) => {
                 const el = ref.value;
                 if (!el) {
                     return;
                 }
-                el.controls = true;
-            },
-            hide: () => {
-                const el = ref.value;
-                if (!el) {
-                    return;
+                if (controls === undefined){
+                    el.controls = !el.controls;
+                }else{
+                    el.controls = !!controls;
                 }
-                el.controls = false;
+                setState({controls: el.controls});
             },
             autoplay: (autoplay: boolean) => {
                 const el = ref.value;
@@ -251,6 +253,7 @@ export default function createHTMLMediaHook(tag: 'audio' | 'video') {
             },
             change: (src: string) => {
                 const el = ref.value;
+
                 if (!el) {
                     return;
                 }
@@ -265,8 +268,6 @@ export default function createHTMLMediaHook(tag: 'audio' | 'video') {
                     volume: el.volume,
                     muted: el.muted,
                     paused: el.paused,
-                    controls: el.controls,
-                    autoplay: el.autoplay,
                 });
 
                 // Start media, if autoPlay requested.
@@ -276,7 +277,47 @@ export default function createHTMLMediaHook(tag: 'audio' | 'video') {
             }
         };
 
-        return [element, computed(() => {
+        useEffect(() => {
+            const el = ref.value!;
+
+            if (!el) {
+                if (process.env.NODE_ENV !== 'production') {
+                    if (tag === 'audio') {
+                        console.error(
+                            'useAudio() ref to <audio> element is empty at mount. ' +
+                            'It seem you have not rendered the audio element, which it ' +
+                            'returns as the first argument const [audio] = useAudio(...).'
+                        );
+                    } else if (tag === 'video') {
+                        console.error(
+                            'useVideo() ref to <video> element is empty at mount. ' +
+                            'It seem you have not rendered the video element, which it ' +
+                            'returns as the first argument const [video] = useVideo(...).'
+                        );
+                    }
+                }
+                return;
+            }
+
+            if (el.src == unref(props.src)) {
+                return;
+            }
+
+            el.src = unref(props.src);
+
+            setState({
+                volume: el.volume,
+                muted: el.muted,
+                paused: el.paused,
+            });
+
+            // Start media, if autoPlay requested.
+            if (props.autoplay && el.paused) {
+                controls.play();
+            }
+        }, sources(props.src));
+
+        return [() => element as VNode<any>, computed(() => {
             return state.value;
         }), controls, ref];
     };

@@ -6,7 +6,7 @@ export default {
     argTypes: {},
 };
 
-export const Docs = ShowDocs(require('../docs/useState.md'));
+export const Docs = ShowDocs(require('../docs/useMethods.md'));
 
 export const Demo = ShowDemo({
     setup(props) {

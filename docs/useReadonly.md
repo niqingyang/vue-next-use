@@ -1,4 +1,4 @@
-# `useReactive`
+# `useReadonly`
 
 Vue state hook with `readonly` that creates `setState` method which works similar to how
 `this.setState` works in class components&mdash;it merges object changes into

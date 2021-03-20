@@ -1,7 +1,7 @@
 import {ref, Ref, UnwrapRef} from 'vue';
-import useState from "./useState";
 import useMountedState from "./useMountedState";
 import {FunctionReturningPromise, PromiseType} from './misc/types';
+import {useReactive, useRef} from "./index";
 
 export type AsyncState<T> =
     | {
@@ -28,7 +28,7 @@ export type AsyncState<T> =
 type StateFromFunctionReturningPromise<T extends FunctionReturningPromise> = AsyncState<PromiseType<ReturnType<T>>>;
 
 export type AsyncFnReturn<T extends FunctionReturningPromise = FunctionReturningPromise> = [
-    Ref<UnwrapRef<StateFromFunctionReturningPromise<T>>>,
+    StateFromFunctionReturningPromise<T>,
     T
 ];
 
@@ -36,14 +36,14 @@ export default function useAsyncFn<T extends FunctionReturningPromise>(
     fn: T,
     initialState: StateFromFunctionReturningPromise<T> = {loading: false}
 ): AsyncFnReturn<T> {
-    const lastCallId = ref(0);
+    const lastCallId = useRef(0);
     const isMounted = useMountedState();
-    const [state, set] = useState(initialState);
+    const [state, set] = useReactive(initialState);
 
     const callback = (...args: Parameters<T>): ReturnType<T> => {
         const callId = ++lastCallId.value;
 
-        state.value.loading = true
+        state.loading = true
 
         return fn(...args).then(
             (value) => {

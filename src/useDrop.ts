@@ -26,19 +26,19 @@ const createProcess = (options: DropAreaOptions, isMounted: () => boolean) => (d
     const uri = dataTransfer.getData('text/uri-list');
 
     if (uri) {
-        (unref(options.onUri) || noop)(uri, event);
+        (options.onUri || noop)(uri, event);
         return;
     }
 
     if (dataTransfer.files && dataTransfer.files.length) {
-        (unref(options.onFiles) || noop)(Array.from(dataTransfer.files), event);
+        (options.onFiles || noop)(Array.from(dataTransfer.files), event);
         return;
     }
 
     if (dataTransfer.items && dataTransfer.items.length) {
         dataTransfer.items[0].getAsString((text) => {
             if (isMounted()) {
-                (unref(options.onText) || noop)(text, event);
+                (options.onText || noop)(text, event);
             }
         });
     }
@@ -93,7 +93,7 @@ const useDrop = (options: DropAreaOptions = {}, args = []): Readonly<DropAreaSta
         on(element, 'dragexit', onDragExit);
         on(element, 'drop', onDrop);
 
-        if (unref(onText)) {
+        if (onText) {
             on(element, 'paste', onPaste);
         }
 
@@ -105,7 +105,7 @@ const useDrop = (options: DropAreaOptions = {}, args = []): Readonly<DropAreaSta
             off(element, 'drop', onDrop);
             off(element, 'paste', onPaste);
         }
-    }, sources([ref, isRef(onText) ? onText : null, isRef(onFiles) ? onFiles : null, isRef(onUri) ? onUri : null]));
+    }, sources([ref]));
 
     return state;
 };

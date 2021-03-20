@@ -1,7 +1,8 @@
 import {Ref, ref as useRef, toRaw, watchEffect} from 'vue';
-import {isBrowser, noop, off, on} from './misc/util';
+import {isBrowser, noop, off, on, sources} from './misc/util';
 import useMountedState from './useMountedState';
 import useSetState from './useSetState';
+import {useEffect, useReactive} from "./index";
 
 export interface State {
     isSliding: boolean;
@@ -16,19 +17,19 @@ export interface Options {
     vertical?: boolean;
 }
 
-const useSlider = (ref: Ref<HTMLElement>, options: Partial<Options> = {}): Ref<State> => {
+const useSlider = (ref: Ref<HTMLElement>, options: Partial<Options> = {}): State => {
     const isMounted = useMountedState();
     const isSliding = useRef(false);
     const valueRef = useRef(0);
     const frame = useRef(0);
-    const [state, setState] = useSetState<State>({
+    const [state, setState] = useReactive<State>({
         isSliding: false,
         value: 0,
     });
 
-    valueRef.value = state.value.value;
+    valueRef.value = state.value;
 
-    watchEffect((onInvalidate) => {
+    useEffect(() => {
         if (!isBrowser) {
             return;
         }
@@ -127,11 +128,11 @@ const useSlider = (ref: Ref<HTMLElement>, options: Partial<Options> = {}): Ref<S
         on(ref.value, 'mousedown', onMouseDown);
         on(ref.value, 'touchstart', onTouchStart);
 
-        onInvalidate(() => {
+        return () => {
             off(ref.value, 'mousedown', onMouseDown);
             off(ref.value, 'touchstart', onTouchStart);
-        });
-    });
+        };
+    }, sources([ref, options.vertical]));
 
     return state;
 };

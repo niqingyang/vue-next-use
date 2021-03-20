@@ -1,6 +1,6 @@
-import {Ref} from "vue";
+import {unref} from "vue";
 import writeText from 'copy-to-clipboard';
-import {useSetState, useMountedState} from './index';
+import {useMountedState, useReactive} from './index';
 
 export interface CopyToClipboardState {
     value?: string;
@@ -8,9 +8,9 @@ export interface CopyToClipboardState {
     error?: Error;
 }
 
-const useCopyToClipboard = (): [Ref<CopyToClipboardState>, (value: string) => void] => {
+const useCopyToClipboard = (): [CopyToClipboardState, (value: string) => void] => {
     const isMounted = useMountedState();
-    const [state, setState] = useSetState<CopyToClipboardState>({
+    const [state, setState] = useReactive<CopyToClipboardState>({
         value: undefined,
         error: undefined,
         noUserInteraction: true,
@@ -23,6 +23,8 @@ const useCopyToClipboard = (): [Ref<CopyToClipboardState>, (value: string) => vo
         let noUserInteraction;
         let normalizedValue;
         try {
+            value = unref(value);
+
             // only strings and numbers casted to strings can be copied to clipboard
             if (typeof value !== 'string' && typeof value !== 'number') {
                 const error = new Error(

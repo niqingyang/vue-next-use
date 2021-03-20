@@ -1,11 +1,11 @@
-import {Ref} from 'vue';
-import {useState} from "./index";
+import {ComputedRef} from 'vue';
+import {useComputedState} from "./index";
 import Cookies from 'js-cookie';
 
 const useCookie = (
     cookieName: string
-): [Ref<string | null>, (newValue: string, options?: Cookies.CookieAttributes) => void, () => void] => {
-    const [value, setValue] = useState<string | null>(() => Cookies.get(cookieName) || null);
+): [ComputedRef<string | null>, (newValue: string, options?: Cookies.CookieAttributes) => void, () => void] => {
+    const [value, setValue] = useComputedState<string | null>(() => Cookies.get(cookieName) || null);
 
     const updateCookie = (newValue: string, options?: Cookies.CookieAttributes) => {
         Cookies.set(cookieName, newValue, options);

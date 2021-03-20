@@ -1,12 +1,12 @@
 import {computed, ComputedRef} from "vue";
-import {useEffect, useState, useMount, sources} from './index';
+import {useEffect, useState, useMounted, sources} from './index';
 import keyboardjs from 'keyboardjs';
 
 const useKeyboardJs = (combination: string | string[]): [ComputedRef<boolean>, ComputedRef<null | KeyboardEvent>] => {
     const [state, set] = useState<[boolean, null | KeyboardEvent]>([false, null]);
     const [keyboardJs, setKeyboardJs] = useState<any>(null);
 
-    useMount(() => {
+    useMounted(() => {
         // import('keyboardjs').then((k) => setKeyboardJs(keyboardjs.default || keyboardjs));
         setKeyboardJs(keyboardjs);
     });

@@ -1,6 +1,6 @@
 import {onMounted} from "vue";
 
-export default function useMount(fn: () => void) {
+export default function useMounted(fn: () => void) {
     onMounted(() => {
         fn();
     })

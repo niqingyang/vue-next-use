@@ -8,7 +8,7 @@ Vue UI hook that provides slide behavior over any HTML element. Supports both mo
 import {useSlider, useRef} from 'vue-next-use';
 
 const Demo = () => {
-  const ref = React.useRef(null);
+  const ref = useRef(null);
   const {isSliding, value, pos, length} = useSlider(ref);
 
   return (

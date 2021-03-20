@@ -45,7 +45,7 @@ export {default as useIntersection} from './useIntersection';
 export {default as useKeyPress} from './useKeyPress';
 export {default as useKeyPressEvent} from './useKeyPressEvent';
 export {default as useKeyboardJs} from './useKeyboardJs';
-export {default as useMount} from './useMount';
+export {default as useMounted} from './useMounted';
 export {default as useLocation} from './useLocation';
 export {default as useLongPress} from './useLongPress';
 export {default as useBattery} from './useBattery';

@@ -57,7 +57,7 @@ const [
 - **`fn`**_`: Function`_ - function that will be called;
 - **`ms`**_`: number`_ - delay in milliseconds;
 - **`deps`**_`: DependencyList`_ - array of values that the debounce depends on, in the same manner as useEffect;
-- **`isReady`**_`: ()=>boolean|null`_ - function returning current debounce state:
+- **`isReady`**_`: ComputedRef<boolean|null>`_ - the current debounce state:
     - `false` - pending
     - `true` - called
     - `null` - cancelled

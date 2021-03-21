@@ -3,7 +3,7 @@ import {ComputedRef} from "vue";
 import {sources} from "./misc/util";
 import {useEffect} from "./index";
 
-export type UseDebounceReturn = [ComputedRef<boolean> | null, () => void];
+export type UseDebounceReturn = [ComputedRef<boolean | null>, () => void];
 
 export default function useDebounce(
     fn: Function,

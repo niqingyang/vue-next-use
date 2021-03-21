@@ -1,11 +1,11 @@
 import {ref, unref, ComputedRef, Ref, isRef} from 'vue';
 import {useComputedState, useEffect} from "./index";
 
-export type UseTimeoutFnReturn = [ComputedRef | null, () => void, () => void];
+export type UseTimeoutFnReturn = [ComputedRef<boolean | null>, () => void, () => void];
 
 // fn: Function - function that will be called;
 // ms: number - delay in milliseconds;
-// isReady: boolean|null - function returning current timeout state:
+// isReady: ComputedRef<boolean|null> - the current timeout state:
 //      false - pending
 //      true - called
 //      null - cancelled

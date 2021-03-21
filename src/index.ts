@@ -57,4 +57,5 @@ export {default as useMethods} from './useMethods';
 export {default as useRef} from './useRef';
 export {default as useSlider} from './useSlider';
 export {default as useDebounce} from './useDebounce';
+export {default as useFavicon} from './useFavicon';
 export {default as useStateValidator, ValidityState, UseStateValidatorReturn} from './useStateValidator';

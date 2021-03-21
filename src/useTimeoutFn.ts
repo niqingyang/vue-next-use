@@ -1,5 +1,5 @@
-import {computed, ComputedRef, Ref, ref as useRef, unref, isRef} from 'vue';
-import useEffect from "./useEffect";
+import {ref, unref, ComputedRef, Ref, isRef} from 'vue';
+import {useComputedState, useEffect} from "./index";
 
 export type UseTimeoutFnReturn = [ComputedRef | null, () => void, () => void];
 
@@ -12,23 +12,22 @@ export type UseTimeoutFnReturn = [ComputedRef | null, () => void, () => void];
 // cancel: ()=>void - cancel the timeout
 // reset: ()=>void - reset the timeout
 export default function useTimeoutFn(fn: Function | Ref<Function>, ms: number | Ref<number> = 0): UseTimeoutFnReturn {
-    const ready = useRef<boolean | null>(false);
-    const timeout = useRef<ReturnType<typeof setTimeout>>();
 
-    const isReady = computed(() => ready.value);
+    const timeout = ref<ReturnType<typeof setTimeout>>();
+    const [isReady, setReady] = useComputedState<boolean | null>(false);
 
     const set = () => {
-        ready.value = false;
+        setReady(false);
         timeout.value && clearTimeout(timeout.value);
 
         timeout.value = setTimeout(() => {
-            ready.value = true;
+            setReady(true);
             unref(fn)();
         }, unref(ms));
     };
 
     const clear = () => {
-        ready.value = null;
+        setReady(null);
         timeout.value && clearTimeout(timeout.value);
     };
 

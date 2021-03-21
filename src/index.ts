@@ -58,4 +58,6 @@ export {default as useRef} from './useRef';
 export {default as useSlider} from './useSlider';
 export {default as useDebounce} from './useDebounce';
 export {default as useFavicon} from './useFavicon';
+export {default as useLocalStorage} from './useLocalStorage';
+export {default as useLockBodyScroll} from './useLockBodyScroll';
 export {default as useStateValidator, ValidityState, UseStateValidatorReturn} from './useStateValidator';

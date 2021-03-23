@@ -1,4 +1,4 @@
-import {onMounted, onUpdated, Teleport, watch, defineComponent} from 'vue';
+import {onMounted, onUpdated, Teleport, watch, defineComponent, renderSlot, onBeforeUnmount, VNode, Ref} from 'vue';
 import {useRef, useMountedState, useEffect, useState} from "./index";
 
 const Content = defineComponent({
@@ -40,10 +40,6 @@ const Content = defineComponent({
 export const Frame = {
     name: 'Frame',
     props: {
-        head: {
-            type: HTMLHeadElement,
-            default: null
-        },
         mountTarget: {
             type: String
         },
@@ -62,13 +58,9 @@ export const Frame = {
             default: '<!DOCTYPE html><html><head></head><body><div class="frame-root"></div></body></html>'
         }
     },
-    emits: [
-        'onContentMounted',
-        'onContentUpdated',
-    ],
     IntrinsicAttributes: true,
     setup(props, ctx) {
-        const [node, setNode] = useState<HTMLIFrameElement | undefined>(undefined);
+        const [node] = useState<HTMLIFrameElement | null>(null);
 
         const isMounted = useMountedState();
 
@@ -84,45 +76,44 @@ export const Frame = {
             return doc?.body.children[0];
         }
 
-        const renderFrameContents = () => {
+        return () => {
 
-            if (!isMounted()) {
-                return null;
-            }
+            const renderFrameContents = () => {
 
-            const doc = getDoc();
+                if (!isMounted()) {
+                    return null;
+                }
 
-            if (!doc) {
-                return null;
-            }
+                const doc = getDoc();
 
-            const win = doc.defaultView;
+                if (!doc) {
+                    return null;
+                }
 
-            if (doc.body.children.length < 1) {
-                doc.open('text/html', 'replace');
-                doc.write(props.initialContent);
-                doc.close();
-            }
+                const win = doc.defaultView;
 
-            const contentMounted = props.contentMounted;
-            const contentUpdated = props.contentUpdated;
+                if (doc.body.children.length < 1) {
+                    doc.open('text/html', 'replace');
+                    doc.write(props.initialContent);
+                    doc.close();
+                }
 
-            const mountTarget = getMountTarget();
+                const contentMounted = props.contentMounted;
+                const contentUpdated = props.contentUpdated;
 
-            // @ts-ignore
-            return (
-                <>
-                    <Teleport to={doc.head}>{props.head}</Teleport>
+                const mountTarget = getMountTarget();
+
+                // @ts-ignore
+                return (
                     <Content contentMounted={contentMounted} contentUpdated={contentUpdated}>
+                        <Teleport to={doc.head}>{renderSlot(ctx.slots, 'head')}</Teleport>
                         <Teleport to={mountTarget}>
-                            <div class="frame-content">{ctx.slots.default()}</div>
+                            <div class="frame-content">{renderSlot(ctx.slots, 'default')}</div>
                         </Teleport>
                     </Content>
-                </>
-            );
-        }
+                );
+            }
 
-        return () => {
             return (
                 <iframe ref={node}>
                     {renderFrameContents()}
@@ -130,7 +121,7 @@ export const Frame = {
             )
         };
     }
-}
+};
 
 export default function useFrame() {
 

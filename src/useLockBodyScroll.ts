@@ -1,6 +1,6 @@
+import {Ref, unref} from "vue";
 import {sources, useEffect, useRef} from './index';
 import {isBrowser, off, on} from './misc/util';
-import {Ref, unref} from "vue";
 
 export function getClosestBody(
     el: Element | HTMLElement | HTMLIFrameElement | null

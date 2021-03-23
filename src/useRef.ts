@@ -1,6 +1,5 @@
-import {useState} from "./index";
+import {Ref, ref} from "vue";
 
-export default function useRef<T>(initialState: T) {
-    const [ref] = useState(initialState);
-    return ref;
+export default function useRef<T>(initialState: T): Ref<T> {
+    return ref(initialState) as Ref<T>;
 };

@@ -62,4 +62,5 @@ export {default as useLocalStorage} from './useLocalStorage';
 export {default as useLockBodyScroll} from './useLockBodyScroll';
 export {default as usePermission} from './usePermission';
 export {default as useRafLoop} from './useRafLoop';
+export {default as useSessionStorage} from './useSessionStorage';
 export {default as useStateValidator, ValidityState, UseStateValidatorReturn} from './useStateValidator';

@@ -15,6 +15,7 @@ export type UseMediatedStateReturn<S = any> = [Ref<S>, Dispatch<SetStateAction<S
 export function useMediatedState<S = undefined>(
     mediator: StateMediator<S | undefined>
 ): UseMediatedStateReturn<S | undefined>;
+
 export function useMediatedState<S = any>(
     mediator: StateMediator<S>,
     initialState: S

@@ -1,4 +1,4 @@
-import {useEffect, useComputedState, useReadonly} from './index';
+import {useEffect, useReadonly} from './index';
 import { isNavigator, off, on } from './misc/util';
 import isDeepEqual from './misc/isDeepEqual';
 import {ComputedRef} from "vue";

@@ -1,6 +1,6 @@
-import {Dispatch, SetStateAction, useComputedState, useRef, useState} from './index';
+import {ComputedRef, readonly, ref, Ref, DeepReadonly, computed} from "vue";
+import {Dispatch, SetStateAction, useReadonly, useRef, useState} from './index';
 import {isBrowser, noop} from './misc/util';
-import {ComputedRef, ref, Ref} from "vue";
 
 type parserOptions<T> =
     | {
@@ -16,9 +16,9 @@ const useLocalStorage = <T>(
     key: string,
     initialValue?: T,
     options?: parserOptions<T>
-): [ComputedRef<T | undefined>, Dispatch<SetStateAction<T | undefined>>, () => void] => {
+) => {
     if (!isBrowser) {
-        return [useComputedState(initialValue as T)[0], noop, noop];
+        return [readonly(ref(initialValue)), noop, noop];
     }
     if (!key) {
         throw new Error('useLocalStorage key may not be falsy');
@@ -31,7 +31,7 @@ const useLocalStorage = <T>(
         : JSON.parse;
 
     // eslint-disable-next-line react-hooks/rules-of-hooks
-    const [state, setState] = useComputedState<T | undefined>(() => {
+    const [state, setState] = useState<T | undefined>(() => {
         try {
             const serializer = options ? (options.raw ? String : options.serializer) : JSON.stringify;
 
@@ -95,7 +95,7 @@ const useLocalStorage = <T>(
         }
     };
 
-    return [state, set, remove];
+    return [readonly(state), set, remove];
 };
 
 export default useLocalStorage;

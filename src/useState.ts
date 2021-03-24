@@ -1,16 +1,25 @@
-import {ref, Ref, isRef, UnwrapRef} from 'vue';
+import {ref, Ref, UnwrapRef} from 'vue';
 import {SetStateAction} from './misc/types';
+import {resolveHookState, IHookStateInitAction} from './misc/hookState';
 
-export default function useState<T>(initialState: T | (() => T)): [Ref<T>, (prevState: SetStateAction<T>) => void] {
-    const state = initialState instanceof Function ? ref((<() => T>initialState)()) : ref(initialState);
+export type ToRef<T> = [T] extends [Ref] ? T : Ref<UnwrapRef<T>>
 
-    const set = (value: SetStateAction<T>) => {
+export default function useState<T extends object>(value: T): [ToRef<T>, (prevState: SetStateAction<T>) => void]
+export default function useState<T>(value: IHookStateInitAction<T>): [Ref<T>, (prevState: SetStateAction<T>) => void]
+export default function useState<T>(value: T): [Ref<UnwrapRef<T>>, (prevState: SetStateAction<T>) => void]
+export default function useState<T = any>(): [Ref<T | undefined>, (prevState: SetStateAction<T>) => void]
+
+export default function useState(initialState?: unknown) {
+
+    const state = ref(resolveHookState(initialState));
+
+    const set = (value) => {
         if (value instanceof Function) {
-            state.value = (<(prevState: T) => UnwrapRef<T>>value)(<T>state.value);
+            state.value = value(state.value);
         } else {
-            state.value = <UnwrapRef<T>>value;
+            state.value = value;
         }
     };
 
-    return [state as Ref<T>, set];
+    return [state, set];
 };

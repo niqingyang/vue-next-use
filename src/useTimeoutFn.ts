@@ -1,5 +1,5 @@
-import {ref, unref, ComputedRef, Ref, isRef} from 'vue';
-import {useComputedState, useEffect} from "./index";
+import {ref, unref, ComputedRef, Ref, isRef, computed} from 'vue';
+import {useEffect, useRef} from "./index";
 
 export type UseTimeoutFnReturn = [ComputedRef<boolean | null>, () => void, () => void];
 
@@ -14,20 +14,20 @@ export type UseTimeoutFnReturn = [ComputedRef<boolean | null>, () => void, () =>
 export default function useTimeoutFn(fn: Function | Ref<Function>, ms: number | Ref<number> = 0): UseTimeoutFnReturn {
 
     const timeout = ref<ReturnType<typeof setTimeout>>();
-    const [isReady, setReady] = useComputedState<boolean | null>(false);
+    const isReady = useRef<boolean | null>(false);
 
     const set = () => {
-        setReady(false);
+        isReady.value = false;
         timeout.value && clearTimeout(timeout.value);
 
         timeout.value = setTimeout(() => {
-            setReady(true);
+            isReady.value = true;
             unref(fn)();
         }, unref(ms));
     };
 
     const clear = () => {
-        setReady(null);
+        isReady.value = null;
         timeout.value && clearTimeout(timeout.value);
     };
 
@@ -38,5 +38,7 @@ export default function useTimeoutFn(fn: Function | Ref<Function>, ms: number | 
         return clear;
     }, isRef(ms) ? ms : null);
 
-    return [isReady, clear, set];
+    return [computed(() => {
+        return isReady.value;
+    }), clear, set];
 }

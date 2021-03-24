@@ -1,6 +1,14 @@
-import {ComputedRef} from "vue";
-import {useComputedState} from "./index";
-import {Dispatch, Reducer, ReducerAction, ReducerState, ReducerStateWithoutAction, DispatchWithoutAction, ReducerWithoutAction} from "./misc/types";
+import {computed, ComputedRef} from "vue";
+import {useState} from "./index";
+import {
+    Dispatch,
+    Reducer,
+    ReducerAction,
+    ReducerState,
+    ReducerStateWithoutAction,
+    DispatchWithoutAction,
+    ReducerWithoutAction
+} from "./misc/types";
 import {resolveHookState} from './misc/hookState'
 
 function useReducer<R extends (Reducer<any, any> | ReducerWithoutAction<any>)>(
@@ -19,13 +27,15 @@ function useReducer<R extends (Reducer<any, any> | ReducerWithoutAction<any>), I
         initialState = initializer(resolveHookState(initialState));
     }
 
-    const [state, setState] = useComputedState(initialState);
+    const [state, setState] = useState(initialState);
 
     const dispatch: Dispatch<R> = (action) => {
         setState(prevState => reducer(prevState, action))
     };
 
-    return [state, dispatch];
+    return [computed(() => {
+        return state.value;
+    }), dispatch];
 };
 
 export default useReducer;

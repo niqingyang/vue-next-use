@@ -1,4 +1,4 @@
-import {useComputedState, useEffect, useState} from './index';
+import {useComputedState, useEffect} from './index';
 import {isBrowser, off, on} from './misc/util';
 import {ComputedRef} from "vue";
 

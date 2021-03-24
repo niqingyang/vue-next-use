@@ -1,5 +1,12 @@
 import {ComputedRef, unref} from 'vue';
-import {Dispatch, SetStateAction, useEffect, useState, useComputedState, useReactive, useReadonly} from './index';
+import {
+    Dispatch,
+    SetStateAction,
+    useEffect,
+    useReactive,
+    useReadonly,
+    useRef
+} from './index';
 
 export type ValidityState = [boolean | undefined, ...any[]] | [undefined];
 
@@ -16,8 +23,8 @@ export default function useStateValidator<V extends ValidityState, S>(
     validator: StateValidator<V, S>,
     initialState: V = [undefined] as V
 ): UseStateValidatorReturn<V> {
-    const [validatorInner] = useState(() => validator);
-    const [stateInner] = useState(state);
+    const stateInner = useRef(state);
+    const validatorInner = useRef(validator);
 
     const [validity, setValidity] = useReadonly(initialState as V);
 

@@ -1,5 +1,6 @@
 import {useFavicon} from "../src/index";
 import {ShowDemo, ShowDocs} from './util/index';
+import NewTabStory from './util/NewTabStory';
 
 export default {
     title: 'SideEffects/useFavicon',
@@ -12,23 +13,8 @@ export const Demo = ShowDemo({
     setup() {
         useFavicon('https://cdn.sstatic.net/Sites/stackoverflow/img/favicon.ico');
         return () => {
-
-            if (window != top.window) {
-                return (
-                    <div>
-                        This story should be
-                        <a
-                            target="_blank"
-                            href="/iframe.html?id=sideeffects-usefavicon--demo&viewMode=story"
-                        >
-                            opened in a new tab
-                        </a>.
-                    </div>
-                )
-            }
-
             return (
-                <div>Favicon should be the Stack Overflow logo</div>
+                <NewTabStory>Favicon should be the Stack Overflow logo</NewTabStory>
             )
         }
     }

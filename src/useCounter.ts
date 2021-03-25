@@ -12,8 +12,8 @@ export interface CounterActions {
 
 export default function useCounter(
     initialValue: Ref<number> | IHookStateInitAction<number> = 0,
-    max: number | null = null,
-    min: number | null = null
+    max: Ref<number> | number | null = null,
+    min: Ref<number> | number | null = null
 ): [ComputedRef<number>, CounterActions] {
     let init = isRef(initialValue) ? initialValue : useRef<number>(resolveHookState(initialValue));
 

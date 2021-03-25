@@ -1,5 +1,6 @@
 import {onUnmounted} from 'vue';
-import {useEffect, useRef, useState} from './index';
+import {sources, useEffect, useRef, useState} from './index';
+import {watch} from "fs";
 
 const useThrottleFn = <T, U extends any[]>(fn: (...args: U) => T, ms: number = 200, args: U) => {
     const [state, setState] = useState<T | null>(null);
@@ -22,7 +23,7 @@ const useThrottleFn = <T, U extends any[]>(fn: (...args: U) => T, ms: number = 2
         } else {
             nextArgs.value = args;
         }
-    }, args);
+    }, sources(args));
 
     onUnmounted(() => {
         timeout.value && clearTimeout(timeout.value);

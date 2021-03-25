@@ -1,4 +1,5 @@
-import {useThrottleFn, useState, useEffect} from "../src/index";
+import {unref, watch, watchEffect} from "vue";
+import {useThrottleFn, useState, useEffect, useCounter, useRef} from "../src/index";
 import {ShowDemo, ShowDocs} from './util/index';
 
 export default {
@@ -11,33 +12,30 @@ export const Docs = ShowDocs(require('../docs/useThrottleFn.md'));
 export const Demo = ShowDemo({
     setup() {
 
-        const [value, setValue] = useState('');
+        const value = useRef('');
         const throttledValue = useThrottleFn((defaultValue) => defaultValue, 2000, [value]);
-        const [lastThrottledValue, setLastThrottledValue] = useState(throttledValue);
-        const [count, {inc}] = useCounter();
+        const [lastThrottledValue, setLastThrottledValue] = useState(throttledValue.value);
+        const [count, {inc}] = useCounter(0);
 
         useEffect(() => {
-            if (lastThrottledValue !== throttledValue) {
-                setLastThrottledValue(throttledValue);
+            if (lastThrottledValue.value !== throttledValue.value) {
+                setLastThrottledValue(throttledValue.value);
                 inc();
             }
-        });
+        }, throttledValue);
 
         return () => (
             <div style={{width: '300px', margin: '40px auto'}}>
                 <input
                     type="text"
-                    value={value}
+                    v-model={value.value}
                     placeholder="Throttled input"
                     style={{width: '100%'}}
-                    onChange={({currentTarget}) => {
-                        setValue(currentTarget.value);
-                    }}
                 />
                 <br/>
                 <br/>
-                <div>Throttled value: {throttledValue}</div>
-                <div>Times updated: {count}</div>
+                <div>Throttled value: {throttledValue.value}</div>
+                <div>Times updated: {count.value}</div>
             </div>
         );
     }

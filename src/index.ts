@@ -63,6 +63,7 @@ export {default as usePermission} from './usePermission';
 export {default as useRafLoop} from './useRafLoop';
 export {default as useSessionStorage} from './useSessionStorage';
 export {default as useThrottleFn} from './useThrottleFn';
+export {default as useThrottle} from './useThrottle';
 export {default as useCounter} from './useCounter';
 export {default as useTitle} from './useTitle';
 export {default as useStateValidator, ValidityState, UseStateValidatorReturn} from './useStateValidator';

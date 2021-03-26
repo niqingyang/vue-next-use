@@ -1,4 +1,4 @@
-import {ref, Ref, UnwrapRef} from 'vue';
+import {ref, Ref, unref, UnwrapRef} from 'vue';
 import {SetStateAction} from './misc/types';
 import {resolveHookState, IHookStateInitAction} from './misc/hookState';
 
@@ -17,7 +17,7 @@ export default function useState(initialState?: unknown) {
         if (value instanceof Function) {
             state.value = value(state.value);
         } else {
-            state.value = value;
+            state.value = unref(value);
         }
     };
 

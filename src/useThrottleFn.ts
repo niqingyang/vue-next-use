@@ -1,6 +1,5 @@
 import {onUnmounted} from 'vue';
 import {sources, useEffect, useRef, useState} from './index';
-import {watch} from "fs";
 
 const useThrottleFn = <T, U extends any[]>(fn: (...args: U) => T, ms: number = 200, args: U) => {
     const [state, setState] = useState<T | null>(null);

@@ -1,4 +1,4 @@
-import {Ref, computed} from 'vue';
+import {Ref, computed, ComputedRef, unref} from 'vue';
 import {useState} from './index';
 import {IHookStateInitAction, IHookStateSetAction, resolveHookState} from './misc/hookState';
 
@@ -58,8 +58,8 @@ export interface ListActions<T> {
     reset: () => void;
 }
 
-function useList<T>(initialList: IHookStateInitAction<T[]> = []): [Ref<T[]>, ListActions<T>] {
-    const [list] = useState(resolveHookState(initialList));
+function useList<T>(initialList: IHookStateInitAction<T[]> = []): [ComputedRef<T[]>, ListActions<T>] {
+    const [list] = useState<T[]>(resolveHookState(initialList));
 
     const actions: ListActions<T> = {
         set: (newList: IHookStateSetAction<T[]>) => {
@@ -95,13 +95,13 @@ function useList<T>(initialList: IHookStateInitAction<T[]> = []): [Ref<T[]>, Lis
         },
 
         updateFirst: (predicate: (a: T, b: T) => boolean, newItem: T) => {
-            const index = list.value.findIndex((item) => predicate(item, newItem));
+            const index = list.value.findIndex((item) => predicate(item as T, newItem));
 
             index >= 0 && actions.updateAt(index, newItem);
         },
 
         upsert: (predicate: (a: T, b: T) => boolean, newItem: T) => {
-            const index = list.value.findIndex((item) => predicate(item, newItem));
+            const index = list.value.findIndex((item) => predicate(item as T, newItem));
 
             index >= 0 ? actions.updateAt(index, newItem) : actions.push(newItem);
         },

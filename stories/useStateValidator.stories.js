@@ -12,7 +12,7 @@ export const Docs = ShowDocs(require('../docs/useStateValidator.md'));
 export const Demo = ShowDemo({
     setup(props) {
 
-        const DemoStateValidator = (s) => [s === '' ? undefined : (s * 1) % 2 === 0] as [boolean | undefined];
+        const DemoStateValidator = (s) => [s === '' ? undefined : (s * 1) % 2 === 0];
 
         const [state] = useState<number>(0);
         const [validateState] = useStateValidator(state, DemoStateValidator);

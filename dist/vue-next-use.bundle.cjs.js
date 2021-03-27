@@ -57,19 +57,6 @@ const sources = (target) => {
     return null;
 };
 
-function useState(initialState) {
-    const state = initialState instanceof Function ? Vue.ref(initialState()) : Vue.ref(initialState);
-    const set = (value) => {
-        if (value instanceof Function) {
-            state.value = value(state.value);
-        }
-        else {
-            state.value = value;
-        }
-    };
-    return [state, set];
-}
-
 function useMountedState() {
     const mountedRef = Vue.ref(false);
     const get = () => mountedRef.value;
@@ -85,10 +72,10 @@ function useMountedState() {
 function useAsyncFn(fn, initialState = { loading: false }) {
     const lastCallId = Vue.ref(0);
     const isMounted = useMountedState();
-    const [state, set] = useState(initialState);
+    const [state, set] = useReactive(initialState);
     const callback = (...args) => {
         const callId = ++lastCallId.value;
-        state.value.loading = true;
+        state.loading = true;
         return fn(...args).then((value) => {
             isMounted() && callId === lastCallId.value && set({ value, loading: false });
             return value;
@@ -117,11 +104,31 @@ function useAsync(fn, deps) {
     return state;
 }
 
+function resolveHookState(nextState, currentState) {
+    if (typeof nextState === 'function') {
+        return nextState.length ? nextState(currentState) : nextState();
+    }
+    return nextState;
+}
+
+function useState(initialState) {
+    const state = Vue.ref(resolveHookState(initialState));
+    const set = (value) => {
+        if (value instanceof Function) {
+            state.value = value(state.value);
+        }
+        else {
+            state.value = Vue.unref(value);
+        }
+    };
+    return [state, set];
+}
+
 function useAsyncRetry(fn, deps = []) {
     const [attempt, setAttempt] = useState(0);
     const state = useAsync(fn, [...deps, attempt]);
-    const retry = () => {
-        if (state.value.loading) {
+    state.retry = () => {
+        if (state.loading) {
             if (process.env.NODE_ENV === 'development') {
                 console.log('You are calling useAsyncRetry hook retry() method while loading in progress, this is a no-op.');
             }
@@ -129,9 +136,10 @@ function useAsyncRetry(fn, deps = []) {
         }
         setAttempt((currentAttempt) => currentAttempt + 1);
     };
-    return [state, retry];
+    return state;
 }
 
+// for internal
 function useComputedState(initialState) {
     const [state, setState] = useState(initialState);
     return [
@@ -197,13 +205,6 @@ const useQueue = (initialValue = []) => {
         }),
     };
 };
-
-function resolveHookState(nextState, currentState) {
-    if (typeof nextState === 'function') {
-        return nextState.length ? nextState(currentState) : nextState();
-    }
-    return nextState;
-}
 
 function useList(initialList = []) {
     const [list] = useState(resolveHookState(initialList));
@@ -306,20 +307,35 @@ const useMap = (initialMap = {}) => {
         reset: () => set(initialMap),
     };
     const utils = Object.assign({ get: (key) => map.value[key] }, stableActions);
-    return [map, utils];
+    return [Vue.computed(() => {
+            return map.value;
+        }), utils];
 };
 
-const useSetState = (initialState = {}) => {
-    const [state, set] = useState(initialState);
+function useSetState(initialState) {
+    const state = Vue.ref(resolveHookState(initialState));
     const setState = (patch) => {
-        set((prevState) => Object.assign({}, prevState, patch instanceof Function ? patch(prevState) : patch));
+        state.value = Object.assign({}, state.value, resolveHookState(patch, state.value));
     };
     return [state, setState];
-};
+}
+const [state, setState] = useSetState({
+    name: '123',
+    id: '123'
+});
+setState({ name: '123' });
+setState(() => ({ name: '123' }));
+
+function useComputedSetState(initialState) {
+    const [state, setState] = useSetState(initialState);
+    return [Vue.computed(() => {
+            return state.value;
+        }), setState];
+}
 
 const useCopyToClipboard = () => {
     const isMounted = useMountedState();
-    const [state, setState] = useSetState({
+    const [state, setState] = useReactive({
         value: undefined,
         error: undefined,
         noUserInteraction: true,
@@ -331,6 +347,7 @@ const useCopyToClipboard = () => {
         let noUserInteraction;
         let normalizedValue;
         try {
+            value = Vue.unref(value);
             // only strings and numbers casted to strings can be copied to clipboard
             if (typeof value !== 'string' && typeof value !== 'number') {
                 const error = new Error(`Cannot copy typeof ${typeof value} to clipboard, must be a string`);
@@ -488,10 +505,10 @@ function createHTMLMediaHook(tag) {
             setState({ buffered: parseTimeRanges(el.buffered) });
         };
         if (element) {
-            element = Vue.createVNode(element, Object.assign(Object.assign({ controls: false }, props), { ref, onPlay: wrapEvent(props.onPlay, onPlay), onPause: wrapEvent(props.onPause, onPause), onVolumeChange: wrapEvent(props.onVolumechange, onVolumeChange), onDurationChange: wrapEvent(props.onDurationchange, onDurationChange), onTimeUpdate: wrapEvent(props.onTimeupdate, onTimeUpdate), onProgress: wrapEvent(props.onProgress, onProgress) }));
+            element = Vue.createVNode(element, Object.assign(Object.assign({ controls: false }, props), { ref, onPlay: wrapEvent(props.onPlay, onPlay), onPause: wrapEvent(props.onPause, onPause), onVolumechange: wrapEvent(props.onVolumechange, onVolumeChange), onDurationchange: wrapEvent(props.onDurationchange, onDurationChange), onTimeupdate: wrapEvent(props.onTimeupdate, onTimeUpdate), onProgress: wrapEvent(props.onProgress, onProgress) }));
         }
         else {
-            element = Vue.createVNode(tag, Object.assign(Object.assign({ controls: false }, props), { onPlay: wrapEvent(props.onPlay, onPlay), onPause: wrapEvent(props.onPause, onPause), onVolumeChange: wrapEvent(props.onVolumechange, onVolumeChange), onDurationChange: wrapEvent(props.onDurationchange, onDurationChange), onTimeUpdate: wrapEvent(props.onTimeupdate, onTimeUpdate), onProgress: wrapEvent(props.onProgress, onProgress) })); // TODO: fix this typing.
+            element = Vue.createVNode(tag, Object.assign(Object.assign({ controls: false }, props), { onPlay: wrapEvent(props.onPlay, onPlay), onPause: wrapEvent(props.onPause, onPause), onVolumechange: wrapEvent(props.onVolumechange, onVolumeChange), onDurationchange: wrapEvent(props.onDurationchange, onDurationChange), onTimeupdate: wrapEvent(props.onTimeupdate, onTimeUpdate), onProgress: wrapEvent(props.onProgress, onProgress) })); // TODO: fix this typing.
         }
         // Some browsers return `Promise` on `.play()` and may throw errors
         // if one tries to execute another `.play()` or `.pause()` while that
@@ -530,6 +547,9 @@ function createHTMLMediaHook(tag) {
                     return;
                 }
                 time = Math.min(state.value.duration, Math.max(0, time));
+                if (isNaN(time)) {
+                    console.error("HTMLMediaElement currentTime must be a number", time);
+                }
                 el.currentTime = time;
             },
             volume: (volume) => {
@@ -557,19 +577,18 @@ function createHTMLMediaHook(tag) {
                 el.muted = false;
                 setState({ muted: el.muted });
             },
-            show: () => {
+            toggle: (controls) => {
                 const el = ref.value;
                 if (!el) {
                     return;
                 }
-                el.controls = true;
-            },
-            hide: () => {
-                const el = ref.value;
-                if (!el) {
-                    return;
+                if (controls === undefined) {
+                    el.controls = !el.controls;
                 }
-                el.controls = false;
+                else {
+                    el.controls = !!controls;
+                }
+                setState({ controls: el.controls });
             },
             autoplay: (autoplay) => {
                 const el = ref.value;
@@ -603,8 +622,6 @@ function createHTMLMediaHook(tag) {
                     volume: el.volume,
                     muted: el.muted,
                     paused: el.paused,
-                    controls: el.controls,
-                    autoplay: el.autoplay,
                 });
                 // Start media, if autoPlay requested.
                 if (el.autoplay && el.paused) {
@@ -612,7 +629,38 @@ function createHTMLMediaHook(tag) {
                 }
             }
         };
-        return [element, Vue.computed(() => {
+        useEffect(() => {
+            const el = ref.value;
+            if (!el) {
+                if (process.env.NODE_ENV !== 'production') {
+                    if (tag === 'audio') {
+                        console.error('useAudio() ref to <audio> element is empty at mount. ' +
+                            'It seem you have not rendered the audio element, which it ' +
+                            'returns as the first argument const [audio] = useAudio(...).');
+                    }
+                    else if (tag === 'video') {
+                        console.error('useVideo() ref to <video> element is empty at mount. ' +
+                            'It seem you have not rendered the video element, which it ' +
+                            'returns as the first argument const [video] = useVideo(...).');
+                    }
+                }
+                return;
+            }
+            if (el.src == Vue.unref(props.src)) {
+                return;
+            }
+            el.src = Vue.unref(props.src);
+            setState({
+                volume: el.volume,
+                muted: el.muted,
+                paused: el.paused,
+            });
+            // Start media, if autoPlay requested.
+            if (props.autoplay && el.paused) {
+                controls.play();
+            }
+        }, sources(props.src));
+        return [() => element, Vue.computed(() => {
                 return state.value;
             }), controls, ref];
     };
@@ -624,7 +672,7 @@ const useVideo = createHTMLMediaHook('video');
 
 const voices = isBrowser && typeof window.speechSynthesis === 'object' ? window.speechSynthesis.getVoices() : [];
 const useSpeech = (text, opts = {}) => {
-    const [state, setState] = useSetState({
+    const [state, setState] = useReadonly({
         isPlaying: false,
         lang: opts.lang || 'default',
         voice: opts.voice || voices[0],
@@ -633,18 +681,20 @@ const useSpeech = (text, opts = {}) => {
         volume: opts.volume || 1,
     });
     const utteranceRef = Vue.ref(null);
-    const utterance = new SpeechSynthesisUtterance(text);
-    opts.lang && (utterance.lang = opts.lang);
-    opts.voice && (utterance.voice = opts.voice);
-    utterance.rate = opts.rate || 1;
-    utterance.pitch = opts.pitch || 1;
-    utterance.volume = opts.volume || 1;
-    utterance.onstart = () => setState({ isPlaying: true });
-    utterance.onresume = () => setState({ isPlaying: true });
-    utterance.onend = () => setState({ isPlaying: false });
-    utterance.onpause = () => setState({ isPlaying: false });
-    utteranceRef.value = utterance;
-    window.speechSynthesis.speak(utteranceRef.value);
+    useMounted(() => {
+        const utterance = new SpeechSynthesisUtterance(text);
+        opts.lang && (utterance.lang = opts.lang);
+        opts.voice && (utterance.voice = opts.voice);
+        utterance.rate = opts.rate || 1;
+        utterance.pitch = opts.pitch || 1;
+        utterance.volume = opts.volume || 1;
+        utterance.onstart = () => setState({ isPlaying: true });
+        utterance.onresume = () => setState({ isPlaying: true });
+        utterance.onend = () => setState({ isPlaying: false });
+        utterance.onpause = () => setState({ isPlaying: false });
+        utteranceRef.value = utterance;
+        window.speechSynthesis.speak(utteranceRef.value);
+    });
     return state;
 };
 
@@ -654,15 +704,15 @@ const useClickAway = (ref, onClickAway, events = defaultEvents$1) => {
         const { value: el } = ref;
         el && !el.contains(event.target) && onClickAway(event);
     };
-    Vue.onMounted(() => {
+    useEffect(() => {
         for (const eventName of events) {
             on(document, eventName, handler);
         }
-    });
-    Vue.onBeforeUnmount(() => {
-        for (const eventName of events) {
-            off(document, eventName, handler);
-        }
+        return () => {
+            for (const eventName of events) {
+                off(document, eventName, handler);
+            }
+        };
     });
 };
 
@@ -691,8 +741,9 @@ const useDrop = (options = {}, args = []) => {
         set({ over });
     };
     const isMounted = useMountedState();
-    Vue.watchEffect((onInvalidate) => {
-        const element = (ref === null || ref === void 0 ? void 0 : ref.value) ? ref === null || ref === void 0 ? void 0 : ref.value : document;
+    const process = createProcess$1(options, isMounted);
+    useEffect(() => {
+        const element = (ref === null || ref === void 0 ? void 0 : ref.value) ? ref.value : document;
         const onDragOver = (event) => {
             event.preventDefault();
             setOver(true);
@@ -707,7 +758,6 @@ const useDrop = (options = {}, args = []) => {
         const onDragExit = () => {
             setOver(false);
         };
-        const process = createProcess$1(options, isMounted);
         const onDrop = (event) => {
             event.preventDefault();
             setOver(false);
@@ -724,15 +774,15 @@ const useDrop = (options = {}, args = []) => {
         if (onText) {
             on(element, 'paste', onPaste);
         }
-        onInvalidate(() => {
+        return () => {
             off(element, 'dragover', onDragOver);
             off(element, 'dragenter', onDragEnter);
             off(element, 'dragleave', onDragLeave);
             off(element, 'dragexit', onDragExit);
             off(element, 'drop', onDrop);
             off(element, 'paste', onPaste);
-        });
-    });
+        };
+    }, sources([ref]));
     return state;
 };
 
@@ -760,15 +810,15 @@ const createProcess = (options, isMounted) => (dataTransfer, event) => {
     }
 };
 const createBond = (process, setOver) => ({
-    onDragOver: (event) => {
+    onDragover: (event) => {
         event.preventDefault();
         setOver(true);
     },
-    onDragEnter: (event) => {
+    onDragenter: (event) => {
         event.preventDefault();
         setOver(true);
     },
-    onDragLeave: () => {
+    onDragleave: () => {
         setOver(false);
     },
     onDrop: (event) => {
@@ -864,7 +914,7 @@ const useFullscreen = (ref, enabled, options = {}) => {
 };
 
 const useCookie = (cookieName) => {
-    const [value, setValue] = useState(() => Cookies__default['default'].get(cookieName) || null);
+    const [value, setValue] = useComputedState(() => (Cookies__default['default'].get(cookieName) || null));
     const updateCookie = (newValue, options) => {
         Cookies__default['default'].set(cookieName, newValue, options);
         setValue(newValue);
@@ -876,48 +926,27 @@ const useCookie = (cookieName) => {
     return [value, updateCookie, deleteCookie];
 };
 
-function useEffect(fn, deps = undefined) {
-    const [callback, setCallback] = useState(undefined);
-    Vue.onMounted(() => {
-        setCallback(() => fn());
-        if (deps) {
-            Vue.watch(deps, (newValue, oldValue) => {
-                if (callback.value instanceof Function) {
-                    callback.value();
-                }
-                setCallback(() => fn());
-            });
-        }
-    });
-    Vue.onUnmounted(() => {
-        if (callback.value instanceof Function) {
-            callback.value();
-        }
-    });
-}
-
 // fn: Function - function that will be called;
 // ms: number - delay in milliseconds;
-// isReady: boolean|null - function returning current timeout state:
+// isReady: ComputedRef<boolean|null> - the current timeout state:
 //      false - pending
 //      true - called
 //      null - cancelled
 // cancel: ()=>void - cancel the timeout
 // reset: ()=>void - reset the timeout
 function useTimeoutFn(fn, ms = 0) {
-    const ready = Vue.ref(false);
     const timeout = Vue.ref();
-    const isReady = Vue.computed(() => ready.value);
+    const isReady = Vue.ref(false);
     const set = () => {
-        ready.value = false;
+        isReady.value = false;
         timeout.value && clearTimeout(timeout.value);
         timeout.value = setTimeout(() => {
-            ready.value = true;
+            isReady.value = true;
             Vue.unref(fn)();
         }, Vue.unref(ms));
     };
     const clear = () => {
-        ready.value = null;
+        isReady.value = null;
         timeout.value && clearTimeout(timeout.value);
     };
     // set on mount, clear on unmount
@@ -925,7 +954,9 @@ function useTimeoutFn(fn, ms = 0) {
         set();
         return clear;
     }, Vue.isRef(ms) ? ms : null);
-    return [isReady, clear, set];
+    return [Vue.computed(() => {
+            return isReady.value;
+        }), clear, set];
 }
 
 function useTimeout(ms = 0) {
@@ -965,6 +996,26 @@ const useHarmonicIntervalFn = (fn, delay = 0) => {
         return undefined;
     }, Vue.isRef(delay) ? delay : undefined);
 };
+
+function useEffect(fn, deps = undefined) {
+    const [callback, setCallback] = useState(undefined);
+    Vue.onMounted(() => {
+        setCallback(() => fn());
+        if (deps) {
+            Vue.watch(deps, (newValue, oldValue) => {
+                if (callback.value instanceof Function) {
+                    callback.value();
+                }
+                setCallback(() => fn());
+            });
+        }
+    });
+    Vue.onUnmounted(() => {
+        if (callback.value instanceof Function) {
+            callback.value();
+        }
+    });
+}
 
 const useSpring = (targetValue = 0, tension = 50, friction = 3) => {
     const [spring, setSpring] = useState(null);
@@ -2267,7 +2318,8 @@ var keyboard = createCommonjsModule(function (module, exports) {
 const useKeyboardJs = (combination) => {
     const [state, set] = useState([false, null]);
     const [keyboardJs, setKeyboardJs] = useState(null);
-    useMount(() => {
+    useMounted(() => {
+        // import('keyboardjs').then((k) => setKeyboardJs(keyboardjs.default || keyboardjs));
         setKeyboardJs(keyboard);
     });
     useEffect(() => {
@@ -2284,7 +2336,7 @@ const useKeyboardJs = (combination) => {
     return [Vue.computed(() => state.value[0]), Vue.computed(() => state.value[1])];
 };
 
-function useMount(fn) {
+function useMounted(fn) {
     Vue.onMounted(() => {
         fn();
     });
@@ -2350,7 +2402,7 @@ var useLocation = isBrowser && hasEventConstructor ? useLocationBrowser : useLoc
 const isTouchEvent = (ev) => {
     return 'touches' in ev;
 };
-const preventDefault = (ev) => {
+const preventDefault$1 = (ev) => {
     if (!isTouchEvent(ev))
         return;
     if (ev.touches.length < 2 && ev.preventDefault) {
@@ -2363,7 +2415,7 @@ const useLongPress = (callback, options = { isPreventDefault: true, delay: 300 }
     const start = (event) => {
         // prevent ghost click on mobile devices
         if (Vue.unref(options.isPreventDefault) && event.target) {
-            on(event.target, 'touchend', preventDefault, { passive: false });
+            on(event.target, 'touchend', preventDefault$1, { passive: false });
             target.value = event.target;
         }
         timeout.value = setTimeout(() => Vue.unref(callback)(event), Vue.unref(options.delay));
@@ -2372,7 +2424,7 @@ const useLongPress = (callback, options = { isPreventDefault: true, delay: 300 }
         // clearTimeout and removeEventListener
         timeout.value && clearTimeout(timeout.value);
         if (Vue.unref(options.isPreventDefault) && target.value) {
-            off(target.value, 'touchend', preventDefault);
+            off(target.value, 'touchend', preventDefault$1);
         }
     };
     return {
@@ -2500,6 +2552,610 @@ function useMediatedState(mediator, initialState) {
     return [state, setState];
 }
 
+function useReducer(reducer, initialState, initializer) {
+    if (initializer) {
+        initialState = initializer(resolveHookState(initialState));
+    }
+    const [state, setState] = useState(initialState);
+    const dispatch = (action) => {
+        setState(prevState => reducer(prevState, action));
+    };
+    return [Vue.computed(() => {
+            return state.value;
+        }), dispatch];
+}
+
+const useMethods = (createMethods, initialState) => {
+    const reducer = (reducerState, action) => {
+        return createMethods(reducerState)[action.type](...action.payload);
+    };
+    const [state, dispatch] = useReducer(reducer, initialState);
+    const wrappedMethods = (() => {
+        const actionTypes = Object.keys(createMethods(initialState));
+        return actionTypes.reduce((acc, type) => {
+            acc[type] = (...payload) => dispatch({ type, payload });
+            return acc;
+        }, {});
+    })();
+    return [state, wrappedMethods];
+};
+
+const useSlider = (ref, options = {}) => {
+    const isMounted = useMountedState();
+    const isSliding = Vue.ref(false);
+    const valueRef = Vue.ref(0);
+    const frame = Vue.ref(0);
+    const [state, setState] = useReactive({
+        isSliding: false,
+        value: 0,
+    });
+    valueRef.value = state.value;
+    useEffect(() => {
+        if (!isBrowser) {
+            return;
+        }
+        const reverse = Vue.toRaw(options.reverse) === undefined ? false : Vue.toRaw(options.reverse);
+        if (ref.value) {
+            ref.value.style.userSelect = 'none';
+        }
+        const startScrubbing = () => {
+            if (!isSliding.value && isMounted()) {
+                (options.onScrubStart || noop)();
+                isSliding.value = true;
+                setState({ isSliding: true });
+                bindEvents();
+            }
+        };
+        const stopScrubbing = () => {
+            if (isSliding.value && isMounted()) {
+                (options.onScrubStop || noop)(valueRef.value);
+                isSliding.value = false;
+                setState({ isSliding: false });
+                unbindEvents();
+            }
+        };
+        const onMouseDown = (event) => {
+            startScrubbing();
+            onMouseMove(event);
+        };
+        const onMouseMove = Vue.toRaw(options.vertical)
+            ? (event) => onScrub(event.clientY)
+            : (event) => onScrub(event.clientX);
+        const onTouchStart = (event) => {
+            startScrubbing();
+            onTouchMove(event);
+        };
+        const onTouchMove = Vue.toRaw(options.vertical)
+            ? (event) => onScrub(event.changedTouches[0].clientY)
+            : (event) => onScrub(event.changedTouches[0].clientX);
+        const bindEvents = () => {
+            on(document, 'mousemove', onMouseMove);
+            on(document, 'mouseup', stopScrubbing);
+            on(document, 'touchmove', onTouchMove);
+            on(document, 'touchend', stopScrubbing);
+        };
+        const unbindEvents = () => {
+            off(document, 'mousemove', onMouseMove);
+            off(document, 'mouseup', stopScrubbing);
+            off(document, 'touchmove', onTouchMove);
+            off(document, 'touchend', stopScrubbing);
+        };
+        const onScrub = (clientXY) => {
+            cancelAnimationFrame(frame.value);
+            frame.value = requestAnimationFrame(() => {
+                if (isMounted() && ref.value) {
+                    const rect = ref.value.getBoundingClientRect();
+                    const pos = Vue.toRaw(options.vertical) ? rect.top : rect.left;
+                    const length = Vue.toRaw(options.vertical) ? rect.height : rect.width;
+                    // Prevent returning 0 when element is hidden by CSS
+                    if (!length) {
+                        return;
+                    }
+                    let value = (clientXY - pos) / length;
+                    if (value > 1) {
+                        value = 1;
+                    }
+                    else if (value < 0) {
+                        value = 0;
+                    }
+                    if (reverse) {
+                        value = 1 - value;
+                    }
+                    setState({
+                        value,
+                    });
+                    (options.onScrub || noop)(value);
+                }
+            });
+        };
+        on(ref.value, 'mousedown', onMouseDown);
+        on(ref.value, 'touchstart', onTouchStart);
+        return () => {
+            off(ref.value, 'mousedown', onMouseDown);
+            off(ref.value, 'touchstart', onTouchStart);
+        };
+    }, sources([ref, options.vertical]));
+    return state;
+};
+
+function useDebounce(fn, ms = 0, deps = []) {
+    const [isReady, cancel, reset] = useTimeoutFn(fn, ms);
+    useEffect(reset, sources(deps));
+    return [isReady, cancel];
+}
+
+const useFavicon = (href) => {
+    useEffect(() => {
+        const link = document.querySelector("link[rel*='icon']") || document.createElement('link');
+        link.type = 'image/x-icon';
+        link.rel = 'shortcut icon';
+        link.href = Vue.unref(href);
+        document.getElementsByTagName('head')[0].appendChild(link);
+    }, sources([href]));
+};
+
+function useLocalStorage(key, initialValue, options) {
+    if (!isBrowser) {
+        return [Vue.computed(() => Vue.unref(initialValue)), noop, noop];
+    }
+    if (!key) {
+        throw new Error('useLocalStorage key may not be falsy');
+    }
+    const deserializer = options
+        ? options.raw
+            ? (value) => value
+            : options.deserializer
+        : JSON.parse;
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    const [state, setState] = useState(() => {
+        try {
+            const serializer = options ? (options.raw ? String : options.serializer) : JSON.stringify;
+            const localStorageValue = localStorage.getItem(key);
+            if (localStorageValue !== null) {
+                return deserializer(localStorageValue);
+            }
+            else {
+                initialValue && localStorage.setItem(key, serializer(initialValue));
+                return initialValue;
+            }
+        }
+        catch (_a) {
+            // If user is in private mode or has storage restriction
+            // localStorage can throw. JSON.parse and JSON.stringify
+            // can throw, too.
+            return initialValue;
+        }
+    });
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    const set = (valOrFunc) => {
+        try {
+            const newState = typeof valOrFunc === 'function' ? valOrFunc(state) : valOrFunc;
+            if (typeof newState === 'undefined') {
+                return;
+            }
+            let value;
+            if (options)
+                if (options.raw) {
+                    if (typeof newState === 'string') {
+                        value = newState;
+                    }
+                    else {
+                        value = JSON.stringify(newState);
+                    }
+                }
+                else if (options.serializer) {
+                    value = options.serializer(newState);
+                }
+                else {
+                    value = JSON.stringify(newState);
+                }
+            else {
+                value = JSON.stringify(newState);
+            }
+            localStorage.setItem(key, value);
+            setState(deserializer(value));
+        }
+        catch (_a) {
+            // If user is in private mode or has storage restriction
+            // localStorage can throw. Also JSON.stringify can throw.
+        }
+    };
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    const remove = () => {
+        try {
+            localStorage.removeItem(key);
+            setState(undefined);
+        }
+        catch (_a) {
+            // If user is in private mode or has storage restriction
+            // localStorage can throw.
+        }
+    };
+    return [Vue.computed(() => state.value), set, remove];
+}
+
+function getClosestBody(el) {
+    if (!el) {
+        return null;
+    }
+    else if (el.tagName === 'BODY') {
+        return el;
+    }
+    else if (el.tagName === 'IFRAME') {
+        const document = el.contentDocument;
+        return document ? document.body : null;
+    }
+    else if (!el.offsetParent) {
+        return null;
+    }
+    return getClosestBody(el.offsetParent);
+}
+function preventDefault(rawEvent) {
+    const e = rawEvent || window.event;
+    // Do not prevent if the event has more than one touch (usually meaning this is a multi touch gesture like pinch to zoom).
+    if (e.touches.length > 1)
+        return true;
+    if (e.preventDefault)
+        e.preventDefault();
+    return false;
+}
+const isIosDevice = isBrowser &&
+    window.navigator &&
+    window.navigator.platform &&
+    /iP(ad|hone|od)/.test(window.navigator.platform);
+const bodies = new Map();
+const doc = typeof document === 'object' ? document : undefined;
+let documentListenerAdded = false;
+var useLockBodyScroll = !doc
+    ? function useLockBodyMock(_locked = true, _elementRef) {
+    }
+    : function useLockBody(locked = true, elementRef) {
+        const bodyRef = Vue.ref(doc.body);
+        elementRef = elementRef || bodyRef;
+        const lock = (body) => {
+            const bodyInfo = bodies.get(body);
+            if (!bodyInfo) {
+                bodies.set(body, { counter: 1, initialOverflow: body.style.overflow });
+                if (isIosDevice) {
+                    if (!documentListenerAdded) {
+                        on(document, 'touchmove', preventDefault, { passive: false });
+                        documentListenerAdded = true;
+                    }
+                }
+                else {
+                    body.style.overflow = 'hidden';
+                }
+            }
+            else {
+                bodies.set(body, {
+                    counter: bodyInfo.counter + 1,
+                    initialOverflow: bodyInfo.initialOverflow,
+                });
+            }
+        };
+        const unlock = (body) => {
+            const bodyInfo = bodies.get(body);
+            if (bodyInfo) {
+                if (bodyInfo.counter === 1) {
+                    bodies.delete(body);
+                    if (isIosDevice) {
+                        body.ontouchmove = null;
+                        if (documentListenerAdded) {
+                            off(document, 'touchmove', preventDefault);
+                            documentListenerAdded = false;
+                        }
+                    }
+                    else {
+                        body.style.overflow = bodyInfo.initialOverflow;
+                    }
+                }
+                else {
+                    bodies.set(body, {
+                        counter: bodyInfo.counter - 1,
+                        initialOverflow: bodyInfo.initialOverflow,
+                    });
+                }
+            }
+        };
+        useEffect(() => {
+            const body = getClosestBody(elementRef.value);
+            if (!body) {
+                return;
+            }
+            if (Vue.unref(locked)) {
+                lock(body);
+            }
+            else {
+                unlock(body);
+            }
+        }, sources([locked, elementRef]));
+        // clean up, on un-mount
+        useEffect(() => {
+            const body = getClosestBody(elementRef.value);
+            if (!body) {
+                return;
+            }
+            return () => {
+                unlock(body);
+            };
+        });
+    };
+
+const usePermission = (permissionDesc) => {
+    let mounted = true;
+    let permissionStatus = null;
+    const [state, setState] = useState('');
+    const onChange = () => {
+        if (mounted && permissionStatus) {
+            setState(permissionStatus.state);
+        }
+    };
+    const changeState = () => {
+        onChange();
+        on(permissionStatus, 'change', onChange);
+    };
+    useEffect(() => {
+        navigator.permissions
+            .query(permissionDesc)
+            .then((status) => {
+            permissionStatus = status;
+            changeState();
+        })
+            .catch(noop);
+        return () => {
+            mounted = false;
+            permissionStatus && off(permissionStatus, 'change', onChange);
+        };
+    });
+    return state;
+};
+
+// https://developer.mozilla.org/zh-CN/docs/Web/API/Window/requestAnimationFrame
+function useRafLoop(callback, initiallyActive = true) {
+    const raf = Vue.ref(null);
+    const rafActivity = Vue.ref(false);
+    const rafCallback = Vue.ref(callback);
+    rafCallback.value = callback;
+    const step = (time) => {
+        if (rafActivity.value) {
+            rafCallback.value(time);
+            raf.value = requestAnimationFrame(step);
+        }
+    };
+    const stop = () => {
+        if (rafActivity.value) {
+            rafActivity.value = false;
+            raf.value && cancelAnimationFrame(raf.value);
+        }
+    };
+    const start = () => {
+        if (!rafActivity.value) {
+            rafActivity.value = true;
+            raf.value = requestAnimationFrame(step);
+        }
+    };
+    const isActive = Vue.computed(() => {
+        return rafActivity.value;
+    });
+    useEffect(() => {
+        if (initiallyActive) {
+            start();
+        }
+        return stop;
+    });
+    return [stop, start, isActive];
+}
+
+const useSessionStorage = (key, initialValue, raw) => {
+    if (!isBrowser) {
+        return [Vue.ref(initialValue), () => {
+                //
+            }];
+    }
+    const [state, setState] = useState(() => {
+        try {
+            const sessionStorageValue = sessionStorage.getItem(key);
+            if (typeof sessionStorageValue !== 'string') {
+                sessionStorage.setItem(key, raw ? String(initialValue) : JSON.stringify(initialValue));
+                return initialValue;
+            }
+            else {
+                return raw ? sessionStorageValue : JSON.parse(sessionStorageValue || 'null');
+            }
+        }
+        catch (_a) {
+            // If user is in private mode or has storage restriction
+            // sessionStorage can throw. JSON.parse and JSON.stringify
+            // cat throw, too.
+            return initialValue;
+        }
+    });
+    Vue.watch(state, () => {
+        try {
+            const serializedState = raw ? String(state.value) : JSON.stringify(state.value);
+            sessionStorage.setItem(key, serializedState);
+        }
+        catch (_a) {
+            // If user is in private mode or has storage restriction
+            // sessionStorage can throw. Also JSON.stringify can throw.
+        }
+    });
+    return [state, setState];
+};
+
+const useThrottleFn = (fn, ms = 200, args) => {
+    const [state, setState] = useState(null);
+    const timeout = Vue.ref();
+    const nextArgs = Vue.ref();
+    useEffect(() => {
+        if (!timeout.value) {
+            setState(fn(...args));
+            const timeoutCallback = () => {
+                if (nextArgs.value) {
+                    setState(fn(...nextArgs.value));
+                    nextArgs.value = undefined;
+                    timeout.value = setTimeout(timeoutCallback, ms);
+                }
+                else {
+                    timeout.value = undefined;
+                }
+            };
+            timeout.value = setTimeout(timeoutCallback, ms);
+        }
+        else {
+            nextArgs.value = args;
+        }
+    }, sources(args));
+    Vue.onUnmounted(() => {
+        timeout.value && clearTimeout(timeout.value);
+    });
+    return state;
+};
+
+const useThrottle = (value, ms = 200) => {
+    const [state, setState] = useState(Vue.isRef(value) ? Vue.unref(value) : value);
+    const timeout = Vue.ref();
+    const nextValue = Vue.ref(null);
+    const hasNextValue = Vue.ref(0);
+    useEffect(() => {
+        if (!timeout.value) {
+            setState(value);
+            const timeoutCallback = () => {
+                if (hasNextValue.value) {
+                    hasNextValue.value = false;
+                    setState(nextValue.value);
+                    timeout.value = setTimeout(timeoutCallback, ms);
+                }
+                else {
+                    timeout.value = undefined;
+                }
+            };
+            timeout.value = setTimeout(timeoutCallback, ms);
+        }
+        else {
+            nextValue.value = Vue.unref(value);
+            hasNextValue.value = true;
+        }
+    }, sources([value]));
+    Vue.onUnmounted(() => {
+        timeout.value && clearTimeout(timeout.value);
+    });
+    return state;
+};
+
+function useCounter(initialValue = 0, max = null, min = null) {
+    let init = Vue.isRef(initialValue) ? initialValue : Vue.ref(resolveHookState(initialValue));
+    if (typeof init.value !== 'number') {
+        console.error('initialValue has to be a number, got ' + typeof initialValue);
+    }
+    const minRef = Vue.ref(min);
+    const maxRef = Vue.ref(max);
+    if (typeof minRef.value === 'number') {
+        init.value = Math.max(init.value, minRef.value);
+    }
+    else if (minRef.value !== null) {
+        console.error('min has to be a number, got ' + typeof minRef.value);
+    }
+    if (typeof maxRef.value === 'number') {
+        init.value = Math.min(init.value, maxRef.value);
+    }
+    else if (maxRef.value !== null) {
+        console.error('max has to be a number, got ' + typeof maxRef.value);
+    }
+    const [current, setInternal] = useState(init.value);
+    const get = () => {
+        return current.value;
+    };
+    const set = (newState) => {
+        const prevState = get();
+        let rState = resolveHookState(newState, prevState);
+        if (prevState !== rState) {
+            if (typeof minRef.value === 'number') {
+                rState = Math.max(rState, minRef.value);
+            }
+            if (typeof maxRef.value === 'number') {
+                rState = Math.min(rState, maxRef.value);
+            }
+            prevState !== rState && setInternal(rState);
+        }
+    };
+    return [
+        Vue.computed(() => {
+            return current.value;
+        }),
+        {
+            get,
+            set,
+            inc: (delta = 1) => {
+                const rDelta = resolveHookState(delta, get());
+                if (typeof rDelta !== 'number') {
+                    console.error('delta has to be a number or function returning a number, got ' + typeof rDelta);
+                }
+                set((num) => num + rDelta);
+            },
+            dec: (delta = 1) => {
+                const rDelta = resolveHookState(delta, get());
+                if (typeof rDelta !== 'number') {
+                    console.error('delta has to be a number or function returning a number, got ' + typeof rDelta);
+                }
+                set((num) => num - rDelta);
+            },
+            reset: (value = initialValue) => {
+                const rValue = Vue.isRef(value) ? value.value : resolveHookState(value, get());
+                if (typeof rValue !== 'number') {
+                    console.error('value has to be a number or function returning a number, got ' + typeof rValue);
+                }
+                // eslint-disable-next-line react-hooks/exhaustive-deps
+                init.value = rValue;
+                set(rValue);
+            },
+        },
+    ];
+}
+
+const DEFAULT_USE_TITLE_OPTIONS = {
+    restoreOnUnmount: false,
+};
+function useTitle(title, options = DEFAULT_USE_TITLE_OPTIONS) {
+    const prevTitleRef = Vue.ref(document.title);
+    document.title = title;
+    useEffect(() => {
+        if (options && options.restoreOnUnmount) {
+            return () => {
+                document.title = prevTitleRef.value;
+            };
+        }
+        else {
+            return;
+        }
+    });
+}
+var useTitle$1 = typeof document !== 'undefined' ? useTitle : (_title) => { };
+
+function useStateValidator(state, validator, initialState = [undefined]) {
+    const stateInner = Vue.ref(state);
+    const validatorInner = Vue.ref(validator);
+    const [validity, setValidity] = useReadonly(initialState);
+    const validate = () => {
+        if (validatorInner.value.length >= 2) {
+            validatorInner.value(Vue.unref(stateInner.value), setValidity);
+        }
+        else {
+            setValidity(validatorInner.value(Vue.unref(stateInner.value)));
+        }
+    };
+    useEffect(() => {
+        validate();
+    }, stateInner);
+    return [validity, validate];
+}
+
+Object.defineProperty(exports, 'useRef', {
+    enumerable: true,
+    get: function () {
+        return Vue.ref;
+    }
+});
 exports.UseKey = UseKey;
 exports.off = off;
 exports.on = on;
@@ -2512,14 +3168,17 @@ exports.useBattery = useBattery$1;
 exports.useBeforeUnload = useBeforeUnload;
 exports.useBoolean = useToggle;
 exports.useClickAway = useClickAway;
-exports.useComputedSetState = useSetState;
+exports.useComputedSetState = useComputedSetState;
 exports.useComputedState = useComputedState;
 exports.useCookie = useCookie;
 exports.useCopyToClipboard = useCopyToClipboard;
+exports.useCounter = useCounter;
+exports.useDebounce = useDebounce;
 exports.useDrop = useDrop;
 exports.useDropArea = useDropArea;
 exports.useEffect = useEffect;
 exports.useEvent = useEvent;
+exports.useFavicon = useFavicon;
 exports.useFullscreen = useFullscreen;
 exports.useGeolocation = useGeolocation;
 exports.useGetSet = useGetSet;
@@ -2535,22 +3194,34 @@ exports.useKeyPress = useKeyPress;
 exports.useKeyPressEvent = useKeyPressEvent;
 exports.useKeyboardJs = useKeyboardJs;
 exports.useList = useList;
+exports.useLocalStorage = useLocalStorage;
 exports.useLocation = useLocation;
+exports.useLockBodyScroll = useLockBodyScroll;
 exports.useLongPress = useLongPress;
 exports.useMap = useMap;
 exports.useMediatedState = useMediatedState;
-exports.useMount = useMount;
+exports.useMethods = useMethods;
+exports.useMounted = useMounted;
 exports.useMountedState = useMountedState;
+exports.usePermission = usePermission;
 exports.useQueue = useQueue;
+exports.useRafLoop = useRafLoop;
 exports.useReactive = useReactive;
 exports.useReadonly = useReadonly;
+exports.useReducer = useReducer;
+exports.useSessionStorage = useSessionStorage;
 exports.useSet = useSet;
 exports.useSetState = useSetState;
+exports.useSlider = useSlider;
 exports.useSpeech = useSpeech;
 exports.useSpring = useSpring;
 exports.useState = useState;
+exports.useStateValidator = useStateValidator;
+exports.useThrottle = useThrottle;
+exports.useThrottleFn = useThrottleFn;
 exports.useTimeout = useTimeout;
 exports.useTimeoutFn = useTimeoutFn;
+exports.useTitle = useTitle$1;
 exports.useToggle = useToggle;
 exports.useVideo = useVideo;
 //# sourceMappingURL=vue-next-use.bundle.cjs.js.map

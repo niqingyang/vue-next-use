@@ -2,11 +2,11 @@ import {ref, Ref, unref, UnwrapRef} from 'vue';
 import {SetStateAction} from './misc/types';
 import {resolveHookState, IHookStateInitAction} from './misc/hookState';
 
-export type ToRef<T> = [T] extends [Ref] ? T : Ref<UnwrapRef<T>>
+export type ToRef<T> = [T] extends [Ref] ? T : Ref<T>
 
 export default function useState<T extends object>(value: T): [ToRef<T>, (prevState: SetStateAction<T>) => void]
 export default function useState<T>(value: IHookStateInitAction<T>): [Ref<T>, (prevState: SetStateAction<T>) => void]
-export default function useState<T>(value: T): [Ref<UnwrapRef<T>>, (prevState: SetStateAction<T>) => void]
+export default function useState<T>(value: T): [ToRef<T>, (prevState: SetStateAction<T>) => void]
 export default function useState<T = any>(): [Ref<T | undefined>, (prevState: SetStateAction<T>) => void]
 
 export default function useState(initialState?: unknown) {

@@ -17,7 +17,7 @@ export const Demo = ShowDemo({
             return isNaN(initialState) ? 0 : initialState;
         };
 
-        const [state, dispatch] = useReducer<Reducer<any, any>>((preState, action) => {
+        const [state, dispatch] = useReducer((preState, action) => {
             switch (action) {
                 case "increment":
                     return preState + 1;

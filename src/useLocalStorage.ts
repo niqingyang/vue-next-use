@@ -1,5 +1,5 @@
-import {ComputedRef, readonly, ref, Ref, DeepReadonly, computed} from "vue";
-import {Dispatch, SetStateAction, useReadonly, useRef, useState} from './index';
+import {computed, ComputedRef, readonly, ref, unref} from "vue";
+import {Dispatch, SetStateAction, useState} from './index';
 import {isBrowser, noop} from './misc/util';
 
 type parserOptions<T> =
@@ -12,13 +12,13 @@ type parserOptions<T> =
     deserializer: (value: string) => T;
 };
 
-const useLocalStorage = <T>(
+export default function useLocalStorage<T>(
     key: string,
     initialValue?: T,
     options?: parserOptions<T>
-) => {
+) {
     if (!isBrowser) {
-        return [readonly(ref(initialValue)), noop, noop];
+        return [computed(() => unref(initialValue)), noop, noop];
     }
     if (!key) {
         throw new Error('useLocalStorage key may not be falsy');
@@ -95,7 +95,5 @@ const useLocalStorage = <T>(
         }
     };
 
-    return [readonly(state), set, remove];
+    return [computed(() => state.value), set, remove];
 };
-
-export default useLocalStorage;

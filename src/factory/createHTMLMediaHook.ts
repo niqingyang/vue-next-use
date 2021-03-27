@@ -222,9 +222,9 @@ export default function createHTMLMediaHook(tag: 'audio' | 'video') {
                 if (!el) {
                     return;
                 }
-                if (controls === undefined){
+                if (controls === undefined) {
                     el.controls = !el.controls;
-                }else{
+                } else {
                     el.controls = !!controls;
                 }
                 setState({controls: el.controls});

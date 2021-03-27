@@ -7,7 +7,7 @@ import {SetStateAction} from "./misc/types";
  * read and write url hash, response to url hash change
  */
 export default function useHash(): [Ref<string>, (hash: string) => void] {
-    const [hash, setHash] = useState(() => window.location.hash);
+    const [hash, setHash] = useState<string>(() => window.location.hash);
 
     const onHashChange = () => {
         setHash(window.location.hash);

@@ -1,6 +1,5 @@
 import {useCss} from "../src/index";
 import {ShowDemo, ShowDocs} from './util/index';
-import {h, createVNode} from "vue";
 
 export default {
     title: 'UI/useCss',
@@ -10,7 +9,7 @@ export default {
 export const Docs = ShowDocs(require('../docs/useCss.md'));
 
 export const Demo = ShowDemo({
-    setup(props) {
+    setup() {
 
         const className = useCss({
             color: 'red',

@@ -77,7 +77,9 @@
     "rollup-plugin-vue": "^6.0.0",
     "tslib": "^2.1.0",
     "typescript": "^4.1.5",
-    "vue": "3.0.7",
     "vue-loader": "^16.1.2"
+  },
+  "peerDependencies": {
+    "vue": "3.0.7"
   }
 }

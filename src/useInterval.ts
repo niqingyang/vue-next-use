@@ -1,5 +1,5 @@
-import {Ref, ref as useRef, unref, watch, isRef} from 'vue';
-import {useEffect} from './index';
+import {Ref, unref, watch, isRef} from 'vue';
+import {sources, useEffect, useRef} from './index';
 
 const useInterval = (callback: Function | Ref<Function>, delay?: number | Ref<number>) => {
     const savedCallback = useRef<Function>(unref(callback));
@@ -16,7 +16,7 @@ const useInterval = (callback: Function | Ref<Function>, delay?: number | Ref<nu
             return () => clearInterval(interval);
         }
         return undefined;
-    }, isRef(delay) ? delay : undefined);
+    }, sources(delay));
 };
 
 export default useInterval;

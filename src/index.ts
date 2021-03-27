@@ -66,5 +66,7 @@ export {default as useThrottleFn} from './useThrottleFn';
 export {default as useThrottle} from './useThrottle';
 export {default as useCounter} from './useCounter';
 export {default as useTitle} from './useTitle';
+export {default as useRaf} from './useRaf';
+export {default as useCss} from './useCss';
 export {default as useStateValidator, ValidityState, UseStateValidatorReturn} from './useStateValidator';
 export {ref as useRef} from 'vue';

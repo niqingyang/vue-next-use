@@ -68,5 +68,6 @@ export {default as useCounter} from './useCounter';
 export {default as useTitle} from './useTitle';
 export {default as useRaf} from './useRaf';
 export {default as useCss} from './useCss';
+export {default as useTween} from './useTween';
 export {default as useStateValidator, ValidityState, UseStateValidatorReturn} from './useStateValidator';
 export {ref as useRef} from 'vue';

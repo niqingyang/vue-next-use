@@ -530,6 +530,12 @@ interface UseTitleOptions {
 declare function useTitle(title: string, options?: UseTitleOptions): void;
 declare const _default: typeof useTitle;
 
+declare function useRaf(ms?: number | Ref<number>, delay?: number | Ref<number>): ComputedRef<number>;
+
+declare function useCss(css: object | Ref<object>): string;
+
+declare const useTween: (easingName?: string, ms?: number, delay?: number) => ComputedRef<number>;
+
 declare type ValidityState = [boolean | undefined, ...any[]] | [undefined];
 interface StateValidator<V, S> {
     (state: S): V;
@@ -538,5 +544,5 @@ interface StateValidator<V, S> {
 declare type UseStateValidatorReturn<V> = [Readonly<V>, () => void];
 declare function useStateValidator<V extends ValidityState, S>(state: S, validator: StateValidator<V, S>, initialState?: V): UseStateValidatorReturn<V>;
 
-export { Dispatch$1 as Dispatch, Reducer, SetStateAction, UseKey, UseStateValidatorReturn, ValidityState, off, on, sources, useAsync, useAsyncFn, useAsyncRetry, useAudio, _default$2 as useBattery, useBeforeUnload, useToggle as useBoolean, useClickAway, useComputedSetState, useComputedState, useCookie, useCopyToClipboard, useCounter, useDebounce, useDrop, useDropArea, useEffect, useEvent, useFavicon, useFullscreen, useGeolocation, useGetSet, useHarmonicIntervalFn, useHash, useHover, useHoverDirty, useIdle, useIntersection, useInterval, useKey, useKeyPress, useKeyPressEvent, useKeyboardJs, useList, useLocalStorage, _default$3 as useLocation, _default$1 as useLockBodyScroll, useLongPress, useMap, useMediatedState, useMethods, useMounted, useMountedState, usePermission, useQueue, useRafLoop, useReactive, useReadonly, useReducer, useSessionStorage, useSet, useSetState, useSlider, useSpeech, useSpring, useState, useStateValidator, useThrottle, useThrottleFn, useTimeout, useTimeoutFn, _default as useTitle, useToggle, useVideo };
+export { Dispatch$1 as Dispatch, Reducer, SetStateAction, UseKey, UseStateValidatorReturn, ValidityState, off, on, sources, useAsync, useAsyncFn, useAsyncRetry, useAudio, _default$2 as useBattery, useBeforeUnload, useToggle as useBoolean, useClickAway, useComputedSetState, useComputedState, useCookie, useCopyToClipboard, useCounter, useCss, useDebounce, useDrop, useDropArea, useEffect, useEvent, useFavicon, useFullscreen, useGeolocation, useGetSet, useHarmonicIntervalFn, useHash, useHover, useHoverDirty, useIdle, useIntersection, useInterval, useKey, useKeyPress, useKeyPressEvent, useKeyboardJs, useList, useLocalStorage, _default$3 as useLocation, _default$1 as useLockBodyScroll, useLongPress, useMap, useMediatedState, useMethods, useMounted, useMountedState, usePermission, useQueue, useRaf, useRafLoop, useReactive, useReadonly, useReducer, useSessionStorage, useSet, useSetState, useSlider, useSpeech, useSpring, useState, useStateValidator, useThrottle, useThrottleFn, useTimeout, useTimeoutFn, _default as useTitle, useToggle, useTween, useVideo };
 //# sourceMappingURL=vue-next-use.d.ts.map

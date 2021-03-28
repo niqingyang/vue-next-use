@@ -969,7 +969,7 @@ const useInterval = (callback, delay) => {
             return () => clearInterval(interval);
         }
         return undefined;
-    }, isRef(delay) ? delay : undefined);
+    }, sources(delay));
 };
 
 const useHarmonicIntervalFn = (fn, delay = 0) => {
@@ -3123,6 +3123,392 @@ function useTitle(title, options = DEFAULT_USE_TITLE_OPTIONS) {
 }
 var useTitle$1 = typeof document !== 'undefined' ? useTitle : (_title) => { };
 
+function useRaf(ms = 1e12, delay = 0) {
+    const [elapsed, set] = useState(0);
+    useEffect(() => {
+        let raf;
+        let timerStop;
+        let start;
+        const onFrame = () => {
+            const time = Math.min(1, (Date.now() - start) / unref(ms));
+            set(time);
+            loop();
+        };
+        const loop = () => {
+            raf = requestAnimationFrame(onFrame);
+        };
+        const onStart = () => {
+            timerStop = setTimeout(() => {
+                cancelAnimationFrame(raf);
+                set(1);
+            }, unref(ms));
+            start = Date.now();
+            loop();
+        };
+        const timerDelay = setTimeout(onStart, unref(delay));
+        return () => {
+            clearTimeout(timerStop);
+            clearTimeout(timerDelay);
+            cancelAnimationFrame(raf);
+        };
+    }, sources([ms, delay]));
+    return computed(() => {
+        return elapsed.value;
+    });
+}
+
+var KEBAB_REGEX = /[A-Z]/g;
+var hash = function (str) {
+    var h = 5381, i = str.length;
+    while (i) h = (h * 33) ^ str.charCodeAt(--i);
+    return '_' + (h >>> 0).toString(36);
+};
+var create = function (config) {
+    config = config || {};
+    var assign = config.assign || Object.assign;
+    var client = typeof window === 'object';
+    if (process.env.NODE_ENV !== 'production') {
+        if (client) {
+            if ((typeof document !== 'object') || !document.getElementsByTagName('HTML')) {
+                console.error(
+                    'nano-css detected browser environment because of "window" global, but ' +
+                    '"document" global seems to be defective.'
+                );
+            }
+        }
+    }
+    var renderer = assign({
+        raw: '',
+        pfx: '_',
+        client: client,
+        assign: assign,
+        stringify: JSON.stringify,
+        kebab: function (prop) {
+            return prop.replace(KEBAB_REGEX, '-$&').toLowerCase();
+        },
+        decl: function (key, value) {
+            key = renderer.kebab(key);
+            return key + ':' + value + ';';
+        },
+        hash: function (obj) {
+            return hash(renderer.stringify(obj));
+        },
+        selector: function (parent, selector) {
+            return parent + (selector[0] === ':' ? ''  : ' ') + selector;
+        },
+        putRaw: function (rawCssRule) {
+            renderer.raw += rawCssRule;
+        },
+    }, config);
+    if (renderer.client) {
+        if (!renderer.sh)
+            document.head.appendChild(renderer.sh = document.createElement('style'));
+        if (process.env.NODE_ENV !== 'production') {
+            renderer.sh.setAttribute('data-nano-css-dev', '');
+            renderer.shTest = document.createElement('style');
+            renderer.shTest.setAttribute('data-nano-css-dev-tests', '');
+            document.head.appendChild(renderer.shTest);
+        }
+        renderer.putRaw = function (rawCssRule) {
+            if (process.env.NODE_ENV === 'production') {
+                var sheet = renderer.sh.sheet;
+                try {
+                    sheet.insertRule(rawCssRule, sheet.cssRules.length);
+                } catch (error) {}
+            } else {
+                try {
+                    renderer.shTest.sheet.insertRule(rawCssRule, renderer.shTest.sheet.cssRules.length);
+                } catch (error) {
+                    if (config.verbose) {
+                        console.error(error);
+                    }
+                }
+                renderer.sh.appendChild(document.createTextNode(rawCssRule));
+            }
+        };
+    }
+    renderer.put = function (selector, decls, atrule) {
+        var str = '';
+        var prop, value;
+        var postponed = [];
+        for (prop in decls) {
+            value = decls[prop];
+            if ((value instanceof Object) && !(value instanceof Array)) {
+                postponed.push(prop);
+            } else {
+                if ((process.env.NODE_ENV !== 'production') && !renderer.sourcemaps) {
+                    str += '    ' + renderer.decl(prop, value, selector, atrule) + '\n';
+                } else {
+                    str += renderer.decl(prop, value, selector, atrule);
+                }
+            }
+        }
+        if (str) {
+            if ((process.env.NODE_ENV !== 'production') && !renderer.sourcemaps) {
+                str = '\n' + selector + ' {\n' + str + '}\n';
+            } else {
+                str = selector + '{' + str + '}';
+            }
+            renderer.putRaw(atrule ? atrule + '{' + str + '}' : str);
+        }
+        for (var i = 0; i < postponed.length; i++) {
+            prop = postponed[i];
+            if (prop[0] === '@' && prop !== '@font-face') {
+                renderer.putAt(selector, decls[prop], prop);
+            } else {
+                renderer.put(renderer.selector(selector, prop), decls[prop], atrule);
+            }
+        }
+    };
+    renderer.putAt = renderer.put;
+    return renderer;
+};
+
+var pkgName = 'nano-css';
+var warnOnMissingDependencies = function warnOnMissingDependencies (addon, renderer, deps) {
+    var missing = [];
+    for (var i = 0; i < deps.length; i++) {
+        var name = deps[i];
+        if (!renderer[name]) {
+            missing.push(name);
+        }
+    }
+    if (missing.length) {
+        var str = 'Addon "' + addon + '" is missing the following dependencies:';
+        for (var j = 0; j < missing.length; j++) {
+            str += '\n require("' + pkgName + '/addon/' + missing[j] + '").addon(nano);';
+        }
+        throw new Error(str);
+    }
+};
+
+var addon$1 = function (renderer) {
+    if (!renderer.client) return;
+    if (process.env.NODE_ENV !== 'production') {
+        warnOnMissingDependencies('cssom', renderer, ['sh']);
+    }
+    document.head.appendChild(renderer.msh = document.createElement('style'));
+    renderer.createRule = function (selector, prelude) {
+        var rawCss = selector + '{}';
+        if (prelude) rawCss = prelude + '{' + rawCss + '}';
+        var sheet = prelude ? renderer.msh.sheet : renderer.sh.sheet;
+        var index = sheet.insertRule(rawCss, sheet.cssRules.length);
+        var rule = (sheet.cssRules || sheet.rules)[index];
+        rule.index = index;
+        if (prelude) {
+            var selectorRule = (rule.cssRules || rule.rules)[0];
+            rule.style = selectorRule.style;
+            rule.styleMap = selectorRule.styleMap;
+        }
+        return rule;
+    };
+};
+
+function removeRule$1 (rule) {
+    var maxIndex = rule.index;
+    var sh = rule.parentStyleSheet;
+    var rules = sh.cssRules || sh.rules;
+    maxIndex = Math.max(maxIndex, rules.length - 1);
+    while (maxIndex >= 0) {
+        if (rules[maxIndex] === rule) {
+            sh.deleteRule(maxIndex);
+            break;
+        }
+        maxIndex--;
+    }
+}
+var removeRule_2 = removeRule$1;
+var removeRule_1 = {
+	removeRule: removeRule_2
+};
+
+var removeRule = removeRule_1.removeRule;
+var addon = function (renderer) {
+    if (!renderer.client) return;
+    if (process.env.NODE_ENV !== 'production') {
+        warnOnMissingDependencies('cssom', renderer, ['createRule']);
+    }
+    var kebab = renderer.kebab;
+    function VRule (selector, prelude) {
+        this.rule = renderer.createRule(selector, prelude);
+        this.decl = {};
+    }
+    VRule.prototype.diff = function (newDecl) {
+        var oldDecl = this.decl;
+        var style = this.rule.style;
+        var property;
+        for (property in oldDecl)
+            if (newDecl[property] === undefined)
+                style.removeProperty(property);
+        for (property in newDecl)
+            if (newDecl[property] !== oldDecl[property])
+                style.setProperty(kebab(property), newDecl[property]);
+        this.decl = newDecl;
+    };
+    VRule.prototype.del = function () {
+        removeRule(this.rule);
+    };
+    function VSheet () {
+        this.tree = {};
+    }
+    VSheet.prototype.diff = function (newTree) {
+        var oldTree = this.tree;
+        for (var prelude in oldTree) {
+            if (newTree[prelude] === undefined) {
+                var rules = oldTree[prelude];
+                for (var selector in rules)
+                    rules[selector].del();
+            }
+        }
+        for (var prelude in newTree) {
+            if (oldTree[prelude] === undefined) {
+                for (var selector in newTree[prelude]) {
+                    var rule = new VRule(selector, prelude);
+                    rule.diff(newTree[prelude][selector]);
+                    newTree[prelude][selector] = rule;
+                }
+            } else {
+                var oldRules = oldTree[prelude];
+                var newRules = newTree[prelude];
+                for (var selector in oldRules)
+                    if (!newRules[selector])
+                        oldRules[selector].del();
+                for (var selector in newRules) {
+                    var rule = oldRules[selector];
+                    if (rule) {
+                        rule.diff(newRules[selector]);
+                        newRules[selector] = rule;
+                    } else {
+                        rule = new VRule(selector, prelude);
+                        rule.diff(newRules[selector]);
+                        newRules[selector] = rule;
+                    }
+                }
+            }
+        }
+        this.tree = newTree;
+    };
+    renderer.VRule = VRule;
+    renderer.VSheet = VSheet;
+};
+
+function cssToTree (tree, css, selector, prelude) {
+    var declarations = {};
+    var hasDeclarations = false;
+    var key, value;
+    for (key in css) {
+        value = css[key];
+        if (typeof value !== 'object') {
+            hasDeclarations = true;
+            declarations[key] = value;
+        }
+    }
+    if (hasDeclarations) {
+        if (!tree[prelude]) tree[prelude] = {};
+        tree[prelude][selector] = declarations;
+    }
+    for (key in css) {
+        value = css[key];
+        if (typeof value === 'object') {
+            if (key[0] === '@') {
+                cssToTree(tree, value, selector, key);
+            } else {
+                var hasCurrentSymbol = key.indexOf('&') > -1;
+                var selectorParts = selector.split(',');
+                if (hasCurrentSymbol) {
+                    for (var i = 0; i < selectorParts.length; i++) {
+                        selectorParts[i] = key.replace(/&/g, selectorParts[i]);
+                    }
+                } else {
+                    for (var i = 0; i < selectorParts.length; i++) {
+                        selectorParts[i] = selectorParts[i] + ' ' + key;
+                    }
+                }
+                cssToTree(tree, value, selectorParts.join(','), prelude);
+            }
+        }
+    }
+}var cssToTree_2 = cssToTree;
+
+const nano = create();
+addon$1(nano);
+addon(nano);
+let counter = 0;
+function useCss(css) {
+    const className = 'vue-next-use-css-' + (counter++).toString(36);
+    const sheet = new nano.VSheet();
+    useEffect(() => {
+        const tree = {};
+        cssToTree_2(tree, unref(css), '.' + className, '');
+        sheet.diff(tree);
+        return () => {
+            sheet.diff({});
+        };
+    }, isRef(css) ? css : null);
+    return className;
+}
+
+var easing = {
+    linear: function (t) { return t; },
+    quadratic: function (t) { return t * (-(t * t) * t + 4 * t * t - 6 * t + 4); },
+    cubic: function (t) { return t * (4 * t * t - 9 * t + 6); },
+    elastic: function (t) { return t * (33 * t * t * t * t - 106 * t * t * t + 126 * t * t - 67 * t + 15); },
+    inQuad: function (t) { return t * t; },
+    outQuad: function (t) { return t * (2 - t); },
+    inOutQuad: function (t) { return t < .5 ? 2 * t * t : -1 + (4 - 2 * t) * t; },
+    inCubic: function (t) { return t * t * t; },
+    outCubic: function (t) { return (--t) * t * t + 1; },
+    inOutCubic: function (t) { return t < .5 ? 4 * t * t * t : (t - 1) * (2 * t - 2) * (2 * t - 2) + 1; },
+    inQuart: function (t) { return t * t * t * t; },
+    outQuart: function (t) { return 1 - (--t) * t * t * t; },
+    inOutQuart: function (t) { return t < .5 ? 8 * t * t * t * t : 1 - 8 * (--t) * t * t * t; },
+    inQuint: function (t) { return t * t * t * t * t; },
+    outQuint: function (t) { return 1 + (--t) * t * t * t * t; },
+    inOutQuint: function (t) { return t < .5 ? 16 * t * t * t * t * t : 1 + 16 * (--t) * t * t * t * t; },
+    inSine: function (t) { return -Math.cos(t * (Math.PI / 2)) + 1; },
+    outSine: function (t) { return Math.sin(t * (Math.PI / 2)); },
+    inOutSine: function (t) { return -(Math.cos(Math.PI * t) - 1) / 2; },
+    inExpo: function (t) { return Math.pow(2, 10 * (t - 1)); },
+    outExpo: function (t) { return -Math.pow(2, -10 * t) + 1; },
+    inOutExpo: function (t) {
+        t /= .5;
+        if (t < 1)
+            return Math.pow(2, 10 * (t - 1)) / 2;
+        t--;
+        return (-Math.pow(2, -10 * t) + 2) / 2;
+    },
+    inCirc: function (t) { return -Math.sqrt(1 - t * t) + 1; },
+    outCirc: function (t) { return Math.sqrt(1 - (t = t - 1) * t); },
+    inOutCirc: function (t) {
+        t /= .5;
+        if (t < 1)
+            return -(Math.sqrt(1 - t * t) - 1) / 2;
+        t -= 2;
+        return (Math.sqrt(1 - t * t) + 1) / 2;
+    }
+};
+Object.defineProperty({
+	easing: easing
+}, '__esModule', {value: true});
+
+const useTween = (easingName = 'inCirc', ms = 200, delay = 0) => {
+    const fn = easing[easingName];
+    const t = useRaf(ms, delay);
+    if (process.env.NODE_ENV !== 'production') {
+        if (typeof fn !== 'function') {
+            console.error('useTween() expected "easingName" property to be a valid easing function name, like:' +
+                '"' +
+                Object.keys(easing).join('", "') +
+                '".');
+            console.trace();
+            return computed(() => 0);
+        }
+    }
+    return computed(() => {
+        return fn(t.value);
+    });
+};
+
 function useStateValidator(state, validator, initialState = [undefined]) {
     const stateInner = ref(state);
     const validatorInner = ref(validator);
@@ -3141,5 +3527,5 @@ function useStateValidator(state, validator, initialState = [undefined]) {
     return [validity, validate];
 }
 
-export { UseKey, off, on, sources, useAsync, useAsyncFn, useAsyncRetry, useAudio, useBattery$1 as useBattery, useBeforeUnload, useToggle as useBoolean, useClickAway, useComputedSetState, useComputedState, useCookie, useCopyToClipboard, useCounter, useDebounce, useDrop, useDropArea, useEffect, useEvent, useFavicon, useFullscreen, useGeolocation, useGetSet, useHarmonicIntervalFn, useHash, useHover, useHoverDirty, useIdle, useIntersection, useInterval, useKey, useKeyPress, useKeyPressEvent, useKeyboardJs, useList, useLocalStorage, useLocation, useLockBodyScroll, useLongPress, useMap, useMediatedState, useMethods, useMounted, useMountedState, usePermission, useQueue, useRafLoop, useReactive, useReadonly, useReducer, useSessionStorage, useSet, useSetState, useSlider, useSpeech, useSpring, useState, useStateValidator, useThrottle, useThrottleFn, useTimeout, useTimeoutFn, useTitle$1 as useTitle, useToggle, useVideo };
+export { UseKey, off, on, sources, useAsync, useAsyncFn, useAsyncRetry, useAudio, useBattery$1 as useBattery, useBeforeUnload, useToggle as useBoolean, useClickAway, useComputedSetState, useComputedState, useCookie, useCopyToClipboard, useCounter, useCss, useDebounce, useDrop, useDropArea, useEffect, useEvent, useFavicon, useFullscreen, useGeolocation, useGetSet, useHarmonicIntervalFn, useHash, useHover, useHoverDirty, useIdle, useIntersection, useInterval, useKey, useKeyPress, useKeyPressEvent, useKeyboardJs, useList, useLocalStorage, useLocation, useLockBodyScroll, useLongPress, useMap, useMediatedState, useMethods, useMounted, useMountedState, usePermission, useQueue, useRaf, useRafLoop, useReactive, useReadonly, useReducer, useSessionStorage, useSet, useSetState, useSlider, useSpeech, useSpring, useState, useStateValidator, useThrottle, useThrottleFn, useTimeout, useTimeoutFn, useTitle$1 as useTitle, useToggle, useTween, useVideo };
 //# sourceMappingURL=vue-next-use.bundle.esm.js.map

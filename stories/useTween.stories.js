@@ -46,7 +46,7 @@ export const Demo = ShowDemo({
     props: {
         easingName: {
             type: String,
-            default: 'inCirc'
+            default: 'outCirc'
         },
         ms: {
             type: Number,
@@ -62,14 +62,14 @@ export const Demo = ShowDemo({
 
         return () => (
             <div>
-                Tween: {t.value * 100}
+                Tween: {Math.round(t.value * 100)}
             </div>
         );
     }
 }, {
-    easingName: 'inCirc',
-    ms: 200,
-    delay: 0,
+    easingName: 'outCirc',
+    ms: 5000,
+    delay: 1000,
 });
 
 const Track = {

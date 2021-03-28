@@ -1,6 +1,6 @@
+import {computed, ComputedRef} from "vue";
 import {easing} from 'ts-easing';
 import {useRaf} from './index';
-import {computed, ComputedRef} from "vue";
 
 export type Easing = (t: number) => number;
 

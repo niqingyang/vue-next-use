@@ -70,5 +70,6 @@ export {default as useRaf} from './useRaf';
 export {default as useCss} from './useCss';
 export {default as useTween} from './useTween';
 export {default as createGlobalState} from './createGlobalState';
+export {default as useDefault} from './useDefault';
 export {default as useStateValidator, ValidityState, UseStateValidatorReturn} from './useStateValidator';
 export {ref as useRef} from 'vue';

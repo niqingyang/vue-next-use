@@ -36,9 +36,5 @@ export default function useStateValidator<V extends ValidityState, S>(
         }
     };
 
-    useEffect(() => {
-        validate();
-    }, stateInner);
-
     return [validity, validate];
 }

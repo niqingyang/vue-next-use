@@ -73,5 +73,6 @@ export {default as createGlobalState} from './createGlobalState';
 export {default as useDefault} from './useDefault';
 export {default as useRafState} from './useRafState';
 export {default as useStateList} from './useStateList';
+export {default as useMultiStateValidator} from './useMultiStateValidator';
 export {default as useStateValidator, ValidityState, UseStateValidatorReturn} from './useStateValidator';
 export {ref as useRef} from 'vue';

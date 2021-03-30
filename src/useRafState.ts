@@ -1,5 +1,5 @@
 import {onUnmounted, Ref} from 'vue';
-import {Dispatch, SetStateAction, useRef, useState} from './index';
+import {Dispatch, SetStateAction, useReactive, useRef, useState} from './index';
 
 export default function useRafState<S>(initialState: S | (() => S)): [Ref<S>, Dispatch<SetStateAction<S>>] {
     const frame = useRef(0);

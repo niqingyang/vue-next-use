@@ -78,5 +78,7 @@ export {default as useMeasure} from './useMeasure';
 export {default as useMedia} from './useMedia';
 export {default as useMediaDevices} from './useMediaDevices';
 export {default as useMotion} from './useMotion';
+export {default as useMouse} from './useMouse';
+export {default as useMouseHovered} from './useMouseHovered';
 export {default as useStateValidator, ValidityState, UseStateValidatorReturn} from './useStateValidator';
 export {ref as useRef} from 'vue';

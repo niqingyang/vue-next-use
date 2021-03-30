@@ -9,12 +9,15 @@ Vue sensor hook that uses device's acceleration sensor to track its motions.
 import {useMotion} from 'vue-next-use';
 
 const Demo = () => {
-  const state = useMotion();
+  const [state, requestPermission] = useMotion();
 
   return () => (
-    <pre>
-      {JSON.stringify(state, null, 2)}
-    </pre>
+      <div>
+          <button onClick={requestPermission}>Get Permision</button>
+          <pre>
+              {JSON.stringify(state, null, 2)}
+          </pre>
+      </div>
   );
 };
 ```

@@ -65,33 +65,32 @@ const useMotion = (initialState: MotionSensorState = defaultState) => {
         });
     };
 
-    let requested = false;
+    let hasGranted = false;
+
+    const needGrantPermission = typeof DeviceMotionEvent.requestPermission === 'function';
 
     const requestPermisson = () => {
+        if (needGrantPermission) {
 
-        if (requested) {
-            return;
-        }
+            if (hasGranted) return;
 
-        requested = true;
+            hasGranted = true;
 
-        if (typeof DeviceMotionEvent.requestPermission === 'function') {
-            DeviceMotionEvent.requestPermission().then(function (state) {
+            return DeviceMotionEvent.requestPermission().then(function (state) {
                 if ('granted' === state) {
                     on(window, 'devicemotion', handler);
-                } else {
-                    alert('apply permission state: ' + state);
                 }
-            }).catch(function (err) {
-                alert('error: ' + err);
             });
-        } else {
-            on(window, 'devicemotion', handler);
         }
+        return new Promise((resolve: Function) => {
+            resolve({state: ''});
+        });
     };
 
     useEffect(() => {
-        requestPermisson();
+        if (!needGrantPermission) {
+            on(window, 'devicemotion', handler);
+        }
 
         return () => {
             off(window, 'devicemotion', handler);

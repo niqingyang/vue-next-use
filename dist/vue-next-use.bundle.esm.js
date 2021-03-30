@@ -2459,8 +2459,8 @@ var react = function equal(a, b) {
   return a!==a && b!==b;
 };
 
-const nav = isNavigator ? navigator : undefined;
-const isBatteryApiSupported = nav && typeof nav.getBattery === 'function';
+const nav$1 = isNavigator ? navigator : undefined;
+const isBatteryApiSupported = nav$1 && typeof nav$1.getBattery === 'function';
 function useBatteryMock() {
     return { isSupported: false };
 }
@@ -2483,7 +2483,7 @@ function useBattery() {
             };
             !react(state, newState) && setState(newState);
         };
-        nav.getBattery().then((bat) => {
+        nav$1.getBattery().then((bat) => {
             if (!isMounted) {
                 return;
             }
@@ -3509,6 +3509,399 @@ const useTween = (easingName = 'inCirc', ms = 200, delay = 0) => {
     });
 };
 
+function createGlobalState(initialState) {
+    const store = {
+        state: initialState instanceof Function ? initialState() : initialState,
+        setState(nextState) {
+            store.state = resolveHookState(nextState, store.state);
+            store.setters.forEach((setter) => setter(store.state));
+        },
+        setters: [],
+    };
+    return () => {
+        const [globalState, stateSetter] = useState(store.state);
+        useEffect(() => () => {
+            store.setters = store.setters.filter((setter) => setter !== stateSetter);
+        });
+        useEffect(() => {
+            if (!store.setters.includes(stateSetter)) {
+                store.setters.push(stateSetter);
+            }
+        });
+        return [globalState, store.setState];
+    };
+}
+
+function useDefault(defaultValue, initialValue) {
+    const [value, setValue] = useState(resolveHookState(initialValue));
+    watch(value, (newValue) => {
+        if (newValue === undefined || newValue === null) {
+            setValue(defaultValue);
+        }
+    }, {
+        immediate: true
+    });
+    return [value, setValue];
+}
+
+function useRafState(initialState) {
+    const frame = ref(0);
+    const [state, setState] = useState(initialState);
+    const setRafState = (value) => {
+        cancelAnimationFrame(frame.value);
+        frame.value = requestAnimationFrame(() => {
+            setState(value);
+        });
+    };
+    onUnmounted(() => {
+        cancelAnimationFrame(frame.value);
+    });
+    return [state, setRafState];
+}
+
+function useStateList(stateSet = []) {
+    const isMounted = useMountedState();
+    const index = ref(0);
+    // If new state list is shorter that before - switch to the last element
+    useEffect(() => {
+        if (unref(stateSet).length <= index.value) {
+            index.value = unref(stateSet).length - 1;
+        }
+    }, computed(() => {
+        return unref(stateSet).length;
+    }));
+    const actions = {
+        next: () => actions.setStateAt(index.value + 1),
+        prev: () => actions.setStateAt(index.value - 1),
+        setStateAt: (newIndex) => {
+            // do nothing on unmounted component
+            if (!isMounted())
+                return;
+            // do nothing on empty states list
+            if (!unref(stateSet).length)
+                return;
+            // in case new index is equal current - do nothing
+            if (newIndex === index.value)
+                return;
+            // it gives the ability to travel through the left and right borders.
+            // 4ex: if list contains 5 elements, attempt to set index 9 will bring use to 5th element
+            // in case of negative index it will start counting from the right, so -17 will bring us to 4th element
+            index.value =
+                newIndex >= 0
+                    ? newIndex % unref(stateSet).length
+                    : unref(stateSet).length + (newIndex % unref(stateSet).length);
+        },
+        setState: (state) => {
+            // do nothing on unmounted component
+            if (!isMounted())
+                return;
+            const newIndex = unref(stateSet).length ? unref(stateSet).indexOf(state) : -1;
+            if (newIndex === -1) {
+                throw new Error(`State '${state}' is not a valid state (does not exist in state list)`);
+            }
+            index.value = newIndex;
+        },
+    };
+    return Object.assign({ state: computed(() => {
+            return unref(stateSet)[index.value];
+        }), currentIndex: index.value }, actions);
+}
+
+function useMultiStateValidator(states, validator, initialValidity = [undefined]) {
+    if (typeof states !== 'object') {
+        throw new Error('states expected to be an object or array, got ' + typeof states);
+    }
+    const validatorInner = ref(validator);
+    const statesInner = ref(states);
+    validatorInner.value = validator;
+    statesInner.value = states;
+    const [validity, setValidity] = useReadonly(initialValidity);
+    const validate = () => {
+        if (validatorInner.value.length >= 2) {
+            validatorInner.value(statesInner.value.map(item => unref(item)), setValidity);
+        }
+        else {
+            setValidity(validatorInner.value(statesInner.value.map(item => unref(item))));
+        }
+    };
+    useEffect(() => {
+        validate();
+    }, Object.values(states));
+    return [validity, validate];
+}
+
+const defaultState$1 = {
+    x: 0,
+    y: 0,
+    width: 0,
+    height: 0,
+    top: 0,
+    left: 0,
+    bottom: 0,
+    right: 0,
+};
+function useMeasure() {
+    const [element, ref] = useState(null);
+    const [rect, setRect] = useReadonly(defaultState$1);
+    const observer = new window.ResizeObserver((entries) => {
+        if (entries[0]) {
+            const { x, y, width, height, top, left, bottom, right } = entries[0].contentRect;
+            setRect({ x, y, width, height, top, left, bottom, right });
+        }
+    });
+    useEffect(() => {
+        if (!element) {
+            return;
+        }
+        observer.observe(element.value);
+        return () => {
+            observer.disconnect();
+        };
+    }, [element]);
+    return [ref, rect];
+}
+var useMeasure$1 = isBrowser && typeof window.ResizeObserver !== 'undefined'
+    ? useMeasure
+    : (() => [noop, defaultState$1]);
+
+function useMedia(query, defaultState = false) {
+    const [state, setState] = useState(isBrowser ? () => window.matchMedia(unref(query)).matches : defaultState);
+    useEffect(() => {
+        let mounted = true;
+        const mql = window.matchMedia(unref(query));
+        const onChange = () => {
+            if (!mounted) {
+                return;
+            }
+            setState(!!mql.matches);
+        };
+        mql.addListener(onChange);
+        setState(mql.matches);
+        return () => {
+            mounted = false;
+            mql.removeListener(onChange);
+        };
+    }, sources([query]));
+    return computed(() => {
+        return state.value;
+    });
+}
+
+const useMediaDevices = () => {
+    const [state, setState] = useReactive({});
+    useEffect(() => {
+        let mounted = true;
+        const onChange = () => {
+            navigator.mediaDevices
+                .enumerateDevices()
+                .then((devices) => {
+                if (mounted) {
+                    setState({
+                        devices: devices.map(({ deviceId, groupId, kind, label }) => ({
+                            deviceId,
+                            groupId,
+                            kind,
+                            label,
+                        })),
+                    });
+                }
+            })
+                .catch(noop);
+        };
+        on(navigator.mediaDevices, 'devicechange', onChange);
+        onChange();
+        return () => {
+            mounted = false;
+            off(navigator.mediaDevices, 'devicechange', onChange);
+        };
+    }, []);
+    return state;
+};
+const useMediaDevicesMock = () => ({});
+var useMediaDevices$1 = isNavigator && !!navigator.mediaDevices ? useMediaDevices : useMediaDevicesMock;
+
+const defaultState = {
+    acceleration: {
+        x: null,
+        y: null,
+        z: null,
+    },
+    accelerationIncludingGravity: {
+        x: null,
+        y: null,
+        z: null,
+    },
+    rotationRate: {
+        alpha: null,
+        beta: null,
+        gamma: null,
+    },
+    interval: 16,
+};
+const useMotion = (initialState = defaultState) => {
+    const [state, setState] = useReactive(initialState);
+    const handler = (event) => {
+        const { acceleration, accelerationIncludingGravity, rotationRate, interval } = event;
+        setState({
+            acceleration: {
+                x: acceleration.x,
+                y: acceleration.y,
+                z: acceleration.z,
+            },
+            accelerationIncludingGravity: {
+                x: accelerationIncludingGravity.x,
+                y: accelerationIncludingGravity.y,
+                z: accelerationIncludingGravity.z,
+            },
+            rotationRate: {
+                alpha: rotationRate.alpha,
+                beta: rotationRate.beta,
+                gamma: rotationRate.gamma,
+            },
+            interval,
+        });
+    };
+    let hasGranted = false;
+    const needGrantPermission = typeof DeviceMotionEvent.requestPermission === 'function';
+    const requestPermisson = () => {
+        if (needGrantPermission) {
+            if (hasGranted)
+                return;
+            hasGranted = true;
+            return DeviceMotionEvent.requestPermission().then(function (state) {
+                if ('granted' === state) {
+                    on(window, 'devicemotion', handler);
+                }
+            });
+        }
+        return new Promise((resolve) => {
+            resolve({ state: '' });
+        });
+    };
+    useEffect(() => {
+        if (!needGrantPermission) {
+            on(window, 'devicemotion', handler);
+        }
+        return () => {
+            off(window, 'devicemotion', handler);
+        };
+    }, []);
+    return [state, requestPermisson];
+};
+
+const useMouse = (ref) => {
+    if (process.env.NODE_ENV === 'development') {
+        if (typeof ref !== 'object' || typeof ref.value === 'undefined') {
+            console.error('useMouse expects a single ref argument.');
+        }
+    }
+    const [state, setState] = useRafState({
+        docX: 0,
+        docY: 0,
+        posX: 0,
+        posY: 0,
+        elX: 0,
+        elY: 0,
+        elH: 0,
+        elW: 0,
+    });
+    useEffect(() => {
+        const moveHandler = (event) => {
+            if (ref && ref.value) {
+                const { left, top, width: elW, height: elH } = ref.value.getBoundingClientRect();
+                const posX = left + window.pageXOffset;
+                const posY = top + window.pageYOffset;
+                const elX = event.pageX - posX;
+                const elY = event.pageY - posY;
+                setState({
+                    docX: event.pageX,
+                    docY: event.pageY,
+                    posX,
+                    posY,
+                    elX,
+                    elY,
+                    elH,
+                    elW,
+                });
+            }
+        };
+        on(document, 'mousemove', moveHandler);
+        return () => {
+            off(document, 'mousemove', moveHandler);
+        };
+    }, [ref]);
+    return computed(() => {
+        return state.value;
+    });
+};
+
+const useMouseHovered = (ref, options = {}) => {
+    const whenHovered = !!unref(options.whenHovered);
+    const bound = !!unref(options.bound);
+    const isHovered = useHoverDirty(ref, whenHovered);
+    const state = useMouse(computed(() => {
+        return whenHovered && !isHovered.value ? null : ref.value;
+    }));
+    if (unref(bound)) {
+        watch(state, () => {
+            state.value.elX = Math.max(0, Math.min(state.value.elX, state.value.elW));
+            state.value.elY = Math.max(0, Math.min(state.value.elY, state.value.elH));
+        });
+    }
+    return state;
+};
+
+function useMouseWheel() {
+    const [mouseWheelScrolled, setMouseWheelScrolled] = useState(0);
+    useEffect(() => {
+        const updateScroll = (e) => {
+            setMouseWheelScrolled(e.deltaY + mouseWheelScrolled.value);
+        };
+        on(window, 'wheel', updateScroll, false);
+        return () => off(window, 'wheel', updateScroll);
+    });
+    return mouseWheelScrolled;
+}
+
+const nav = isNavigator ? navigator : undefined;
+const conn = nav && (nav.connection || nav.mozConnection || nav.webkitConnection);
+function getConnectionState(previousState) {
+    const online = nav === null || nav === void 0 ? void 0 : nav.onLine;
+    const previousOnline = previousState === null || previousState === void 0 ? void 0 : previousState.online;
+    return {
+        online,
+        previous: previousOnline,
+        since: online !== previousOnline ? new Date() : previousState === null || previousState === void 0 ? void 0 : previousState.since,
+        downlink: conn === null || conn === void 0 ? void 0 : conn.downlink,
+        downlinkMax: conn === null || conn === void 0 ? void 0 : conn.downlinkMax,
+        effectiveType: conn === null || conn === void 0 ? void 0 : conn.effectiveType,
+        rtt: conn === null || conn === void 0 ? void 0 : conn.rtt,
+        saveData: conn === null || conn === void 0 ? void 0 : conn.saveData,
+        type: conn === null || conn === void 0 ? void 0 : conn.type,
+    };
+}
+function useNetworkState(initialState) {
+    const [state, setState] = useReactive(initialState !== null && initialState !== void 0 ? initialState : getConnectionState);
+    useEffect(() => {
+        const handleStateChange = () => {
+            setState(getConnectionState);
+        };
+        on(window, 'online', handleStateChange, { passive: true });
+        on(window, 'offline', handleStateChange, { passive: true });
+        if (conn) {
+            on(conn, 'change', handleStateChange, { passive: true });
+        }
+        return () => {
+            off(window, 'online', handleStateChange);
+            off(window, 'offline', handleStateChange);
+            if (conn) {
+                off(conn, 'change', handleStateChange);
+            }
+        };
+    }, []);
+    return state;
+}
+
 function useStateValidator(state, validator, initialState = [undefined]) {
     const stateInner = ref(state);
     const validatorInner = ref(validator);
@@ -3521,11 +3914,8 @@ function useStateValidator(state, validator, initialState = [undefined]) {
             setValidity(validatorInner.value(unref(stateInner.value)));
         }
     };
-    useEffect(() => {
-        validate();
-    }, stateInner);
     return [validity, validate];
 }
 
-export { UseKey, off, on, sources, useAsync, useAsyncFn, useAsyncRetry, useAudio, useBattery$1 as useBattery, useBeforeUnload, useToggle as useBoolean, useClickAway, useComputedSetState, useComputedState, useCookie, useCopyToClipboard, useCounter, useCss, useDebounce, useDrop, useDropArea, useEffect, useEvent, useFavicon, useFullscreen, useGeolocation, useGetSet, useHarmonicIntervalFn, useHash, useHover, useHoverDirty, useIdle, useIntersection, useInterval, useKey, useKeyPress, useKeyPressEvent, useKeyboardJs, useList, useLocalStorage, useLocation, useLockBodyScroll, useLongPress, useMap, useMediatedState, useMethods, useMounted, useMountedState, usePermission, useQueue, useRaf, useRafLoop, useReactive, useReadonly, useReducer, useSessionStorage, useSet, useSetState, useSlider, useSpeech, useSpring, useState, useStateValidator, useThrottle, useThrottleFn, useTimeout, useTimeoutFn, useTitle$1 as useTitle, useToggle, useTween, useVideo };
+export { UseKey, createGlobalState, off, on, sources, useAsync, useAsyncFn, useAsyncRetry, useAudio, useBattery$1 as useBattery, useBeforeUnload, useToggle as useBoolean, useClickAway, useComputedSetState, useComputedState, useCookie, useCopyToClipboard, useCounter, useCss, useDebounce, useDefault, useDrop, useDropArea, useEffect, useEvent, useFavicon, useFullscreen, useGeolocation, useGetSet, useHarmonicIntervalFn, useHash, useHover, useHoverDirty, useIdle, useIntersection, useInterval, useKey, useKeyPress, useKeyPressEvent, useKeyboardJs, useList, useLocalStorage, useLocation, useLockBodyScroll, useLongPress, useMap, useMeasure$1 as useMeasure, useMedia, useMediaDevices$1 as useMediaDevices, useMediatedState, useMethods, useMotion, useMounted, useMountedState, useMouse, useMouseHovered, useMouseWheel, useMultiStateValidator, useNetworkState, usePermission, useQueue, useRaf, useRafLoop, useRafState, useReactive, useReadonly, useReducer, useSessionStorage, useSet, useSetState, useSlider, useSpeech, useSpring, useState, useStateList, useStateValidator, useThrottle, useThrottleFn, useTimeout, useTimeoutFn, useTitle$1 as useTitle, useToggle, useTween, useVideo };
 //# sourceMappingURL=vue-next-use.bundle.esm.js.map

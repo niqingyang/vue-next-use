@@ -417,7 +417,7 @@ interface LocationSensorState {
     protocol?: string;
     search?: string;
 }
-declare const _default$3: (() => LocationSensorState) | (() => ComputedRef<LocationSensorState>);
+declare const _default$5: (() => LocationSensorState) | (() => ComputedRef<LocationSensorState>);
 
 interface Options$1 {
     isPreventDefault?: boolean | Ref<boolean>;
@@ -447,7 +447,7 @@ declare type UseBatteryState = {
     fetched: true;
 });
 declare function useBattery(): Readonly<UseBatteryState>;
-declare const _default$2: typeof useBattery;
+declare const _default$4: typeof useBattery;
 
 declare function useReactive<T extends Object>(initialState?: T | (() => T)): [T, (patch: Partial<T> | ((prevState: T) => Partial<T>)) => void];
 
@@ -473,7 +473,7 @@ declare type WrappedMethods<M> = {
 };
 declare const useMethods: <M, T>(createMethods: CreateMethods<M, T>, initialState: T) => [ComputedRef<T>, WrappedMethods<M>];
 
-interface State$1 {
+interface State$2 {
     isSliding: boolean;
     value: number;
 }
@@ -484,7 +484,7 @@ interface Options {
     reverse: boolean;
     vertical?: boolean;
 }
-declare const useSlider: (ref: Ref<HTMLElement>, options?: Partial<Options>) => State$1;
+declare const useSlider: (ref: Ref<HTMLElement>, options?: Partial<Options>) => State$2;
 
 declare type UseDebounceReturn = [ComputedRef<boolean | null>, () => void];
 declare function useDebounce(fn: Function, ms?: number, deps?: any[]): UseDebounceReturn;
@@ -500,11 +500,11 @@ declare type parserOptions<T> = {
 };
 declare function useLocalStorage<T>(key: string, initialValue?: T, options?: parserOptions<T>): ((() => void) | ComputedRef<(T extends Ref<infer V> ? V : T) | undefined>)[] | (ComputedRef<T | undefined> | Dispatch$1<SetStateAction<T | undefined>>)[];
 
-declare const _default$1: (_locked?: boolean | Ref<boolean>, _elementRef?: Ref<HTMLElement> | undefined) => void;
+declare const _default$3: (_locked?: boolean | Ref<boolean>, _elementRef?: Ref<HTMLElement> | undefined) => void;
 
 declare type PermissionDesc = PermissionDescriptor | DevicePermissionDescriptor | MidiPermissionDescriptor | PushPermissionDescriptor;
-declare type State = PermissionState | '';
-declare const usePermission: (permissionDesc: PermissionDesc) => Ref<State>;
+declare type State$1 = PermissionState | '';
+declare const usePermission: (permissionDesc: PermissionDesc) => Ref<State$1>;
 
 declare type RafLoopReturns = [() => void, () => void, ComputedRef<boolean>];
 declare function useRafLoop(callback: FrameRequestCallback, initiallyActive?: boolean): RafLoopReturns;
@@ -528,13 +528,33 @@ interface UseTitleOptions {
     restoreOnUnmount?: boolean;
 }
 declare function useTitle(title: string, options?: UseTitleOptions): void;
-declare const _default: typeof useTitle;
+declare const _default$2: typeof useTitle;
 
 declare function useRaf(ms?: number | Ref<number>, delay?: number | Ref<number>): ComputedRef<number>;
 
 declare function useCss(css: object | Ref<object>): string;
 
 declare const useTween: (easingName?: string, ms?: number, delay?: number) => ComputedRef<number>;
+
+declare function createGlobalState<S = any>(initialState: IHookStateInitAction<S>): () => [Ref<S>, (state: IHookStateSetAction<S>) => void];
+declare function createGlobalState<S = undefined>(): () => [
+    Ref<S>,
+    (state: IHookStateSetAction<S>) => void
+];
+
+declare function useDefault<T>(defaultValue: T, initialValue: T | (() => T)): readonly [Ref<T | null | undefined>, (prevState: SetStateAction<T | null | undefined>) => void];
+
+declare function useRafState<S>(initialState: S | (() => S)): [Ref<S>, Dispatch$1<SetStateAction<S>>];
+
+interface UseStateListReturn<T> {
+    state: ComputedRef<T>;
+    currentIndex: number;
+    setStateAt: (newIndex: number) => void;
+    setState: (state: T) => void;
+    next: () => void;
+    prev: () => void;
+}
+declare function useStateList<T>(stateSet?: T[] | Ref<T[]>): UseStateListReturn<T>;
 
 declare type ValidityState = [boolean | undefined, ...any[]] | [undefined];
 interface StateValidator<V, S> {
@@ -544,5 +564,127 @@ interface StateValidator<V, S> {
 declare type UseStateValidatorReturn<V> = [Readonly<V>, () => void];
 declare function useStateValidator<V extends ValidityState, S>(state: S, validator: StateValidator<V, S>, initialState?: V): UseStateValidatorReturn<V>;
 
-export { Dispatch$1 as Dispatch, Reducer, SetStateAction, UseKey, UseStateValidatorReturn, ValidityState, off, on, sources, useAsync, useAsyncFn, useAsyncRetry, useAudio, _default$2 as useBattery, useBeforeUnload, useToggle as useBoolean, useClickAway, useComputedSetState, useComputedState, useCookie, useCopyToClipboard, useCounter, useCss, useDebounce, useDrop, useDropArea, useEffect, useEvent, useFavicon, useFullscreen, useGeolocation, useGetSet, useHarmonicIntervalFn, useHash, useHover, useHoverDirty, useIdle, useIntersection, useInterval, useKey, useKeyPress, useKeyPressEvent, useKeyboardJs, useList, useLocalStorage, _default$3 as useLocation, _default$1 as useLockBodyScroll, useLongPress, useMap, useMediatedState, useMethods, useMounted, useMountedState, usePermission, useQueue, useRaf, useRafLoop, useReactive, useReadonly, useReducer, useSessionStorage, useSet, useSetState, useSlider, useSpeech, useSpring, useState, useStateValidator, useThrottle, useThrottleFn, useTimeout, useTimeoutFn, _default as useTitle, useToggle, useTween, useVideo };
+declare type MultiStateValidatorStates = any[] | {
+    [p: string]: any;
+} | {
+    [p: number]: any;
+};
+declare type MultiStateValidator<V extends ValidityState, S extends MultiStateValidatorStates> = StateValidator<V, S>;
+declare function useMultiStateValidator<V extends ValidityState, S extends MultiStateValidatorStates>(states: S, validator: MultiStateValidator<V, S>, initialValidity?: V): UseStateValidatorReturn<V>;
+
+declare type UseMeasureRect = Pick<DOMRectReadOnly, 'x' | 'y' | 'top' | 'left' | 'right' | 'bottom' | 'height' | 'width'>;
+declare type UseMeasureRef<E extends Element = Element> = (element: E) => void;
+declare type UseMeasureResult<E extends Element = Element> = [UseMeasureRef<E>, UseMeasureRect];
+declare function useMeasure<E extends Element = Element>(): UseMeasureResult<E>;
+declare const _default$1: typeof useMeasure;
+
+declare function useMedia(query: string | Ref<string>, defaultState?: boolean): ComputedRef<boolean>;
+
+declare const _default: () => {};
+
+interface MotionSensorState {
+    acceleration: {
+        x: number | null;
+        y: number | null;
+        z: number | null;
+    };
+    accelerationIncludingGravity: {
+        x: number | null;
+        y: number | null;
+        z: number | null;
+    };
+    rotationRate: {
+        alpha: number | null;
+        beta: number | null;
+        gamma: number | null;
+    };
+    interval: number | null;
+}
+declare const useMotion: (initialState?: MotionSensorState) => (MotionSensorState | (() => Promise<unknown> | undefined))[];
+
+interface State {
+    docX: number;
+    docY: number;
+    posX: number;
+    posY: number;
+    elX: number;
+    elY: number;
+    elH: number;
+    elW: number;
+}
+declare const useMouse: (ref: Ref<Element | null>) => ComputedRef<State>;
+
+interface UseMouseHoveredOptions {
+    whenHovered?: boolean | Ref<boolean>;
+    bound?: boolean | Ref<boolean>;
+}
+declare const useMouseHovered: (ref: Ref<Element>, options?: UseMouseHoveredOptions) => ComputedRef<State>;
+
+declare function useMouseWheel(): Ref<number>;
+
+interface INetworkInformation extends EventTarget {
+    readonly downlink: number;
+    readonly downlinkMax: number;
+    readonly effectiveType: 'slow-2g' | '2g' | '3g' | '4g';
+    readonly rtt: number;
+    readonly saveData: boolean;
+    readonly type: 'bluetooth' | 'cellular' | 'ethernet' | 'none' | 'wifi' | 'wimax' | 'other' | 'unknown';
+    onChange: (event: Event) => void;
+}
+interface IUseNetworkState {
+    /**
+     * @desc Whether browser connected to the network or not.
+     */
+    online: boolean | undefined;
+    /**
+     * @desc Previous value of `online` property. Helps to identify if browser
+     * just connected or lost connection.
+     */
+    previous: boolean | undefined;
+    /**
+     * @desc The {Date} object pointing to the moment when state change occurred.
+     */
+    since: Date | undefined;
+    /**
+     * @desc Effective bandwidth estimate in megabits per second, rounded to the
+     * nearest multiple of 25 kilobits per seconds.
+     */
+    downlink: INetworkInformation['downlink'] | undefined;
+    /**
+     * @desc Maximum downlink speed, in megabits per second (Mbps), for the
+     * underlying connection technology
+     */
+    downlinkMax: INetworkInformation['downlinkMax'] | undefined;
+    /**
+     * @desc Effective type of the connection meaning one of 'slow-2g', '2g', '3g', or '4g'.
+     * This value is determined using a combination of recently observed round-trip time
+     * and downlink values.
+     */
+    effectiveType: INetworkInformation['effectiveType'] | undefined;
+    /**
+     * @desc Estimated effective round-trip time of the current connection, rounded
+     * to the nearest multiple of 25 milliseconds
+     */
+    rtt: INetworkInformation['rtt'] | undefined;
+    /**
+     * @desc {true} if the user has set a reduced data usage option on the user agent.
+     */
+    saveData: INetworkInformation['saveData'] | undefined;
+    /**
+     * @desc The type of connection a device is using to communicate with the network.
+     * It will be one of the following values:
+     *  - bluetooth
+     *  - cellular
+     *  - ethernet
+     *  - none
+     *  - wifi
+     *  - wimax
+     *  - other
+     *  - unknown
+     */
+    type: INetworkInformation['type'] | undefined;
+}
+declare function useNetworkState(initialState?: IHookStateInitAction<IUseNetworkState>): IUseNetworkState;
+
+export { Dispatch$1 as Dispatch, Reducer, SetStateAction, UseKey, UseStateValidatorReturn, ValidityState, createGlobalState, off, on, sources, useAsync, useAsyncFn, useAsyncRetry, useAudio, _default$4 as useBattery, useBeforeUnload, useToggle as useBoolean, useClickAway, useComputedSetState, useComputedState, useCookie, useCopyToClipboard, useCounter, useCss, useDebounce, useDefault, useDrop, useDropArea, useEffect, useEvent, useFavicon, useFullscreen, useGeolocation, useGetSet, useHarmonicIntervalFn, useHash, useHover, useHoverDirty, useIdle, useIntersection, useInterval, useKey, useKeyPress, useKeyPressEvent, useKeyboardJs, useList, useLocalStorage, _default$5 as useLocation, _default$3 as useLockBodyScroll, useLongPress, useMap, _default$1 as useMeasure, useMedia, _default as useMediaDevices, useMediatedState, useMethods, useMotion, useMounted, useMountedState, useMouse, useMouseHovered, useMouseWheel, useMultiStateValidator, useNetworkState, usePermission, useQueue, useRaf, useRafLoop, useRafState, useReactive, useReadonly, useReducer, useSessionStorage, useSet, useSetState, useSlider, useSpeech, useSpring, useState, useStateList, useStateValidator, useThrottle, useThrottleFn, useTimeout, useTimeoutFn, _default$2 as useTitle, useToggle, useTween, useVideo };
 //# sourceMappingURL=vue-next-use.d.ts.map

@@ -80,5 +80,7 @@ export {default as useMediaDevices} from './useMediaDevices';
 export {default as useMotion} from './useMotion';
 export {default as useMouse} from './useMouse';
 export {default as useMouseHovered} from './useMouseHovered';
+export {default as useMouseWheel} from './useMouseWheel';
+export {default as useNetworkState} from './useNetworkState';
 export {default as useStateValidator, ValidityState, UseStateValidatorReturn} from './useStateValidator';
 export {ref as useRef} from 'vue';

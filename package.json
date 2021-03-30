@@ -1,6 +1,6 @@
 {
   "name": "vue-next-use",
-  "version": "0.0.22-beta",
+  "version": "0.0.24-beta",
   "description": "Vue Hooks - 👍",
   "main": "dist/vue-next-use.bundle.esm.js",
   "module": "dist/vue-next-use.bundle.esm.js",
@@ -41,7 +41,7 @@
   "bugs": {
     "url": "https://github.com/niqingyang/vue-next-use/issues"
   },
-  "homepage": "https://github.com/niqingyang/vue-next-use#readme",
+  "homepage": "https://niqingyang.github.io/vue-next-use",
   "dependencies": {
     "copy-to-clipboard": "^3.3.1",
     "fast-deep-equal": "^3.1.3",

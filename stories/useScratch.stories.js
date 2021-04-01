@@ -24,10 +24,9 @@ export const Demo = ShowDemo({
             userSelect: 'none',
         };
 
-
         return () => {
 
-            let {x = 0, y = 0, dx = 0, dy = 0} = state;
+            let {isScratching, x = 0, y = 0, dx = 0, dy = 0} = state.value;
             if (dx < 0) [x, dx] = [x + dx, -dx];
             if (dy < 0) [y, dy] = [y + dy, -dy];
 
@@ -44,8 +43,8 @@ export const Demo = ShowDemo({
 
             return (
                 <div ref={ref} style={blockStyle}>
-                    <pre style={preStyle}>{JSON.stringify(state, null, 4)}</pre>
-                    {state.isScratching && <div style={rectangleStyle}/>}
+                    <pre style={preStyle}>{JSON.stringify(state.value, null, 4)}</pre>
+                    {isScratching && <div style={rectangleStyle}/>}
                 </div>
             )
         };

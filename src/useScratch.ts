@@ -1,4 +1,4 @@
-import {cloneVNode, createVNode, VNode} from 'vue';
+import {cloneVNode, createVNode, unref, VNode, renderSlot, computed, ComputedRef} from 'vue';
 import {sources, useEffect, useReactive, useRef, useState} from './index';
 import {noop, off, on} from './misc/util';
 
@@ -29,11 +29,11 @@ export interface ScratchSensorState {
 
 export default function useScratch(
     params: ScratchSensorParams = {}
-): [(el: HTMLElement | null) => void, ScratchSensorState] {
+): [(el: HTMLElement | null) => void, ComputedRef<ScratchSensorState>] {
     const {disabled} = params;
     const paramsRef = useRef(params);
-    const [state, setState] = useReactive<ScratchSensorState>({isScratching: false});
-    const refState = useRef<ScratchSensorState>(state);
+    const [state, setState] = useState<ScratchSensorState>({isScratching: false});
+    const refState = useRef<ScratchSensorState>(state.value);
     const refScratching = useRef<boolean>(false);
     const refAnimationFrame = useRef<any>(null);
     const [el, setEl] = useState<HTMLElement | null>(null);
@@ -45,6 +45,7 @@ export default function useScratch(
             cancelAnimationFrame(refAnimationFrame.value);
             refAnimationFrame.value = requestAnimationFrame(() => {
                 if (el.value == null) return;
+                if (state.value.isScratching == false) return;
                 const {left, top} = el.value.getBoundingClientRect();
                 const elX = left + window.scrollX;
                 const elY = top + window.scrollY;
@@ -154,26 +155,30 @@ export default function useScratch(
         };
     }, sources([el, disabled, paramsRef]));
 
-    return [setEl, state];
+    return [setEl, computed(()=>{
+        return state.value;
+    })];
 };
 
-export interface ScratchSensorProps extends ScratchSensorParams {
+// 有Bug，未实现
+interface ScratchSensorProps extends ScratchSensorParams {
     children: (
         state: ScratchSensorState,
         ref: (el: HTMLElement | null) => void
     ) => VNode<any>;
 }
 
-export const ScratchSensor = {
+// 有Bug，未实现
+const ScratchSensor = {
     props: {},
     setup(props, ctx) {
         const [setRef, state] = useScratch(ctx.args);
         const element = render(props, state);
 
-        return cloneVNode(element, {
-            ...element.props,
+        return () => cloneVNode(renderSlot(ctx.slots, 'default'), {
+            ...props,
             ref: (el: HTMLElement) => {
-                if (element.props.ref) {
+                if (props.ref) {
                     if (typeof element.props.ref === 'object') element.props.ref.value = el;
                     if (typeof element.props.ref === 'function') element.props.ref(el);
                 }
@@ -186,6 +191,12 @@ export const ScratchSensor = {
 const isFn = fn => typeof fn === 'function';
 
 const render = (props, data, ...more) => {
+
+    props = unref(props);
+    data = unref(data);
+
+    console.log(props, data)
+
     if (process.env.NODE_ENV !== 'production') {
         if (typeof props !== 'object') {
             throw new TypeError('renderChildren(props, data) first argument must be a props object.');

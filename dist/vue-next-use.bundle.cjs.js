@@ -505,10 +505,18 @@ function createHTMLMediaHook(tag) {
             setState({ buffered: parseTimeRanges(el.buffered) });
         };
         if (element) {
-            element = Vue.createVNode(element, Object.assign(Object.assign({ controls: false }, props), { ref, onPlay: wrapEvent(props.onPlay, onPlay), onPause: wrapEvent(props.onPause, onPause), onVolumechange: wrapEvent(props.onVolumechange, onVolumeChange), onDurationchange: wrapEvent(props.onDurationchange, onDurationChange), onTimeupdate: wrapEvent(props.onTimeupdate, onTimeUpdate), onProgress: wrapEvent(props.onProgress, onProgress) }));
+            element = Vue.createVNode({
+                render() {
+                    return element && Vue.createVNode(element, Object.assign(Object.assign({ controls: false }, props), { ref, onPlay: wrapEvent(props.onPlay, onPlay), onPause: wrapEvent(props.onPause, onPause), onVolumechange: wrapEvent(props.onVolumechange, onVolumeChange), onDurationchange: wrapEvent(props.onDurationchange, onDurationChange), onTimeupdate: wrapEvent(props.onTimeupdate, onTimeUpdate), onProgress: wrapEvent(props.onProgress, onProgress) }));
+                }
+            });
         }
         else {
-            element = Vue.createVNode(tag, Object.assign(Object.assign({ controls: false }, props), { onPlay: wrapEvent(props.onPlay, onPlay), onPause: wrapEvent(props.onPause, onPause), onVolumechange: wrapEvent(props.onVolumechange, onVolumeChange), onDurationchange: wrapEvent(props.onDurationchange, onDurationChange), onTimeupdate: wrapEvent(props.onTimeupdate, onTimeUpdate), onProgress: wrapEvent(props.onProgress, onProgress) })); // TODO: fix this typing.
+            element = Vue.createVNode({
+                setup() {
+                    return () => Vue.createVNode(tag, Object.assign(Object.assign({ controls: false }, props), { ref, onPlay: wrapEvent(props.onPlay, onPlay), onPause: wrapEvent(props.onPause, onPause), onVolumechange: wrapEvent(props.onVolumechange, onVolumeChange), onDurationchange: wrapEvent(props.onDurationchange, onDurationChange), onTimeupdate: wrapEvent(props.onTimeupdate, onTimeUpdate), onProgress: wrapEvent(props.onProgress, onProgress) }));
+                }
+            }); // TODO: fix this typing.
         }
         // Some browsers return `Promise` on `.play()` and may throw errors
         // if one tries to execute another `.play()` or `.pause()` while that

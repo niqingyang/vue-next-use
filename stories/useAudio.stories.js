@@ -18,14 +18,14 @@ export const Demo = ShowDemo({
         //     <audio src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3" autoplay={true}/>
         // );
 
-        const [Audio, state, controls, ref] = useAudio({
+        const [Audio, state, controls] = useAudio({
             src: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3',
             autoplay: true,
         });
 
         return () => (
             <div>
-                <Audio ref={ref}/>
+                <Audio/>
                 <pre>{JSON.stringify(state.value, null, 2)}</pre>
                 <button onClick={() => controls.toggle()}>controls toggle</button>
                 <button onClick={controls.pause}>Pause</button>

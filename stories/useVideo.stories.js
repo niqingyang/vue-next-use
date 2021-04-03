@@ -18,14 +18,14 @@ export const Demo = ShowDemo({
         //     <video src="http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4" autoPlay={true}/>
         // );
 
-        const [Video, state, controls, ref] = useVideo({
+        const [Video, state, controls] = useVideo({
             src: 'http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4',
             autoplay: true,
         });
 
         return () => (
             <div>
-                <Video ref={ref}/>
+                <Video/>
                 <pre>{JSON.stringify(state.value, null, 2)}</pre>
                 <button onClick={() => controls.toggle()}>controls toggle</button>
                 <button onClick={controls.pause}>Pause</button>

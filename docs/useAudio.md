@@ -9,14 +9,14 @@ Creates `<audio>` element, tracks its state and exposes playback controls.
 import {useAudio} from 'vue-next-use';
 
 const Demo = () => {
-  const [audio, state, controls, ref] = useAudio({
+  const [Audio, state, controls] = useAudio({
     src: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3',
     autoPlay: true,
   });
 
   return (
     <div>
-      {audio}
+      <Audio />
       <pre>{JSON.stringify(state, null, 2)}</pre>
       <button onClick={controls.pause}>Pause</button>
       <button onClick={controls.play}>Play</button>

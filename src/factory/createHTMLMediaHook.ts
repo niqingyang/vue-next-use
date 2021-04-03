@@ -122,28 +122,37 @@ export default function createHTMLMediaHook(tag: 'audio' | 'video') {
         };
 
         if (element) {
-            element = createVNode(element, {
-                controls: false,
-                ...props,
-                ref,
-                onPlay: wrapEvent(props.onPlay, onPlay),
-                onPause: wrapEvent(props.onPause, onPause),
-                onVolumechange: wrapEvent(props.onVolumechange, onVolumeChange),
-                onDurationchange: wrapEvent(props.onDurationchange, onDurationChange),
-                onTimeupdate: wrapEvent(props.onTimeupdate, onTimeUpdate),
-                onProgress: wrapEvent(props.onProgress, onProgress),
+            element = createVNode({
+                render() {
+                    return element && createVNode(element, {
+                        controls: false,
+                        ...props,
+                        ref,
+                        onPlay: wrapEvent(props.onPlay, onPlay),
+                        onPause: wrapEvent(props.onPause, onPause),
+                        onVolumechange: wrapEvent(props.onVolumechange, onVolumeChange),
+                        onDurationchange: wrapEvent(props.onDurationchange, onDurationChange),
+                        onTimeupdate: wrapEvent(props.onTimeupdate, onTimeUpdate),
+                        onProgress: wrapEvent(props.onProgress, onProgress),
+                    })
+                }
             });
         } else {
-            element = createVNode(tag, {
-                controls: false,
-                ...props,
-                onPlay: wrapEvent(props.onPlay, onPlay),
-                onPause: wrapEvent(props.onPause, onPause),
-                onVolumechange: wrapEvent(props.onVolumechange, onVolumeChange),
-                onDurationchange: wrapEvent(props.onDurationchange, onDurationChange),
-                onTimeupdate: wrapEvent(props.onTimeupdate, onTimeUpdate),
-                onProgress: wrapEvent(props.onProgress, onProgress),
-            } as any); // TODO: fix this typing.
+            element = createVNode({
+                setup() {
+                    return () => createVNode(tag, {
+                        controls: false,
+                        ...props,
+                        ref,
+                        onPlay: wrapEvent(props.onPlay, onPlay),
+                        onPause: wrapEvent(props.onPause, onPause),
+                        onVolumechange: wrapEvent(props.onVolumechange, onVolumeChange),
+                        onDurationchange: wrapEvent(props.onDurationchange, onDurationChange),
+                        onTimeupdate: wrapEvent(props.onTimeupdate, onTimeUpdate),
+                        onProgress: wrapEvent(props.onProgress, onProgress),
+                    } as any)
+                }
+            }); // TODO: fix this typing.
         }
 
         // Some browsers return `Promise` on `.play()` and may throw errors

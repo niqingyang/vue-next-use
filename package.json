@@ -81,5 +81,8 @@
     "vue": "3.0.7",
     "vue-loader": "^16.1.2"
   },
-  "peerDependencies": {}
+  "peerDependencies": {
+    "@xobotyi/scrollbar-width": "^1.9.5",
+    "lodash": "^4.17.21"
+  }
 }

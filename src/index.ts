@@ -91,5 +91,6 @@ export {default as useScrolling} from './useScrolling';
 // export {default as useScrollbarWidth} from './useScrollbarWidth';
 export {default as useSearchParam} from './useSearchParam';
 export {default as useSize} from './useSize';
+export {default as useStartTyping} from './useStartTyping';
 export {default as useStateValidator, ValidityState, UseStateValidatorReturn} from './useStateValidator';
 export {ref as useRef} from 'vue';

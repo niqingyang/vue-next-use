@@ -9,18 +9,21 @@ import {useSize} from 'vue-next-use';
 
 const Demo = {
   setup(){
-      const [Sized, {width, height}] = useSize({ width: 100, height: 100 });
+      const [Sized, state] = useSize({ width: 100, height: 100 });
 
-      return () => (
-          <div>
-              <div style={{background: 'red'}}>
-                  <Sized/>
-                  Size me up! ({width}px)
+      return () => {
+          const {width, height} = state;
+          return (
+              <div>
+                  <div style={{background: 'red'}}>
+                      <Sized/>
+                      Size me up! ({width}px)
+                  </div>
+                  <div>width: {width}</div>
+                  <div>height: {height}</div>
               </div>
-              <div>width: {width}</div>
-              <div>height: {height}</div>
-          </div>
-      );
+          )
+      };
   }
 };
 ```

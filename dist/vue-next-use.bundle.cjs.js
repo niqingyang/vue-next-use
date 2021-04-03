@@ -2520,7 +2520,7 @@ var useBattery$1 = isBatteryApiSupported ? useBattery : useBatteryMock;
 function useReactive(initialState = {}) {
     const state = Vue.isReactive(initialState) ? initialState : (initialState instanceof Function ? Vue.reactive(initialState()) : Vue.reactive(initialState));
     const setState = (patch) => {
-        Object.assign(state, patch instanceof Function ? patch(Vue.toRaw(state)) : patch);
+        Object.assign(state, resolveHookState(patch, Vue.toRaw(state)));
     };
     return [state, setState];
 }
@@ -3568,6 +3568,21 @@ function useRafState(initialState) {
     return [state, setRafState];
 }
 
+function useRafReactive(initialState) {
+    const frame = Vue.ref(0);
+    const [state, setState] = useReactive(initialState);
+    const setRafState = (value) => {
+        cancelAnimationFrame(frame.value);
+        frame.value = requestAnimationFrame(() => {
+            setState(value);
+        });
+    };
+    Vue.onUnmounted(() => {
+        cancelAnimationFrame(frame.value);
+    });
+    return [state, setRafState];
+}
+
 function useStateList(stateSet = []) {
     const isMounted = useMountedState();
     const index = Vue.ref(0);
@@ -3639,7 +3654,7 @@ function useMultiStateValidator(states, validator, initialValidity = [undefined]
     return [validity, validate];
 }
 
-const defaultState$1 = {
+const defaultState$2 = {
     x: 0,
     y: 0,
     width: 0,
@@ -3651,7 +3666,7 @@ const defaultState$1 = {
 };
 function useMeasure() {
     const [element, ref] = useState(null);
-    const [rect, setRect] = useReadonly(defaultState$1);
+    const [rect, setRect] = useReadonly(defaultState$2);
     const observer = new window.ResizeObserver((entries) => {
         if (entries[0]) {
             const { x, y, width, height, top, left, bottom, right } = entries[0].contentRect;
@@ -3671,7 +3686,7 @@ function useMeasure() {
 }
 var useMeasure$1 = isBrowser && typeof window.ResizeObserver !== 'undefined'
     ? useMeasure
-    : (() => [noop, defaultState$1]);
+    : (() => [noop, defaultState$2]);
 
 function useMedia(query, defaultState = false) {
     const [state, setState] = useState(isBrowser ? () => window.matchMedia(Vue.unref(query)).matches : defaultState);
@@ -3729,7 +3744,7 @@ const useMediaDevices = () => {
 const useMediaDevicesMock = () => ({});
 var useMediaDevices$1 = isNavigator && !!navigator.mediaDevices ? useMediaDevices : useMediaDevicesMock;
 
-const defaultState = {
+const defaultState$1 = {
     acceleration: {
         x: null,
         y: null,
@@ -3747,7 +3762,7 @@ const defaultState = {
     },
     interval: 16,
 };
-const useMotion = (initialState = defaultState) => {
+const useMotion = (initialState = defaultState$1) => {
     const [state, setState] = useReactive(initialState);
     const handler = (event) => {
         const { acceleration, accelerationIncludingGravity, rotationRate, interval } = event;
@@ -3911,6 +3926,476 @@ function useNetworkState(initialState) {
     return state;
 }
 
+const defaultState = {
+    angle: 0,
+    type: 'landscape-primary',
+};
+function useOrientation(initialState = defaultState) {
+    const [state, setState] = useReactive(initialState);
+    useEffect(() => {
+        const screen = window.screen;
+        let mounted = true;
+        const onChange = () => {
+            if (mounted) {
+                const { orientation } = screen;
+                if (orientation) {
+                    const { angle, type } = orientation;
+                    setState({ angle, type });
+                }
+                else if (window.orientation !== undefined) {
+                    setState({
+                        angle: typeof window.orientation === 'number' ? window.orientation : 0,
+                        type: '',
+                    });
+                }
+                else {
+                    setState(initialState);
+                }
+            }
+        };
+        on(window, 'orientationchange', onChange);
+        onChange();
+        return () => {
+            mounted = false;
+            off(window, 'orientationchange', onChange);
+        };
+    }, []);
+    return state;
+}
+
+const usePageLeave = (onPageLeave, args = []) => {
+    useEffect(() => {
+        if (!onPageLeave) {
+            return;
+        }
+        const handler = (event) => {
+            event = event ? event : window.event;
+            const from = event.relatedTarget || event.toElement;
+            if (!from || from.nodeName === 'HTML') {
+                onPageLeave();
+            }
+        };
+        on(document, 'mouseout', handler);
+        return () => {
+            off(document, 'mouseout', handler);
+        };
+    }, sources(args));
+};
+
+function useScratch(params = {}) {
+    const { disabled } = params;
+    const paramsRef = Vue.ref(params);
+    const [state, setState] = useState({ isScratching: false });
+    const refState = Vue.ref(state.value);
+    const refScratching = Vue.ref(false);
+    const refAnimationFrame = Vue.ref(null);
+    const [el, setEl] = useState(null);
+    useEffect(() => {
+        if (disabled)
+            return;
+        if (el.value == null)
+            return;
+        const onMoveEvent = (docX, docY) => {
+            cancelAnimationFrame(refAnimationFrame.value);
+            refAnimationFrame.value = requestAnimationFrame(() => {
+                if (el.value == null)
+                    return;
+                if (state.value.isScratching == false)
+                    return;
+                const { left, top } = el.value.getBoundingClientRect();
+                const elX = left + window.scrollX;
+                const elY = top + window.scrollY;
+                const x = docX - elX;
+                const y = docY - elY;
+                setState((oldState) => {
+                    const newState = Object.assign(Object.assign({}, oldState), { dx: x - (oldState.x || 0), dy: y - (oldState.y || 0), end: Date.now(), isScratching: true });
+                    refState.value = newState;
+                    (paramsRef.value.onScratch || noop)(newState);
+                    return newState;
+                });
+            });
+        };
+        const onMouseMove = (event) => {
+            onMoveEvent(event.pageX, event.pageY);
+        };
+        const onTouchMove = (event) => {
+            onMoveEvent(event.changedTouches[0].pageX, event.changedTouches[0].pageY);
+        };
+        let onMouseUp;
+        let onTouchEnd;
+        const stopScratching = () => {
+            if (!refScratching.value)
+                return;
+            refScratching.value = false;
+            refState.value = Object.assign(Object.assign({}, refState.value), { isScratching: false });
+            (paramsRef.value.onScratchEnd || noop)(refState.value);
+            setState({ isScratching: false });
+            off(window, 'mousemove', onMouseMove);
+            off(window, 'touchmove', onTouchMove);
+            off(window, 'mouseup', onMouseUp);
+            off(window, 'touchend', onTouchEnd);
+        };
+        onMouseUp = stopScratching;
+        onTouchEnd = stopScratching;
+        const startScratching = (docX, docY) => {
+            if (!refScratching.value)
+                return;
+            if (el.value == null)
+                return;
+            const { left, top } = el.value.getBoundingClientRect();
+            const elX = left + window.scrollX;
+            const elY = top + window.scrollY;
+            const x = docX - elX;
+            const y = docY - elY;
+            const time = Date.now();
+            const newState = {
+                isScratching: true,
+                start: time,
+                end: time,
+                docX,
+                docY,
+                x,
+                y,
+                dx: 0,
+                dy: 0,
+                elH: el.value.offsetHeight,
+                elW: el.value.offsetWidth,
+                elX,
+                elY,
+            };
+            refState.value = newState;
+            (paramsRef.value.onScratchStart || noop)(newState);
+            setState(newState);
+            on(window, 'mousemove', onMouseMove);
+            on(window, 'touchmove', onTouchMove);
+            on(window, 'mouseup', onMouseUp);
+            on(window, 'touchend', onTouchEnd);
+        };
+        const onMouseDown = (event) => {
+            refScratching.value = true;
+            startScratching(event.pageX, event.pageY);
+        };
+        const onTouchStart = (event) => {
+            refScratching.value = true;
+            startScratching(event.changedTouches[0].pageX, event.changedTouches[0].pageY);
+        };
+        on(el.value, 'mousedown', onMouseDown);
+        on(el.value, 'touchstart', onTouchStart);
+        return () => {
+            off(el.value, 'mousedown', onMouseDown);
+            off(el.value, 'touchstart', onTouchStart);
+            off(window, 'mousemove', onMouseMove);
+            off(window, 'touchmove', onTouchMove);
+            off(window, 'mouseup', onMouseUp);
+            off(window, 'touchend', onTouchEnd);
+            if (refAnimationFrame.value)
+                cancelAnimationFrame(refAnimationFrame.value);
+            refAnimationFrame.value = null;
+            refScratching.value = false;
+            refState.value = { isScratching: false };
+            setState(refState.value);
+        };
+    }, sources([el, disabled, paramsRef]));
+    return [setEl, Vue.computed(() => {
+            return state.value;
+        })];
+}
+
+function useScroll(ref) {
+    if (process.env.NODE_ENV === 'development') {
+        if (typeof ref !== 'object' || typeof ref.value === 'undefined') {
+            console.error('`useScroll` expects a single ref argument.');
+        }
+    }
+    const [state, setState] = useRafReactive({
+        x: 0,
+        y: 0,
+    });
+    useEffect(() => {
+        const handler = () => {
+            if (ref.value) {
+                setState({
+                    x: ref.value.scrollLeft,
+                    y: ref.value.scrollTop,
+                });
+            }
+        };
+        if (ref.value) {
+            on(ref.value, 'scroll', handler, {
+                capture: false,
+                passive: true,
+            });
+        }
+        return () => {
+            if (ref.value) {
+                off(ref.value, 'scroll', handler);
+            }
+        };
+    }, [ref]);
+    return Vue.readonly(state);
+}
+
+const useScrolling = (ref) => {
+    const [scrolling, setScrolling] = useState(false);
+    useEffect(() => {
+        if (ref.value) {
+            let scrollingTimeout;
+            const handleScrollEnd = () => {
+                setScrolling(false);
+            };
+            const handleScroll = () => {
+                setScrolling(true);
+                clearTimeout(scrollingTimeout);
+                scrollingTimeout = setTimeout(() => handleScrollEnd(), 150);
+            };
+            on(ref.value, 'scroll', handleScroll, false);
+            return () => {
+                if (ref.value) {
+                    off(ref.value, 'scroll', handleScroll, false);
+                }
+            };
+        }
+        return () => {
+            // void
+        };
+    }, [ref]);
+    return Vue.readonly(scrolling);
+};
+
+const getValue = (search, param) => new URLSearchParams(search).get(param);
+const useSearchParam = (param) => {
+    const location = window.location;
+    const [value, setValue] = useState(() => getValue(location.search, Vue.unref(param)));
+    useEffect(() => {
+        const onChange = () => {
+            setValue(getValue(location.search, Vue.unref(param)));
+        };
+        on(window, 'popstate', onChange);
+        on(window, 'pushstate', onChange);
+        on(window, 'replacestate', onChange);
+        return () => {
+            off(window, 'popstate', onChange);
+            off(window, 'pushstate', onChange);
+            off(window, 'replacestate', onChange);
+        };
+    }, []);
+    return value;
+};
+const useSearchParamServer = () => null;
+var useSearchParam$1 = isBrowser ? useSearchParam : useSearchParamServer;
+
+const DRAF = (callback) => setTimeout(callback, 35);
+const useSize = ({ width = Infinity, height = Infinity } = {}) => {
+    if (!isBrowser) {
+        return [
+            Vue.createVNode(""),
+            { width, height },
+        ];
+    }
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    const [state, setState] = useReactive({ width, height });
+    const ref = Vue.ref(null);
+    let window = null;
+    const setSize = () => {
+        const iframe = ref.value;
+        const size = iframe
+            ? {
+                width: iframe.offsetWidth,
+                height: iframe.offsetHeight,
+            }
+            : { width, height };
+        setState(size);
+    };
+    const onWindow = (windowToListenOn) => {
+        on(windowToListenOn, 'resize', setSize);
+        DRAF(setSize);
+    };
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    useEffect(() => {
+        const iframe = ref.value;
+        if (!iframe) {
+            // iframe will be undefined if component is already unmounted
+            return;
+        }
+        if (iframe.parentElement) {
+            iframe.parentElement.style.position = 'relative';
+        }
+        if (iframe.contentWindow) {
+            window = iframe.contentWindow;
+            onWindow(window);
+        }
+        else {
+            const onLoad = () => {
+                on(iframe, 'load', onLoad);
+                window = iframe.contentWindow;
+                onWindow(window);
+            };
+            off(iframe, 'load', onLoad);
+        }
+        return () => {
+            if (window && window.removeEventListener) {
+                off(window, 'resize', setSize);
+            }
+        };
+    });
+    const Sized = Vue.createVNode({
+        render() {
+            return Vue.createVNode('iframe', {
+                ref: ref,
+                style: {
+                    background: 'transparent',
+                    border: 'none',
+                    height: '100%',
+                    left: 0,
+                    position: 'absolute',
+                    top: 0,
+                    width: '100%',
+                    zIndex: -1,
+                },
+            });
+        }
+    });
+    return [Sized, Vue.readonly(state)];
+};
+
+const isFocusedElementEditable = () => {
+    const { activeElement, body } = document;
+    if (!activeElement) {
+        return false;
+    }
+    // If not element has focus, we assume it is not editable, too.
+    if (activeElement === body) {
+        return false;
+    }
+    // Assume <input> and <textarea> elements are editable.
+    switch (activeElement.tagName) {
+        case 'INPUT':
+        case 'TEXTAREA':
+            return true;
+    }
+    // Check if any other focused element id editable.
+    return activeElement.hasAttribute('contenteditable');
+};
+const isTypedCharGood = ({ keyCode, metaKey, ctrlKey, altKey }) => {
+    if (metaKey || ctrlKey || altKey) {
+        return false;
+    }
+    // 0...9
+    if (keyCode >= 48 && keyCode <= 57) {
+        return true;
+    }
+    // a...z
+    if (keyCode >= 65 && keyCode <= 90) {
+        return true;
+    }
+    // All other keys.
+    return false;
+};
+const useStartTyping = (onStartTyping) => {
+    useEffect(() => {
+        const keydown = (event) => {
+            !isFocusedElementEditable() && isTypedCharGood(event) && onStartTyping(event);
+        };
+        on(document, 'keydown', keydown);
+        return () => {
+            off(document, 'keydown', keydown);
+        };
+    });
+};
+
+const useWindowScroll = () => {
+    const [state, setState] = useRafReactive(() => ({
+        x: isBrowser ? window.pageXOffset : 0,
+        y: isBrowser ? window.pageYOffset : 0,
+    }));
+    useEffect(() => {
+        const handler = () => {
+            setState((state) => {
+                const { pageXOffset, pageYOffset } = window;
+                //Check state for change, return same state if no change happened to prevent rerender
+                //(see useState/setState documentation). useState/setState is used internally in useRafState/setState.
+                return state.x !== pageXOffset || state.y !== pageYOffset
+                    ? {
+                        x: pageXOffset,
+                        y: pageYOffset,
+                    }
+                    : state;
+            });
+        };
+        //We have to update window scroll at mount, before subscription.
+        //Window scroll may be changed between render and effect handler.
+        handler();
+        on(window, 'scroll', handler, {
+            capture: false,
+            passive: true,
+        });
+        return () => {
+            off(window, 'scroll', handler);
+        };
+    });
+    return state;
+};
+
+const useWindowSize = (initialWidth = Infinity, initialHeight = Infinity) => {
+    const [state, setState] = useRafReactive({
+        width: isBrowser ? window.innerWidth : initialWidth,
+        height: isBrowser ? window.innerHeight : initialHeight,
+    });
+    useEffect(() => {
+        if (isBrowser) {
+            const handler = () => {
+                setState({
+                    width: window.innerWidth,
+                    height: window.innerHeight,
+                });
+            };
+            on(window, 'resize', handler);
+            return () => {
+                off(window, 'resize', handler);
+            };
+        }
+    }, []);
+    return state;
+};
+
+function useMemo(factory, deps = undefined) {
+    const [state, setState] = useState(() => factory());
+    if (deps) {
+        Vue.watch(deps, function () {
+            setState(() => factory());
+        });
+    }
+    return state;
+}
+
+function useBreakpoint(breakpoints = { laptopL: 1440, laptop: 1024, tablet: 768 }) {
+    const [screen, setScreen] = useState(0);
+    useEffect(() => {
+        const setSideScreen = () => {
+            setScreen(window.innerWidth);
+        };
+        setSideScreen();
+        on(window, 'resize', setSideScreen);
+        return () => {
+            off(window, 'resize', setSideScreen);
+        };
+    });
+    const sortedBreakpoints = useMemo(() => {
+        return Object.entries(Vue.unref(breakpoints)).sort((a, b) => (a[1] >= b[1] ? 1 : -1));
+    }, sources([breakpoints]));
+    const result = useMemo(() => {
+        return sortedBreakpoints.value.reduce((acc, [name, width]) => {
+            if (screen.value >= width) {
+                return name;
+            }
+            else {
+                return acc;
+            }
+        }, sortedBreakpoints.value[0][0]);
+    }, screen);
+    return result;
+}
+
 function useStateValidator(state, validator, initialState = [undefined]) {
     const stateInner = Vue.ref(state);
     const validatorInner = Vue.ref(validator);
@@ -3944,6 +4429,7 @@ exports.useAudio = useAudio;
 exports.useBattery = useBattery$1;
 exports.useBeforeUnload = useBeforeUnload;
 exports.useBoolean = useToggle;
+exports.useBreakpoint = useBreakpoint;
 exports.useClickAway = useClickAway;
 exports.useComputedSetState = useComputedSetState;
 exports.useComputedState = useComputedState;
@@ -3982,6 +4468,7 @@ exports.useMeasure = useMeasure$1;
 exports.useMedia = useMedia;
 exports.useMediaDevices = useMediaDevices$1;
 exports.useMediatedState = useMediatedState;
+exports.useMemo = useMemo;
 exports.useMethods = useMethods;
 exports.useMotion = useMotion;
 exports.useMounted = useMounted;
@@ -3991,20 +4478,29 @@ exports.useMouseHovered = useMouseHovered;
 exports.useMouseWheel = useMouseWheel;
 exports.useMultiStateValidator = useMultiStateValidator;
 exports.useNetworkState = useNetworkState;
+exports.useOrientation = useOrientation;
+exports.usePageLeave = usePageLeave;
 exports.usePermission = usePermission;
 exports.useQueue = useQueue;
 exports.useRaf = useRaf;
 exports.useRafLoop = useRafLoop;
+exports.useRafReactive = useRafReactive;
 exports.useRafState = useRafState;
 exports.useReactive = useReactive;
 exports.useReadonly = useReadonly;
 exports.useReducer = useReducer;
+exports.useScratch = useScratch;
+exports.useScroll = useScroll;
+exports.useScrolling = useScrolling;
+exports.useSearchParam = useSearchParam$1;
 exports.useSessionStorage = useSessionStorage;
 exports.useSet = useSet;
 exports.useSetState = useSetState;
+exports.useSize = useSize;
 exports.useSlider = useSlider;
 exports.useSpeech = useSpeech;
 exports.useSpring = useSpring;
+exports.useStartTyping = useStartTyping;
 exports.useState = useState;
 exports.useStateList = useStateList;
 exports.useStateValidator = useStateValidator;
@@ -4016,4 +4512,6 @@ exports.useTitle = useTitle$1;
 exports.useToggle = useToggle;
 exports.useTween = useTween;
 exports.useVideo = useVideo;
+exports.useWindowScroll = useWindowScroll;
+exports.useWindowSize = useWindowSize;
 //# sourceMappingURL=vue-next-use.bundle.cjs.js.map

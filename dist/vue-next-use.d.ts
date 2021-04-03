@@ -3,13 +3,13 @@ export { ref as useRef } from 'vue';
 
 declare function on<T extends Window | Document | HTMLElement | EventTarget>(obj: T | null, ...args: Parameters<T['addEventListener']> | [string, Function | null, ...any]): void;
 declare function off<T extends Window | Document | HTMLElement | EventTarget>(obj: T | null, ...args: Parameters<T['removeEventListener']> | [string, Function | null, ...any]): void;
-declare type MultiWatchSources$1 = (WatchSource<unknown> | object)[];
+declare type MultiWatchSources$2 = (WatchSource<unknown> | object)[];
 /**
  * filter watch sources
  * @param target
  * @returns
  */
-declare const sources: (target: any) => (MultiWatchSources$1 | WatchSource | null);
+declare const sources: (target: any) => (MultiWatchSources$2 | WatchSource | null);
 
 declare type PromiseType<P extends Promise<any>> = P extends Promise<infer T> ? T : never;
 declare type FunctionReturningPromise = (...args: any[]) => Promise<any>;
@@ -304,8 +304,8 @@ declare const useInterval: (callback: Function | Ref<Function>, delay?: number |
 
 declare const useHarmonicIntervalFn: (fn: Function, delay?: number | Ref<number> | null) => void;
 
-declare type MultiWatchSources = (WatchSource<unknown> | object)[];
-declare function useEffect(fn: () => (void | (() => void)), deps?: MultiWatchSources | WatchSource | null | undefined): void;
+declare type MultiWatchSources$1 = (WatchSource<unknown> | object)[];
+declare function useEffect(fn: () => (void | (() => void)), deps?: MultiWatchSources$1 | WatchSource | null | undefined): void;
 
 declare const useSpring: (targetValue?: number | Ref<number>, tension?: number | Ref<number>, friction?: number | Ref<number>) => Ref<number>;
 
@@ -417,7 +417,7 @@ interface LocationSensorState {
     protocol?: string;
     search?: string;
 }
-declare const _default$5: (() => LocationSensorState) | (() => ComputedRef<LocationSensorState>);
+declare const _default$6: (() => LocationSensorState) | (() => ComputedRef<LocationSensorState>);
 
 interface Options$1 {
     isPreventDefault?: boolean | Ref<boolean>;
@@ -447,7 +447,7 @@ declare type UseBatteryState = {
     fetched: true;
 });
 declare function useBattery(): Readonly<UseBatteryState>;
-declare const _default$4: typeof useBattery;
+declare const _default$5: typeof useBattery;
 
 declare function useReactive<T extends Object>(initialState?: T | (() => T)): [T, (patch: Partial<T> | ((prevState: T) => Partial<T>)) => void];
 
@@ -473,7 +473,7 @@ declare type WrappedMethods<M> = {
 };
 declare const useMethods: <M, T>(createMethods: CreateMethods<M, T>, initialState: T) => [ComputedRef<T>, WrappedMethods<M>];
 
-interface State$2 {
+interface State$5 {
     isSliding: boolean;
     value: number;
 }
@@ -484,7 +484,7 @@ interface Options {
     reverse: boolean;
     vertical?: boolean;
 }
-declare const useSlider: (ref: Ref<HTMLElement>, options?: Partial<Options>) => State$2;
+declare const useSlider: (ref: Ref<HTMLElement>, options?: Partial<Options>) => State$5;
 
 declare type UseDebounceReturn = [ComputedRef<boolean | null>, () => void];
 declare function useDebounce(fn: Function, ms?: number, deps?: any[]): UseDebounceReturn;
@@ -500,11 +500,11 @@ declare type parserOptions<T> = {
 };
 declare function useLocalStorage<T>(key: string, initialValue?: T, options?: parserOptions<T>): ((() => void) | ComputedRef<(T extends Ref<infer V> ? V : T) | undefined>)[] | (ComputedRef<T | undefined> | Dispatch$1<SetStateAction<T | undefined>>)[];
 
-declare const _default$3: (_locked?: boolean | Ref<boolean>, _elementRef?: Ref<HTMLElement> | undefined) => void;
+declare const _default$4: (_locked?: boolean | Ref<boolean>, _elementRef?: Ref<HTMLElement> | undefined) => void;
 
 declare type PermissionDesc = PermissionDescriptor | DevicePermissionDescriptor | MidiPermissionDescriptor | PushPermissionDescriptor;
-declare type State$1 = PermissionState | '';
-declare const usePermission: (permissionDesc: PermissionDesc) => Ref<State$1>;
+declare type State$4 = PermissionState | '';
+declare const usePermission: (permissionDesc: PermissionDesc) => Ref<State$4>;
 
 declare type RafLoopReturns = [() => void, () => void, ComputedRef<boolean>];
 declare function useRafLoop(callback: FrameRequestCallback, initiallyActive?: boolean): RafLoopReturns;
@@ -528,7 +528,7 @@ interface UseTitleOptions {
     restoreOnUnmount?: boolean;
 }
 declare function useTitle(title: string, options?: UseTitleOptions): void;
-declare const _default$2: typeof useTitle;
+declare const _default$3: typeof useTitle;
 
 declare function useRaf(ms?: number | Ref<number>, delay?: number | Ref<number>): ComputedRef<number>;
 
@@ -545,6 +545,8 @@ declare function createGlobalState<S = undefined>(): () => [
 declare function useDefault<T>(defaultValue: T, initialValue: T | (() => T)): readonly [Ref<T | null | undefined>, (prevState: SetStateAction<T | null | undefined>) => void];
 
 declare function useRafState<S>(initialState: S | (() => S)): [Ref<S>, Dispatch$1<SetStateAction<S>>];
+
+declare function useRafReactive<S extends Object>(initialState: S | (() => S)): [S, Dispatch$1<SetStateAction<S>>];
 
 interface UseStateListReturn<T> {
     state: ComputedRef<T>;
@@ -576,11 +578,11 @@ declare type UseMeasureRect = Pick<DOMRectReadOnly, 'x' | 'y' | 'top' | 'left' |
 declare type UseMeasureRef<E extends Element = Element> = (element: E) => void;
 declare type UseMeasureResult<E extends Element = Element> = [UseMeasureRef<E>, UseMeasureRect];
 declare function useMeasure<E extends Element = Element>(): UseMeasureResult<E>;
-declare const _default$1: typeof useMeasure;
+declare const _default$2: typeof useMeasure;
 
 declare function useMedia(query: string | Ref<string>, defaultState?: boolean): ComputedRef<boolean>;
 
-declare const _default: () => {};
+declare const _default$1: () => {};
 
 interface MotionSensorState {
     acceleration: {
@@ -602,7 +604,7 @@ interface MotionSensorState {
 }
 declare const useMotion: (initialState?: MotionSensorState) => (MotionSensorState | (() => Promise<unknown> | undefined))[];
 
-interface State {
+interface State$3 {
     docX: number;
     docY: number;
     posX: number;
@@ -612,13 +614,13 @@ interface State {
     elH: number;
     elW: number;
 }
-declare const useMouse: (ref: Ref<Element | null>) => ComputedRef<State>;
+declare const useMouse: (ref: Ref<Element | null>) => ComputedRef<State$3>;
 
 interface UseMouseHoveredOptions {
     whenHovered?: boolean | Ref<boolean>;
     bound?: boolean | Ref<boolean>;
 }
-declare const useMouseHovered: (ref: Ref<Element>, options?: UseMouseHoveredOptions) => ComputedRef<State>;
+declare const useMouseHovered: (ref: Ref<Element>, options?: UseMouseHoveredOptions) => ComputedRef<State$3>;
 
 declare function useMouseWheel(): Ref<number>;
 
@@ -686,5 +688,76 @@ interface IUseNetworkState {
 }
 declare function useNetworkState(initialState?: IHookStateInitAction<IUseNetworkState>): IUseNetworkState;
 
-export { Dispatch$1 as Dispatch, Reducer, SetStateAction, UseKey, UseStateValidatorReturn, ValidityState, createGlobalState, off, on, sources, useAsync, useAsyncFn, useAsyncRetry, useAudio, _default$4 as useBattery, useBeforeUnload, useToggle as useBoolean, useClickAway, useComputedSetState, useComputedState, useCookie, useCopyToClipboard, useCounter, useCss, useDebounce, useDefault, useDrop, useDropArea, useEffect, useEvent, useFavicon, useFullscreen, useGeolocation, useGetSet, useHarmonicIntervalFn, useHash, useHover, useHoverDirty, useIdle, useIntersection, useInterval, useKey, useKeyPress, useKeyPressEvent, useKeyboardJs, useList, useLocalStorage, _default$5 as useLocation, _default$3 as useLockBodyScroll, useLongPress, useMap, _default$1 as useMeasure, useMedia, _default as useMediaDevices, useMediatedState, useMethods, useMotion, useMounted, useMountedState, useMouse, useMouseHovered, useMouseWheel, useMultiStateValidator, useNetworkState, usePermission, useQueue, useRaf, useRafLoop, useRafState, useReactive, useReadonly, useReducer, useSessionStorage, useSet, useSetState, useSlider, useSpeech, useSpring, useState, useStateList, useStateValidator, useThrottle, useThrottleFn, useTimeout, useTimeoutFn, _default$2 as useTitle, useToggle, useTween, useVideo };
+interface OrientationState {
+    angle: number;
+    type: string;
+}
+declare function useOrientation(initialState?: OrientationState): OrientationState;
+
+declare const usePageLeave: (onPageLeave: any, args?: never[]) => void;
+
+interface ScratchSensorParams {
+    disabled?: boolean;
+    onScratch?: (state: ScratchSensorState) => void;
+    onScratchStart?: (state: ScratchSensorState) => void;
+    onScratchEnd?: (state: ScratchSensorState) => void;
+}
+interface ScratchSensorState {
+    isScratching: boolean;
+    start?: number;
+    end?: number;
+    x?: number;
+    y?: number;
+    dx?: number;
+    dy?: number;
+    docX?: number;
+    docY?: number;
+    posX?: number;
+    posY?: number;
+    elH?: number;
+    elW?: number;
+    elX?: number;
+    elY?: number;
+}
+declare function useScratch(params?: ScratchSensorParams): [(el: HTMLElement | null) => void, ComputedRef<ScratchSensorState>];
+
+interface State$2 {
+    x: number;
+    y: number;
+}
+declare function useScroll(ref: Ref<HTMLElement>): Readonly<State$2>;
+
+declare const useScrolling: (ref: Ref<HTMLElement>) => Readonly<Ref<boolean>>;
+
+declare type UseQueryParam = (param: string | Ref<string>) => Ref<string | null>;
+declare const _default: UseQueryParam | (() => null);
+
+interface State$1 {
+    width: number;
+    height: number;
+}
+declare const useSize: ({ width, height }?: Partial<State$1>) => [VNode<any>, Readonly<State$1>];
+
+declare const useStartTyping: (onStartTyping: (event: KeyboardEvent) => void) => void;
+
+interface State {
+    x: number;
+    y: number;
+}
+declare const useWindowScroll: () => State;
+
+declare const useWindowSize: (initialWidth?: number, initialHeight?: number) => {
+    width: number;
+    height: number;
+};
+
+declare type MultiWatchSources = (WatchSource<unknown> | object)[];
+declare function useMemo<T>(factory: () => T, deps?: MultiWatchSources | WatchSource | null | undefined): Ref<T>;
+
+declare type Breakpoints = {
+    [name: string]: number;
+};
+declare function useBreakpoint(breakpoints?: Breakpoints | Ref<Breakpoints>): Ref<string>;
+
+export { Dispatch$1 as Dispatch, Reducer, SetStateAction, UseKey, UseStateValidatorReturn, ValidityState, createGlobalState, off, on, sources, useAsync, useAsyncFn, useAsyncRetry, useAudio, _default$5 as useBattery, useBeforeUnload, useToggle as useBoolean, useBreakpoint, useClickAway, useComputedSetState, useComputedState, useCookie, useCopyToClipboard, useCounter, useCss, useDebounce, useDefault, useDrop, useDropArea, useEffect, useEvent, useFavicon, useFullscreen, useGeolocation, useGetSet, useHarmonicIntervalFn, useHash, useHover, useHoverDirty, useIdle, useIntersection, useInterval, useKey, useKeyPress, useKeyPressEvent, useKeyboardJs, useList, useLocalStorage, _default$6 as useLocation, _default$4 as useLockBodyScroll, useLongPress, useMap, _default$2 as useMeasure, useMedia, _default$1 as useMediaDevices, useMediatedState, useMemo, useMethods, useMotion, useMounted, useMountedState, useMouse, useMouseHovered, useMouseWheel, useMultiStateValidator, useNetworkState, useOrientation, usePageLeave, usePermission, useQueue, useRaf, useRafLoop, useRafReactive, useRafState, useReactive, useReadonly, useReducer, useScratch, useScroll, useScrolling, _default as useSearchParam, useSessionStorage, useSet, useSetState, useSize, useSlider, useSpeech, useSpring, useStartTyping, useState, useStateList, useStateValidator, useThrottle, useThrottleFn, useTimeout, useTimeoutFn, _default$3 as useTitle, useToggle, useTween, useVideo, useWindowScroll, useWindowSize };
 //# sourceMappingURL=vue-next-use.d.ts.map

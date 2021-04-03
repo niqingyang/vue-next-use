@@ -94,5 +94,7 @@ export {default as useSize} from './useSize';
 export {default as useStartTyping} from './useStartTyping';
 export {default as useWindowScroll} from './useWindowScroll';
 export {default as useWindowSize} from './useWindowSize';
+export {default as useMemo} from './useMemo';
+export {default as useBreakpoint} from './useBreakpoint';
 export {default as useStateValidator, ValidityState, UseStateValidatorReturn} from './useStateValidator';
 export {ref as useRef} from 'vue';

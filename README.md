@@ -89,7 +89,7 @@
     - [`useTimeout`](./docs/useTimeout.md) &mdash; re-renders component after a timeout.
     - [`useTimeoutFn`](./docs/useTimeoutFn.md) &mdash; calls given function after a timeout. [![][img-demo]](https://niqingyang.github.io/vue-next-use/?path=/story/animation-usetimeoutfn--demo)
     - [`useTween`](./docs/useTween.md) &mdash; re-renders component, while tweening a number from 0 to 1. [![][img-demo]](https://niqingyang.github.io/vue-next-use/?path=/story/animation-usetween--easing-demo)
-    - [`useUpdate`](./docs/useUpdate.md) &mdash; returns a callback, which re-renders component when called.
+    <!-- - [`useUpdate`](./docs/useUpdate.md) &mdash; returns a callback, which re-renders component when called. -->
       <br/>
       <br/>
 - [**Side-effects**](./docs/Side-effects.md)
@@ -109,6 +109,7 @@
     - [`usePermission`](./docs/usePermission.md) &mdash; query permission status for browser APIs.
       <br/>
       <br/>
+<!--
 - [**Lifecycles**](./docs/Lifecycles.md)
     - [`useEffectOnce`](./docs/useEffectOnce.md) &mdash; a modified [`useEffect`](https://reactjs.org/docs/hooks-reference.html#useeffect) hook that only runs once.
     - [`useEvent`](./docs/useEvent.md) &mdash; subscribe to events.
@@ -123,6 +124,7 @@
     - [`useDeepCompareEffect`](./docs/useDeepCompareEffect.md), [`useShallowCompareEffect`](./docs/useShallowCompareEffect.md), and [`useCustomCompareEffect`](./docs/useCustomCompareEffect.md) &mdash; run an `effect` depending on deep comparison of its dependencies
       <br/>
       <br/>
+-->
 - [**State**](./docs/State.md)
     - [`createMemo`](./docs/createMemo.md) &mdash; factory of memoized hooks.
     - [`createReducer`](./docs/createReducer.md) &mdash; factory of reducer hooks with custom middleware.

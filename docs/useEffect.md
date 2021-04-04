@@ -1,16 +1,24 @@
-# `useState`
+# `useEffect`
 
-Vue state hook with `ref` that creates `setState` method which works similar to how
-React.useState works;it set object changes into value state.
+Vue effect hook with `onMounted` `onUnMounted` `watch` which works similar to how
+React.useEffect works without update; 
 
 
 ## Usage
 
 ```jsx
-import {useState} from 'vue-next-use';
+import {useEffect} from 'vue-next-use';
 
 const Demo = () => {
   const [state, setState] = useState({});
+  
+  useEffect(()=>{
+      console.log('state changed', state.value);
+      
+      return () => {
+          console.log('clean');
+      }
+  }, state);
 
   return (
     <div>
@@ -34,10 +42,5 @@ const Demo = () => {
 ## Reference
 
 ```js
-const [state, setState] = useState({cnt: 0});
-
-setState({cnt: state.value.cnt + 1});
-setState((prevState) => ({
-  cnt: prevState + 1,
-}));
+useEffect(create: () => (() => void) | void, deps?: MultiWatchSources | WatchSource | null | undefined = undefined)
 ```

@@ -19,7 +19,8 @@ export const Demo = ShowDemo({
         // );
 
         const [Video, state, controls] = useVideo({
-            src: 'http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4',
+            // src: 'http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4',
+            src: 'http://vjs.zencdn.net/v/oceans.mp4',
             autoplay: true,
         });
 

@@ -127,12 +127,6 @@
 -->
 - [**State**](./docs/State.md)
     - [`useDefault`](./docs/useDefault.md) &mdash; returns the default value when state is `null` or `undefined`.
-    - [`useGetSet`](./docs/useGetSet.md) &mdash; returns state getter `get()` instead of raw state.
-    - [`useGetSetState`](./docs/useGetSetState.md) &mdash; as if [`useGetSet`](./docs/useGetSet.md) and [`useSetState`](./docs/useSetState.md) had a baby.
-    - [`useLatest`](./docs/useLatest.md) &mdash; returns the latest state or props
-    - [`usePrevious`](./docs/usePrevious.md) &mdash; returns the previous state or props. [![][img-demo]](https://codesandbox.io/s/fervent-galileo-krgx6)
-    - [`usePreviousDistinct`](./docs/usePreviousDistinct.md) &mdash; like `usePrevious` but with a predicate to determine if `previous` should update.
-    - [`useObservable`](./docs/useObservable.md) &mdash; tracks latest value of an `Observable`.
     - [`useRafState`](./docs/useRafState.md) &mdash; creates `setState` method which only updates after `requestAnimationFrame`. [![][img-demo]](https://niqingyang.github.io/vue-next-use/?path=/story/state-userafstate--demo)
     - [`useSetState`](./docs/useSetState.md) &mdash; creates `setState` method which works like `this.setState`. [![][img-demo]](https://niqingyang.github.io/vue-next-use/?path=/story/state-usesetstate--demo)
     - [`useStateList`](./docs/useStateList.md) &mdash; circularly iterates over an array. [![][img-demo]](https://niqingyang.github.io/vue-next-use/?path=/story/state-usestatelist--demo)
@@ -140,8 +134,8 @@
     - [`useCounter` and `useNumber`](./docs/useCounter.md) &mdash; tracks state of a number. [![][img-demo]](https://niqingyang.github.io/vue-next-use/?path=/story/state-usecounter--demo)
     - [`useList`](./docs/useList.md) ~and [`useUpsert`](./docs/useUpsert.md)~ &mdash; tracks state of an array. [![][img-demo]](https://niqingyang.github.io/vue-next-use/?path=/story/state-uselist--demo)
     - [`useMap`](./docs/useMap.md) &mdash; tracks state of an object. [![][img-demo]](https://niqingyang.github.io/vue-next-use/?path=/story/state-usemap--demo)
-    - [`useSet`](./docs/useSet.md) &mdash; tracks state of a Set. [![][img-demo]](https://codesandbox.io/s/bold-shtern-6jlgw)
-    - [`useQueue`](./docs/useQueue.md) &mdash; implements simple queue.
+    - [`useSet`](./docs/useSet.md) &mdash; tracks state of a Set. [![][img-demo]](https://niqingyang.github.io/vue-next-use/?path=/story/state-useset--demo)
+    - [`useQueue`](./docs/useQueue.md) &mdash; implements simple queue.  [![][img-demo]](https://niqingyang.github.io/vue-next-use/?path=/story/state-usequeue--demo)
     - [`useStateValidator`](./docs/useStateValidator.md) &mdash; tracks state of an object. [![][img-demo]](https://niqingyang.github.io/vue-next-use/?path=/story/state-usestatevalidator--demo)
     - [`useStateWithHistory`](./docs/useStateWithHistory.md) &mdash; stores previous state values and provides handles to travel through them. [![][img-demo]](https://niqingyang.github.io/vue-next-use/?path=/story/state-usestatewithhistory--demo)
     - [`useMultiStateValidator`](./docs/useMultiStateValidator.md) &mdash; alike the `useStateValidator`, but tracks multiple states at a time. [![][img-demo]](https://niqingyang.github.io/vue-next-use/?path=/story/state-usemultistatevalidator--demo)

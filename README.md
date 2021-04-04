@@ -93,20 +93,20 @@
       <br/>
   
 - [**Side-effects**](./docs/Side-effects.md)
-    - [`useAsync`](./docs/useAsync.md), [`useAsyncFn`](./docs/useAsyncFn.md), and [`useAsyncRetry`](./docs/useAsyncRetry.md) &mdash; resolves an `async` function.
-    - [`useBeforeUnload`](./docs/useBeforeUnload.md) &mdash; shows browser alert when user try to reload or close the page.
+    - [`useAsync`](./docs/useAsync.md), [`useAsyncFn`](./docs/useAsyncFn.md), and [`useAsyncRetry`](./docs/useAsyncRetry.md) &mdash; resolves an `async` function. [![][img-demo]](https://niqingyang.github.io/vue-next-use/?path=/story/sideeffects-useasyncretry--demo)
+    - [`useBeforeUnload`](./docs/useBeforeUnload.md) &mdash; shows browser alert when user try to reload or close the page. [![][img-demo]](https://niqingyang.github.io/vue-next-use/?path=/story/sideeffects-usebeforeunload--demo-bool)
     - [`useCookie`](./docs/useCookie.md) &mdash; provides way to read, update and delete a cookie. [![][img-demo]](https://niqingyang.github.io/vue-next-use/?path=/story/side-effects-usecookie--demo)
-    - [`useCopyToClipboard`](./docs/useCopyToClipboard.md) &mdash; copies text to clipboard.
+    - [`useCopyToClipboard`](./docs/useCopyToClipboard.md) &mdash; copies text to clipboard. [![][img-demo]](https://niqingyang.github.io/vue-next-use/?path=/story/sideeffects-usecopytoclipboard--demo)
     - [`useDebounce`](./docs/useDebounce.md) &mdash; debounces a function. [![][img-demo]](https://niqingyang.github.io/vue-next-use/?path=/story/side-effects-usedebounce--demo)
     - [`useError`](./docs/useError.md) &mdash; error dispatcher. [![][img-demo]](https://niqingyang.github.io/vue-next-use/?path=/story/side-effects-useerror--demo)
-    - [`useFavicon`](./docs/useFavicon.md) &mdash; sets favicon of the page.
-    - [`useLocalStorage`](./docs/useLocalStorage.md) &mdash; manages a value in `localStorage`.
-    - [`useLockBodyScroll`](./docs/useLockBodyScroll.md) &mdash; lock scrolling of the body element.
-    - [`useRafLoop`](./docs/useRafLoop.md) &mdash; calls given function inside the RAF loop.
-    - [`useSessionStorage`](./docs/useSessionStorage.md) &mdash; manages a value in `sessionStorage`.
+    - [`useFavicon`](./docs/useFavicon.md) &mdash; sets favicon of the page. [![][img-demo]](https://niqingyang.github.io/vue-next-use/?path=/story/sideeffects-usefavicon--demo)
+    - [`useLocalStorage`](./docs/useLocalStorage.md) &mdash; manages a value in `localStorage`. [![][img-demo]](https://niqingyang.github.io/vue-next-use/?path=/story/sideeffects-uselocalstorage--demo)
+    - [`useLockBodyScroll`](./docs/useLockBodyScroll.md) &mdash; lock scrolling of the body element. [![][img-demo]](https://niqingyang.github.io/vue-next-use/?path=/story/sideeffects-uselockbodyscroll--demo)
+    - [`useRafLoop`](./docs/useRafLoop.md) &mdash; calls given function inside the RAF loop. [![][img-demo]](https://niqingyang.github.io/vue-next-use/?path=/story/sideeffects-userafloop--roll-demo)
+    - [`useSessionStorage`](./docs/useSessionStorage.md) &mdash; manages a value in `sessionStorage`. [![][img-demo]](https://niqingyang.github.io/vue-next-use/?path=/story/sideeffects-usesessionstorage--demo)
     - [`useThrottle` and `useThrottleFn`](./docs/useThrottle.md) &mdash; throttles a function. [![][img-demo]](https://niqingyang.github.io/vue-next-use/?path=/story/side-effects-usethrottle--demo)
-    - [`useTitle`](./docs/useTitle.md) &mdash; sets title of the page.
-    - [`usePermission`](./docs/usePermission.md) &mdash; query permission status for browser APIs.
+    - [`useTitle`](./docs/useTitle.md) &mdash; sets title of the page. [![][img-demo]](https://niqingyang.github.io/vue-next-use/?path=/story/sideeffects-usetitle--demo)
+    - [`usePermission`](./docs/usePermission.md) &mdash; query permission status for browser APIs. [![][img-demo]](https://niqingyang.github.io/vue-next-use/?path=/story/sideeffects-usepermission--demo)
       <br/>
       <br/>
 <!--

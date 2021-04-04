@@ -89,9 +89,9 @@
     - [`useTimeout`](./docs/useTimeout.md) &mdash; re-renders component after a timeout.
     - [`useTimeoutFn`](./docs/useTimeoutFn.md) &mdash; calls given function after a timeout. [![][img-demo]](https://niqingyang.github.io/vue-next-use/?path=/story/animation-usetimeoutfn--demo)
     - [`useTween`](./docs/useTween.md) &mdash; re-renders component, while tweening a number from 0 to 1. [![][img-demo]](https://niqingyang.github.io/vue-next-use/?path=/story/animation-usetween--easing-demo)
-    <!-- - [`useUpdate`](./docs/useUpdate.md) &mdash; returns a callback, which re-renders component when called. -->
       <br/>
       <br/>
+  
 - [**Side-effects**](./docs/Side-effects.md)
     - [`useAsync`](./docs/useAsync.md), [`useAsyncFn`](./docs/useAsyncFn.md), and [`useAsyncRetry`](./docs/useAsyncRetry.md) &mdash; resolves an `async` function.
     - [`useBeforeUnload`](./docs/useBeforeUnload.md) &mdash; shows browser alert when user try to reload or close the page.

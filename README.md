@@ -46,35 +46,35 @@
     - [`useGeolocation`](./docs/useGeolocation.md) &mdash; tracks geo location state of user's device. [![][img-demo]](https://niqingyang.github.io/vue-next-use/?path=/story/sensors-usegeolocation--demo)
     - [`useHover` and `useHoverDirty`](./docs/useHover.md) &mdash; tracks mouse hover state of some element. [![][img-demo]](https://niqingyang.github.io/vue-next-use/?path=/story/sensors-usehover--demo)
     - [`useHash`](./docs/useHash.md) &mdash; tracks location hash value. [![][img-demo]](https://niqingyang.github.io/vue-next-use/?path=/story/sensors-usehash--demo)
-    - [`useIdle`](./docs/useIdle.md) &mdash; tracks whether user is being inactive.
+    - [`useIdle`](./docs/useIdle.md) &mdash; tracks whether user is being inactive. [![][img-demo]](https://niqingyang.github.io/vue-next-use/?path=/story/sensors-useidle--demo)
     - [`useIntersection`](./docs/useIntersection.md) &mdash; tracks an HTML element's intersection. [![][img-demo]](https://niqingyang.github.io/vue-next-use/?path=/story/sensors-useintersection--demo)
     - [`useKey`](./docs/useKey.md), [`useKeyPress`](./docs/useKeyPress.md), [`useKeyboardJs`](./docs/useKeyboardJs.md), and [`useKeyPressEvent`](./docs/useKeyPressEvent.md) &mdash; track keys. [![][img-demo]](https://niqingyang.github.io/vue-next-use/?path=/story/sensors-usekeypressevent--demo)
-    - [`useLocation`](./docs/useLocation.md) and [`useSearchParam`](./docs/useSearchParam.md) &mdash; tracks page navigation bar location state.
-    - [`useLongPress`](./docs/useLongPress.md) &mdash; tracks long press gesture of some element.
+    - [`useLocation`](./docs/useLocation.md) and [`useSearchParam`](./docs/useSearchParam.md) &mdash; tracks page navigation bar location state. [![][img-demo]](https://niqingyang.github.io/vue-next-use/?path=/story/sensors-uselocation--demo)
+    - [`useLongPress`](./docs/useLongPress.md) &mdash; tracks long press gesture of some element. [![][img-demo]](https://niqingyang.github.io/vue-next-use/?path=/story/sensors-uselongpress--demo)
     - [`useMedia`](./docs/useMedia.md) &mdash; tracks state of a CSS media query. [![][img-demo]](https://niqingyang.github.io/vue-next-use/?path=/story/sensors-usemedia--demo)
-    - [`useMediaDevices`](./docs/useMediaDevices.md) &mdash; tracks state of connected hardware devices.
-    - [`useMotion`](./docs/useMotion.md) &mdash; tracks state of device's motion sensor.
+    - [`useMediaDevices`](./docs/useMediaDevices.md) &mdash; tracks state of connected hardware devices. [![][img-demo]](https://niqingyang.github.io/vue-next-use/?path=/story/sensors-usemediadevices--demo)
+    - [`useMotion`](./docs/useMotion.md) &mdash; tracks state of device's motion sensor. [![][img-demo]](https://niqingyang.github.io/vue-next-use/?path=/story/sensors-usemotion--demo)
     - [`useMouse` and `useMouseHovered`](./docs/useMouse.md) &mdash; tracks state of mouse position. [![][img-demo]](https://niqingyang.github.io/vue-next-use/?path=/story/sensors-usemouse--docs)
     - [`useMouseWheel`](./docs/useMouseWheel.md) &mdash; tracks deltaY of scrolled mouse wheel. [![][img-demo]](https://niqingyang.github.io/vue-next-use/?path=/story/sensors-usemousewheel--docs)
     - [`useNetworkState`](./docs/useNetworkState.md) &mdash; tracks the state of browser's network connection. [![][img-demo]](https://niqingyang.github.io/vue-next-use/?path=/story/sensors-usenetworkstate--demo)
-    - [`useOrientation`](./docs/useOrientation.md) &mdash; tracks state of device's screen orientation.
-    - [`usePageLeave`](./docs/usePageLeave.md) &mdash; triggers when mouse leaves page boundaries.
-    - [`useScratch`](./docs/useScratch.md) &mdash; tracks mouse click-and-scrub state.
+    - [`useOrientation`](./docs/useOrientation.md) &mdash; tracks state of device's screen orientation. [![][img-demo]](https://niqingyang.github.io/vue-next-use/?path=/story/sensors-useorientation--demo)
+    - [`usePageLeave`](./docs/usePageLeave.md) &mdash; triggers when mouse leaves page boundaries. [![][img-demo]](https://niqingyang.github.io/vue-next-use/?path=/story/sensors-usepageleave--demo)
+    - [`useScratch`](./docs/useScratch.md) &mdash; tracks mouse click-and-scrub state. [![][img-demo]](https://niqingyang.github.io/vue-next-use/?path=/story/sensors-usescratch--demo)
     - [`useScroll`](./docs/useScroll.md) &mdash; tracks an HTML element's scroll position. [![][img-demo]](https://niqingyang.github.io/vue-next-use/?path=/story/sensors-usescroll--docs)
-    - [`useScrolling`](./docs/useScrolling.md) &mdash; tracks whether HTML element is scrolling.
-    - [`useStartTyping`](./docs/useStartTyping.md) &mdash; detects when user starts typing.
+    - [`useScrolling`](./docs/useScrolling.md) &mdash; tracks whether HTML element is scrolling. [![][img-demo]](https://niqingyang.github.io/vue-next-use/?path=/story/sensors-usescrolling--demo)
+    - [`useStartTyping`](./docs/useStartTyping.md) &mdash; detects when user starts typing. [![][img-demo]](https://niqingyang.github.io/vue-next-use/?path=/story/sensors-usestarttyping--demo)
     - [`useWindowScroll`](./docs/useWindowScroll.md) &mdash; tracks `Window` scroll position. [![][img-demo]](https://niqingyang.github.io/vue-next-use/?path=/story/sensors-usewindowscroll--docs)
     - [`useWindowSize`](./docs/useWindowSize.md) &mdash; tracks `Window` dimensions. [![][img-demo]](https://niqingyang.github.io/vue-next-use/?path=/story/sensors-usewindowsize--demo)
     - [`useMeasure`](./docs/useMeasure.md) and [`useSize`](./docs/useSize.md) &mdash; tracks an HTML element's dimensions. [![][img-demo]](https://niqingyang.github.io/vue-next-use/?path=/story/sensors-usemeasure--demo)
-    - [`createBreakpoint`](./docs/createBreakpoint.md) &mdash; tracks `innerWidth`
+    - [`useBreakpoint`](./docs/useBreakpoint.md) &mdash; tracks `innerWidth`. [![][img-demo]](https://niqingyang.github.io/vue-next-use/?path=/story/sensors-usebreakpoint--demo)
     - [`useScrollbarWidth`](./docs/useScrollbarWidth.md) &mdash; detects browser's native scrollbars width. [![][img-demo]](https://niqingyang.github.io/vue-next-use/?path=/story/sensors-usescrollbarwidth--demo)
       <br/>
       <br/>
 - [**UI**](./docs/UI.md)
     - [`useAudio`](./docs/useAudio.md) &mdash; plays audio and exposes its controls. [![][img-demo]](https://niqingyang.github.io/vue-next-use/?path=/story/ui-useaudio--demo)
     - [`useClickAway`](./docs/useClickAway.md) &mdash; triggers callback when user clicks outside target area.
-    - [`useCss`](./docs/useCss.md) &mdash; dynamically adjusts CSS.
-    - [`useDrop` and `useDropArea`](./docs/useDrop.md) &mdash; tracks file, link and copy-paste drops.
+    - [`useCss`](./docs/useCss.md) &mdash; dynamically adjusts CSS. [![][img-demo]](https://niqingyang.github.io/vue-next-use/?path=/story/ui-usecss--demo)
+    - [`useDrop` and `useDropArea`](./docs/useDrop.md) &mdash; tracks file, link and copy-paste drops. [![][img-demo]](https://niqingyang.github.io/vue-next-use/?path=/story/ui-usedrop--demo)
     - [`useFullscreen`](./docs/useFullscreen.md) &mdash; display an element or video full-screen. [![][img-demo]](https://niqingyang.github.io/vue-next-use/?path=/story/ui-usefullscreen--demo)
     - [`useSlider`](./docs/useSlider.md) &mdash; provides slide behavior over any HTML element. [![][img-demo]](https://niqingyang.github.io/vue-next-use/?path=/story/ui-useslider--demo)
     - [`useSpeech`](./docs/useSpeech.md) &mdash; synthesizes speech from a text string. [![][img-demo]](https://niqingyang.github.io/vue-next-use/?path=/story/ui-usespeech--demo)
@@ -83,10 +83,10 @@
       <br/>
       <br/>
 - [**Animations**](./docs/Animations.md)
-    - [`useRaf`](./docs/useRaf.md) &mdash; re-renders component on each `requestAnimationFrame`.
-    - [`useInterval`](./docs/useInterval.md) and [`useHarmonicIntervalFn`](./docs/useHarmonicIntervalFn.md) &mdash; re-renders component on a set interval using `setInterval`.
-    - [`useSpring`](./docs/useSpring.md) &mdash; interpolates number over time according to spring dynamics.
-    - [`useTimeout`](./docs/useTimeout.md) &mdash; re-renders component after a timeout.
+    - [`useRaf`](./docs/useRaf.md) &mdash; re-renders component on each `requestAnimationFrame`. [![][img-demo]](https://niqingyang.github.io/vue-next-use/?path=/story/animation-useraf--progress-demo)
+    - [`useInterval`](./docs/useInterval.md) and [`useHarmonicIntervalFn`](./docs/useHarmonicIntervalFn.md) &mdash; re-renders component on a set interval using `setInterval`. [![][img-demo]](https://niqingyang.github.io/vue-next-use/?path=/story/animation-useinterval--demo)
+    - [`useSpring`](./docs/useSpring.md) &mdash; interpolates number over time according to spring dynamics. [![][img-demo]](https://niqingyang.github.io/vue-next-use/?path=/story/animation-usespring--emoji-demo)
+    - [`useTimeout`](./docs/useTimeout.md) &mdash; re-renders component after a timeout. [![][img-demo]](https://niqingyang.github.io/vue-next-use/?path=/story/animation-usetimeout--demo)
     - [`useTimeoutFn`](./docs/useTimeoutFn.md) &mdash; calls given function after a timeout. [![][img-demo]](https://niqingyang.github.io/vue-next-use/?path=/story/animation-usetimeoutfn--demo)
     - [`useTween`](./docs/useTween.md) &mdash; re-renders component, while tweening a number from 0 to 1. [![][img-demo]](https://niqingyang.github.io/vue-next-use/?path=/story/animation-usetween--easing-demo)
       <br/>

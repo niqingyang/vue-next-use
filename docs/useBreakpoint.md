@@ -1,4 +1,4 @@
-# `createBreakpoint`
+# `useBreakpoint`
 
 ## Usage
 

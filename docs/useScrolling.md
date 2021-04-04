@@ -1,6 +1,6 @@
 # `useScrolling`
 
-React sensor hook that keeps track of whether the user is scrolling or not.
+Vue sensor hook that keeps track of whether the user is scrolling or not.
 
 ## Usage
 

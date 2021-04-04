@@ -1,6 +1,6 @@
 # `useWindowSize`
 
-React sensor hook that tracks dimensions of the browser window.
+Vue sensor hook that tracks dimensions of the browser window.
 
 ## Usage
 

@@ -6,7 +6,7 @@ to spring dynamics.
 ## Usage
 
 ```jsx
-import useSpring from 'vue-next-use/dist/useSpring';
+import useSpring from 'vue-next-use/lib/useSpring';
 
 const Demo = {
   setup(){

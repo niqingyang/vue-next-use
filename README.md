@@ -155,9 +155,10 @@
     - [`useMethods`](./docs/useMethods.md) &mdash; neat alternative to `useReducer`. [![][img-demo]](https://niqingyang.github.io/vue-next-use/?path=/story/state-usemethods--demo)
       <br/>
       <br/>
+<!--
 - [**Miscellaneous**]()
     - [`useEnsuredForwardedRef`](./docs/useEnsuredForwardedRef.md) and [`ensuredForwardRef`](./docs/useEnsuredForwardedRef.md) &mdash; use a React.forwardedRef safely. [![][img-demo]](https://niqingyang.github.io/vue-next-use/?path=/story/state-useensuredforwardedref--demo)
-
+-->
 <br />
 <br />
 <br />
@@ -171,7 +172,6 @@
   <br />
   <a href="./LICENSE"><strong>Unlicense</strong></a> &mdash; public domain.
   <br />
-  <a href="https://opencollective.com/vue-next-use/contribute"><strong>Support</strong></a> &mdash; add yourself to backer list below.
 </p>
 
 <br />

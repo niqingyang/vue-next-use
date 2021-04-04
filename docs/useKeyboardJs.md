@@ -9,7 +9,7 @@ how to make combo strings.
 ## Usage
 
 ```tsx
-import useKeyboardJs from 'vue-next-use/dist/useKeyboardJs';
+import useKeyboardJs from 'vue-next-use/lib/useKeyboardJs';
 
 const Demo = {
     props: {

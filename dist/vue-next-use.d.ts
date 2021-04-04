@@ -1,5 +1,6 @@
 import { WatchSource, Ref, ComputedRef, UnwrapRef, AudioHTMLAttributes, VideoHTMLAttributes, VNode, RendererElement } from 'vue';
 export { ref as useRef } from 'vue';
+import Cookies from 'js-cookie';
 
 declare function on<T extends Window | Document | HTMLElement | EventTarget>(obj: T | null, ...args: Parameters<T['addEventListener']> | [string, Function | null, ...any]): void;
 declare function off<T extends Window | Document | HTMLElement | EventTarget>(obj: T | null, ...args: Parameters<T['removeEventListener']> | [string, Function | null, ...any]): void;
@@ -292,7 +293,7 @@ interface FullScreenOptions {
 }
 declare const useFullscreen: (ref: Ref<Element>, enabled: Ref<boolean>, options?: FullScreenOptions) => ComputedRef<boolean>;
 
-declare const useCookie: (cookieName: string) => [ComputedRef<string | null>, (newValue: string, options?: any) => void, () => void];
+declare const useCookie: (cookieName: string) => [ComputedRef<string | null>, (newValue: string, options?: Cookies.CookieAttributes | undefined) => void, () => void];
 
 declare type UseTimeoutReturn = [ComputedRef<boolean | null>, () => void, () => void];
 declare function useTimeout(ms?: number | Ref<number>): UseTimeoutReturn;

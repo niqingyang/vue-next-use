@@ -8,13 +8,12 @@ Additionally hook provides methods to start/stop loop and check current state.
 ## Usage
 
 ```jsx
-import * as React from 'react';
-import { useRafLoop, useUpdate } from 'vue-next-use';
+import { useRafLoop, useState } from 'vue-next-use';
 
 const Demo = {
   setup(){
-    const [ticks, setTicks] = React.useState(0);
-    const [lastCall, setLastCall] = React.useState(0);
+    const [ticks, setTicks] = useState(0);
+    const [lastCall, setLastCall] = useState(0);
 
     const [loopStop, loopStart, isActive] = useRafLoop((time) => {
       setTicks(ticks => ticks + 1);

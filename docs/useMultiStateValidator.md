@@ -18,17 +18,17 @@ const Demo = {
             <div>
               <div>Below fields will be valid if all of them is even</div>
               <input type="number" min="1" max="10" value={state1}
-                     onChange={(ev: React.ChangeEvent<HTMLInputElement>) => {
+                     onChange={(ev) => {
                        setState1((ev.target.value as unknown) as number);
                      }}
               />
               <input type="number" min="1" max="10" value={state2}
-                     onChange={(ev: React.ChangeEvent<HTMLInputElement>) => {
+                     onChange={(ev) => {
                        setState2((ev.target.value as unknown) as number);
                      }}
               />
               <input type="number" min="1" max="10" value={state3}
-                     onChange={(ev: React.ChangeEvent<HTMLInputElement>) => {
+                     onChange={(ev) => {
                        setState3((ev.target.value as unknown) as number);
                      }}
               />

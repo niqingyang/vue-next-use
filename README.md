@@ -182,18 +182,4 @@
 
 [img-demo]: https://img.shields.io/badge/demo-%20%20%20%F0%9F%9A%80-green.svg
 
-<div align="center">
-  <h1>Contributors</h1>
-</div>
-
-<br />
-<br />
-
-<a href="https://github.com/streamich/vue-next-use/graphs/contributors"><img src="https://opencollective.com/vue-next-use/contributors.svg?width=890&button=false" /></a>
-
-<br />
-<br />
-<br />
-<br />
-<br />
 
